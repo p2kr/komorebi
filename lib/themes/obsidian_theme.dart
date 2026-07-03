@@ -17,7 +17,7 @@ abstract class ObsidianColors {
   static const Color darkBackground = Color(0xFF0A0A0A);
   static const Color darkSurface = Color(0xFF111111);
   static const Color darkSurfaceVariant = Color(0xFF0D0D0D);
-  static const Color darkBorder = Color(0xFF222222);
+  static const Color darkBorder = Color(0xFF181818);
   static const Color darkTextPrimary = Color(0xFFFFFFFF);
   static const Color darkTextSecondary = Color(0xFFAAAAAA);
 

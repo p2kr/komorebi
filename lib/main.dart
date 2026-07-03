@@ -38,6 +38,7 @@ class MyApp extends StatelessWidget {
       title: APP_NAME,
       theme: ObsidianTheme.lightTheme,
       darkTheme: ObsidianTheme.darkTheme,
+      // themeMode: .light,
       home: const HomePage(),
     );
   }

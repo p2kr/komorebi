@@ -34,6 +34,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "diagnostics": MessageLookupByLibrary.simpleMessage("Diagnostics"),
     "entries": MessageLookupByLibrary.simpleMessage("entries"),
     "level": MessageLookupByLibrary.simpleMessage("LEVEL"),
+    "noLogEntriesRecorded": MessageLookupByLibrary.simpleMessage(
+      "No log entries recorded. Initiate MAL synchronizations or crawls to stream logs.",
+    ),
     "online": MessageLookupByLibrary.simpleMessage("ONLINE"),
     "system": MessageLookupByLibrary.simpleMessage("System"),
     "systemDiagnosticsLoggingVault": MessageLookupByLibrary.simpleMessage(

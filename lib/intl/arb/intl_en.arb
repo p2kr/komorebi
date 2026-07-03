@@ -10,5 +10,6 @@
   "bufferCapacity": "Buffer Capacity",
   "entries": "entries",
   "system": "System",
-  "online": "ONLINE"
+  "online": "ONLINE",
+  "noLogEntriesRecorded": "No log entries recorded. Initiate MAL synchronizations or crawls to stream logs."
 }

@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/talker.dart';
 import 'package:talker_flutter/talker_flutter.dart';
 
-class DiagnosticWindow extends StatelessWidget {
+class DiagnosticWindow extends HookWidget {
   const DiagnosticWindow({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final currLevelFilter = useState("all");
+
+    final diagnosticsList = getDiagnosticMessage(
+      context,
+      level: currLevelFilter.value,
+    );
+
     final size = MediaQuery.of(context).size;
     return CallbackShortcuts(
       bindings: {LogicalKeySet(.escape): () => _onClose(context)},
@@ -45,12 +53,13 @@ class DiagnosticWindow extends StatelessWidget {
                   Row(
                     spacing: 8,
                     children: [
-                      _getDropdown(context, _DropdownType.LEVEL, [
-                        "all",
-                        "info",
-                        "warning",
-                        "error",
-                      ]),
+                      _getDropdown(
+                        context,
+                        _DropdownType.LEVEL,
+                        ["all", "info", "warning", "error"],
+                        onSelected: (value) =>
+                            currLevelFilter.value = value ?? "all",
+                      ),
                       _getDropdown(context, _DropdownType.CATEGORY, [
                         "all",
                         // "web crawler",
@@ -61,13 +70,18 @@ class DiagnosticWindow extends StatelessWidget {
                     ],
                   ),
                   Flexible(
-                    child: ListView.builder(
-                      padding: .symmetric(horizontal: 0, vertical: 2),
-                      // padding: .zero,
-                      itemCount: talker.history.length,
-                      itemBuilder: (context, index) =>
-                          _diagnosticLogMsgTile(context, index),
-                    ),
+                    child: diagnosticsList.isNotEmpty
+                        ? ListView.builder(
+                            padding: .symmetric(horizontal: 0, vertical: 2),
+                            itemCount: diagnosticsList.length,
+                            itemBuilder: (context, index) =>
+                                diagnosticsList[index],
+                          )
+                        : Center(
+                            child: Text(
+                              S.of(context).noLogEntriesRecorded,
+                            ),
+                          ),
                   ),
                   Divider(),
                   Row(
@@ -93,9 +107,12 @@ class DiagnosticWindow extends StatelessWidget {
   }
 }
 
-Widget _diagnosticLogMsgTile(BuildContext context, int index) {
-  TalkerData data = _getDiagnosticMessage()[index];
-
+Widget _diagnosticLogMsgTile(
+  BuildContext context,
+  TalkerData data, {
+  String? level,
+  String? category,
+}) {
   return Card(
     child: ListTile(
       dense: true,
@@ -127,18 +144,30 @@ Widget _diagnosticLogMsgTile(BuildContext context, int index) {
   );
 }
 
-List<TalkerData> _getDiagnosticMessage({String? level, String? category}) {
+List<Widget> getDiagnosticMessage(
+  BuildContext context, {
+  String? level,
+  String? category,
+}) {
   return talker.history.reversed
       .where((t) {
         var cond = true;
-        if (level != null) {
-          cond = cond && (t.logLevel.toString() == level);
+        if (level != null && level != "all") {
+          cond = cond && (t.logLevel!.name == level);
         }
-        if (category != null) {
+        if (category != null && category != "all") {
           cond = cond && (t.title.toString() == category);
         }
         return cond;
       })
+      .map(
+        (data) => _diagnosticLogMsgTile(
+          context,
+          data,
+          level: level,
+          category: category,
+        ),
+      )
       .toList(growable: false);
 }
 
@@ -151,8 +180,9 @@ enum _DropdownType { LEVEL, CATEGORY }
 DropdownMenu<String> _getDropdown(
   BuildContext context,
   _DropdownType type,
-  List<String> menus,
-) {
+  List<String> menus, {
+  ValueChanged<String?>? onSelected,
+}) {
   final menuEntries = menus
       .map(
         (value) => DropdownMenuEntry(
@@ -175,5 +205,7 @@ DropdownMenu<String> _getDropdown(
       contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       constraints: BoxConstraints(maxHeight: 36),
     ),
+    selectOnly: true,
+    onSelected: onSelected,
   );
 }

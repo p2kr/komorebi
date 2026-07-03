@@ -128,6 +128,16 @@ class S {
   String get online {
     return Intl.message('ONLINE', name: 'online', desc: '', args: []);
   }
+
+  /// `No log entries recorded. Initiate MAL synchronizations or crawls to stream logs.`
+  String get noLogEntriesRecorded {
+    return Intl.message(
+      'No log entries recorded. Initiate MAL synchronizations or crawls to stream logs.',
+      name: 'noLogEntriesRecorded',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
