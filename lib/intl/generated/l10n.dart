@@ -78,6 +78,56 @@ class S {
       args: [],
     );
   }
+
+  /// `System Diagnostics & Logging Vault`
+  String get systemDiagnosticsLoggingVault {
+    return Intl.message(
+      'System Diagnostics & Logging Vault',
+      name: 'systemDiagnosticsLoggingVault',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `CLOSE`
+  String get close {
+    return Intl.message('CLOSE', name: 'close', desc: '', args: []);
+  }
+
+  /// `LEVEL`
+  String get level {
+    return Intl.message('LEVEL', name: 'level', desc: '', args: []);
+  }
+
+  /// `CATEGORY`
+  String get category {
+    return Intl.message('CATEGORY', name: 'category', desc: '', args: []);
+  }
+
+  /// `Buffer Capacity`
+  String get bufferCapacity {
+    return Intl.message(
+      'Buffer Capacity',
+      name: 'bufferCapacity',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `entries`
+  String get entries {
+    return Intl.message('entries', name: 'entries', desc: '', args: []);
+  }
+
+  /// `System`
+  String get system {
+    return Intl.message('System', name: 'system', desc: '', args: []);
+  }
+
+  /// `ONLINE`
+  String get online {
+    return Intl.message('ONLINE', name: 'online', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

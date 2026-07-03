@@ -5,10 +5,10 @@ import 'package:komorebi/utils/constants.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-import 'accounts_table.dart';
-import 'config_table.dart';
-import 'logs_table.dart';
-import 'queue_items_table.dart';
+import 'package:komorebi/models/accounts_table.dart';
+import 'package:komorebi/models/config_table.dart';
+import 'package:komorebi/models/logs_table.dart';
+import 'package:komorebi/models/queue_items_table.dart';
 
 part 'database.g.dart';
 

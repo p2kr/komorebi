@@ -2,5 +2,13 @@
   "@@locale": "en",
   "automatedCrawlerSyncEngine": "Automated Crawler & Sync Engine",
   "diagnostics": "Diagnostics",
-  "checkNewEpisodes": "Check New Episodes"
+  "checkNewEpisodes": "Check New Episodes",
+  "systemDiagnosticsLoggingVault": "System Diagnostics & Logging Vault",
+  "close": "CLOSE",
+  "level": "LEVEL",
+  "category": "CATEGORY",
+  "bufferCapacity": "Buffer Capacity",
+  "entries": "entries",
+  "system": "System",
+  "online": "ONLINE"
 }

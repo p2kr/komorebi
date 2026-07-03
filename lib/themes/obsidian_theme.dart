@@ -18,8 +18,8 @@ abstract class ObsidianColors {
   static const Color darkSurface = Color(0xFF111111);
   static const Color darkSurfaceVariant = Color(0xFF0D0D0D);
   static const Color darkBorder = Color(0xFF222222);
-  static const Color darkTextPrimary = Color(0xFFE0E0E0);
-  static const Color darkTextSecondary = Color(0xFF666666);
+  static const Color darkTextPrimary = Color(0xFFFFFFFF);
+  static const Color darkTextSecondary = Color(0xFFAAAAAA);
 
   // --- Light Mode ---
   static const Color lightBackground = Color(0xFFF7F7F7);
@@ -27,13 +27,20 @@ abstract class ObsidianColors {
   static const Color lightSurfaceVariant = Color(0xFFF0F0F0);
   static const Color lightBorder = Color(0xFFE5E5E5);
   static const Color lightTextPrimary = Color(0xFF111111);
-  static const Color lightTextSecondary = Color(0xFF666666);
+  static const Color lightTextSecondary = Color(0xFF555555);
 
-  // --- Accents & Semantics ---
-  static const Color malBlue = Color(0xFF2E51A2);
-  static const Color successGreen = Color(0xFF4ADE80);
-  static const Color errorRed = Color(0xFFF87171);
-  static const Color warningYellow = Color(0xFFFACC15);
+  // --- Accents & Semantics (Strictly Shades of Black & White) ---
+  static const Color darkPrimary = Color(0xFFFFFFFF);
+  static const Color lightPrimary = Color(0xFF111111);
+  static const Color success = Color(0xFFCCCCCC);
+  static const Color error = Color(0xFF888888);
+  static const Color warning = Color(0xFFAAAAAA);
+
+  // Backward compatibility aliases using monochrome shades
+  static const Color malBlue = darkPrimary;
+  static const Color successGreen = success;
+  static const Color errorRed = error;
+  static const Color warningYellow = warning;
 }
 
 /// -----------------------------------
@@ -179,16 +186,17 @@ class ObsidianTheme {
   // DARK THEME
   // ==========================================
   static final ThemeData darkTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.dark,
     scaffoldBackgroundColor: ObsidianColors.darkBackground,
-    primaryColor: ObsidianColors.malBlue,
+    primaryColor: ObsidianColors.darkPrimary,
     dividerColor: ObsidianColors.darkBorder,
     colorScheme: const ColorScheme.dark(
-      primary: ObsidianColors.malBlue,
+      primary: ObsidianColors.darkPrimary,
       secondary: ObsidianColors.darkSurfaceVariant,
       surface: ObsidianColors.darkSurface,
-      error: ObsidianColors.errorRed,
-      onPrimary: Colors.white,
+      error: ObsidianColors.error,
+      onPrimary: Colors.black,
       onSurface: ObsidianColors.darkTextPrimary,
     ),
     textTheme: _buildTextTheme(
@@ -263,15 +271,16 @@ class ObsidianTheme {
   // LIGHT THEME
   // ==========================================
   static final ThemeData lightTheme = ThemeData(
+    useMaterial3: true,
     brightness: Brightness.light,
     scaffoldBackgroundColor: ObsidianColors.lightBackground,
-    primaryColor: ObsidianColors.malBlue,
+    primaryColor: ObsidianColors.lightPrimary,
     dividerColor: ObsidianColors.lightBorder,
     colorScheme: const ColorScheme.light(
-      primary: ObsidianColors.malBlue,
+      primary: ObsidianColors.lightPrimary,
       secondary: ObsidianColors.lightSurfaceVariant,
       surface: ObsidianColors.lightSurface,
-      error: ObsidianColors.errorRed,
+      error: ObsidianColors.error,
       onPrimary: Colors.white,
       onSurface: ObsidianColors.lightTextPrimary,
     ),

@@ -25,6 +25,7 @@ dependencies:
   intl: any
   window_manager: ^0.5.1
   talker: ^5.1.17
+  talker_flutter: ^5.1.17
 
 dev_dependencies:
   flutter_test:

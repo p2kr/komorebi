@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:html/parser.dart' as parser;
 import 'package:html/dom.dart';
+import 'package:komorebi/utils/talker.dart';
 
 class LocalAdblockProxy {
   HttpServer? _server;
@@ -9,7 +10,7 @@ class LocalAdblockProxy {
 
   Future<void> start() async {
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
-    print("Embedded Adblock Proxy Server listening on http://localhost:$port");
+    talker.debug("Embedded Adblock Proxy Server listening on http://localhost:$port");
 
     _server!.listen((HttpRequest request) async {
       if (request.uri.path == '/proxy') {

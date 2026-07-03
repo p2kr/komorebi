@@ -1,9 +1,16 @@
 include: package:flutter_lints/flutter.yaml
 
+analyzer:
+  exclude:
+    - lib/intl/generated/**
+  errors:
+    avoid_print: error
+
 linter:
   rules:
-    - always_use_package_imports
-    - avoid_relative_lib_imports
+    always_use_package_imports: true
+    avoid_relative_lib_imports: true
+    constant_identifier_names: false
 
 plugins:
   riverpod_lint: ^3.1.4

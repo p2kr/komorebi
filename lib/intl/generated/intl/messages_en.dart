@@ -25,9 +25,19 @@ class MessageLookup extends MessageLookupByLibrary {
     "automatedCrawlerSyncEngine": MessageLookupByLibrary.simpleMessage(
       "Automated Crawler & Sync Engine",
     ),
+    "bufferCapacity": MessageLookupByLibrary.simpleMessage("Buffer Capacity"),
+    "category": MessageLookupByLibrary.simpleMessage("CATEGORY"),
     "checkNewEpisodes": MessageLookupByLibrary.simpleMessage(
       "Check New Episodes",
     ),
+    "close": MessageLookupByLibrary.simpleMessage("CLOSE"),
     "diagnostics": MessageLookupByLibrary.simpleMessage("Diagnostics"),
+    "entries": MessageLookupByLibrary.simpleMessage("entries"),
+    "level": MessageLookupByLibrary.simpleMessage("LEVEL"),
+    "online": MessageLookupByLibrary.simpleMessage("ONLINE"),
+    "system": MessageLookupByLibrary.simpleMessage("System"),
+    "systemDiagnosticsLoggingVault": MessageLookupByLibrary.simpleMessage(
+      "System Diagnostics & Logging Vault",
+    ),
   };
 }
