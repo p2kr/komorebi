@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
@@ -78,9 +79,7 @@ class DiagnosticWindow extends HookWidget {
                                 diagnosticsList[index],
                           )
                         : Center(
-                            child: Text(
-                              S.of(context).noLogEntriesRecorded,
-                            ),
+                            child: Text(S.of(context).noLogEntriesRecorded),
                           ),
                   ),
                   Divider(),
@@ -139,7 +138,10 @@ Widget _diagnosticLogMsgTile(
           ),
         ],
       ),
-      subtitle: Text(data.displayMessage, style: context.textTheme.bodyMedium),
+      subtitle: Text(
+        data.displayMessage + data.displayError + data.displayException,
+        style: context.textTheme.bodyMedium,
+      ),
     ),
   );
 }
@@ -151,6 +153,9 @@ List<Widget> getDiagnosticMessage(
 }) {
   return talker.history.reversed
       .where((t) {
+        if (!kDebugMode && t.logLevel!.name == 'debug') {
+          return false; // don't show debug logs
+        }
         var cond = true;
         if (level != null && level != "all") {
           cond = cond && (t.logLevel!.name == level);

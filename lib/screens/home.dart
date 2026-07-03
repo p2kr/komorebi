@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:komorebi/navbar.dart';
 import 'package:komorebi/screens/appbar/appbar.dart';
+import 'package:komorebi/screens/navbar.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

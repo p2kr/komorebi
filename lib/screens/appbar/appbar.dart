@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/screens/diagnostic_window.dart';
+import 'package:komorebi/screens/appbar/diagnostic_window.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/constants.dart';
 

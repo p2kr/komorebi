@@ -8,7 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/main.dart';
-import 'package:komorebi/screens/diagnostic_window.dart';
+import 'package:komorebi/screens/appbar/diagnostic_window.dart';
 
 void main() {
   testWidgets('Diagnostics dialog test', (WidgetTester tester) async {
