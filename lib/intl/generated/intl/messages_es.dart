@@ -23,7 +23,43 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "automatedCrawlerSyncEngine": MessageLookupByLibrary.simpleMessage(
-      "Motor de Rastreo y Sincronización Automatizado",
+      "MOTOR DE RASTREO Y SINCRONIZACIÓN AUTOMÁTICA",
+    ),
+    "bufferCapacity": MessageLookupByLibrary.simpleMessage(
+      "Capacidad del búfer",
+    ),
+    "category": MessageLookupByLibrary.simpleMessage("CATEGORÍA"),
+    "checkNewEpisodes": MessageLookupByLibrary.simpleMessage(
+      "Buscar nuevos episodios",
+    ),
+    "close": MessageLookupByLibrary.simpleMessage("CERRAR"),
+    "connectedSince": MessageLookupByLibrary.simpleMessage("Conectado el"),
+    "diagnostics": MessageLookupByLibrary.simpleMessage("Diagnósticos"),
+    "disconnectActiveProfile": MessageLookupByLibrary.simpleMessage(
+      "DESCONECTAR PERFIL ACTIVO",
+    ),
+    "entries": MessageLookupByLibrary.simpleMessage("entradas"),
+    "level": MessageLookupByLibrary.simpleMessage("NIVEL"),
+    "linkAnotherMalOauth": MessageLookupByLibrary.simpleMessage(
+      "VINCULAR OTRO MAL (OAUTH)",
+    ),
+    "myanimelistOauth": MessageLookupByLibrary.simpleMessage(
+      "MYANIMELIST OAUTH",
+    ),
+    "noLogEntriesRecorded": MessageLookupByLibrary.simpleMessage(
+      "No se registraron entradas de registro. Inicie sincronizaciones o rastreos de MAL para transmitir registros.",
+    ),
+    "online": MessageLookupByLibrary.simpleMessage("EN LÍNEA"),
+    "otherConnectedProfiles": MessageLookupByLibrary.simpleMessage(
+      "OTROS PERFILES CONECTADOS",
+    ),
+    "quickSandboxLink": MessageLookupByLibrary.simpleMessage(
+      "ENLACE RÁPIDO AL SANDBOX",
+    ),
+    "sandbox": MessageLookupByLibrary.simpleMessage("SANDBOX"),
+    "system": MessageLookupByLibrary.simpleMessage("Sistema"),
+    "systemDiagnosticsLoggingVault": MessageLookupByLibrary.simpleMessage(
+      "Bóveda de registro y diagnóstico del sistema",
     ),
   };
 }

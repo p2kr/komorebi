@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/screens/appbar/diagnostic_window.dart';
+import 'package:komorebi/screens/appbar/profile_management.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/constants.dart';
 
@@ -8,21 +9,23 @@ AppBar appBar(BuildContext context) {
   return AppBar(
     title: Row(
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              APP_NAME,
-              style: context.textTheme.headlineMedium,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              S.of(context).automatedCrawlerSyncEngine.toUpperCase(),
-              style: context.textTheme.labelSmall,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                APP_NAME,
+                style: context.textTheme.headlineMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                S.of(context).automatedCrawlerSyncEngine,
+                style: context.textTheme.labelSmall,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
         const Spacer(),
         Row(
@@ -38,10 +41,11 @@ AppBar appBar(BuildContext context) {
               icon: const Icon(Icons.notifications_none),
               label: Text(S.of(context).checkNewEpisodes),
             ),
-            OutlinedButton(
+            OutlinedButton.icon(
               style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-              onPressed: onManageAccountsPressed,
-              child: const Icon(Icons.manage_accounts_outlined),
+              onPressed: () => onManageAccountsPressed(context),
+              icon: const Icon(Icons.manage_accounts_outlined), // TODO: Dynamic
+              label: Text("???"), // TODO: Dynamic
             ),
           ],
         ),
@@ -68,6 +72,6 @@ void onCheckNewEpisodePressed() {
   // TODO:
 }
 
-void onManageAccountsPressed() {
-  // TODO:
+void onManageAccountsPressed(BuildContext context) {
+  showDialog(context: context, builder: (context) => ProfileManagementPopup());
 }

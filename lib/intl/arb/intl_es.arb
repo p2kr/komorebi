@@ -1,4 +1,22 @@
 {
   "@@locale": "es",
-  "automatedCrawlerSyncEngine": "Motor de Rastreo y Sincronización Automatizado"
+  "automatedCrawlerSyncEngine": "MOTOR DE RASTREO Y SINCRONIZACIÓN AUTOMÁTICA",
+  "diagnostics": "Diagnósticos",
+  "checkNewEpisodes": "Buscar nuevos episodios",
+  "systemDiagnosticsLoggingVault": "Bóveda de registro y diagnóstico del sistema",
+  "close": "CERRAR",
+  "level": "NIVEL",
+  "category": "CATEGORÍA",
+  "bufferCapacity": "Capacidad del búfer",
+  "entries": "entradas",
+  "system": "Sistema",
+  "online": "EN LÍNEA",
+  "noLogEntriesRecorded": "No se registraron entradas de registro. Inicie sincronizaciones o rastreos de MAL para transmitir registros.",
+  "otherConnectedProfiles": "OTROS PERFILES CONECTADOS",
+  "disconnectActiveProfile": "DESCONECTAR PERFIL ACTIVO",
+  "quickSandboxLink": "ENLACE RÁPIDO AL SANDBOX",
+  "linkAnotherMalOauth": "VINCULAR OTRO MAL (OAUTH)",
+  "connectedSince": "Conectado el",
+  "myanimelistOauth": "MYANIMELIST OAUTH",
+  "sandbox": "SANDBOX"
 }

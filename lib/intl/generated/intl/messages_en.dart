@@ -23,7 +23,7 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "automatedCrawlerSyncEngine": MessageLookupByLibrary.simpleMessage(
-      "Automated Crawler & Sync Engine",
+      "AUTOMATED CRAWLER & SYNC ENGINE",
     ),
     "bufferCapacity": MessageLookupByLibrary.simpleMessage("Buffer Capacity"),
     "category": MessageLookupByLibrary.simpleMessage("CATEGORY"),
@@ -31,13 +31,30 @@ class MessageLookup extends MessageLookupByLibrary {
       "Check New Episodes",
     ),
     "close": MessageLookupByLibrary.simpleMessage("CLOSE"),
+    "connectedSince": MessageLookupByLibrary.simpleMessage("Connected since"),
     "diagnostics": MessageLookupByLibrary.simpleMessage("Diagnostics"),
+    "disconnectActiveProfile": MessageLookupByLibrary.simpleMessage(
+      "DISCONNECT ACTIVE PROFILE",
+    ),
     "entries": MessageLookupByLibrary.simpleMessage("entries"),
     "level": MessageLookupByLibrary.simpleMessage("LEVEL"),
+    "linkAnotherMalOauth": MessageLookupByLibrary.simpleMessage(
+      "LINK ANOTHER MAL (OAUTH)",
+    ),
+    "myanimelistOauth": MessageLookupByLibrary.simpleMessage(
+      "MYANIMELIST OAUTH",
+    ),
     "noLogEntriesRecorded": MessageLookupByLibrary.simpleMessage(
       "No log entries recorded. Initiate MAL synchronizations or crawls to stream logs.",
     ),
     "online": MessageLookupByLibrary.simpleMessage("ONLINE"),
+    "otherConnectedProfiles": MessageLookupByLibrary.simpleMessage(
+      "OTHER CONNECTED PROFILES",
+    ),
+    "quickSandboxLink": MessageLookupByLibrary.simpleMessage(
+      "QUICK SANDBOX LINK",
+    ),
+    "sandbox": MessageLookupByLibrary.simpleMessage("SANDBOX"),
     "system": MessageLookupByLibrary.simpleMessage("System"),
     "systemDiagnosticsLoggingVault": MessageLookupByLibrary.simpleMessage(
       "System Diagnostics & Logging Vault",

@@ -1,6 +1,6 @@
 {
   "@@locale": "en",
-  "automatedCrawlerSyncEngine": "Automated Crawler & Sync Engine",
+  "automatedCrawlerSyncEngine": "AUTOMATED CRAWLER & SYNC ENGINE",
   "diagnostics": "Diagnostics",
   "checkNewEpisodes": "Check New Episodes",
   "systemDiagnosticsLoggingVault": "System Diagnostics & Logging Vault",
@@ -11,5 +11,12 @@
   "entries": "entries",
   "system": "System",
   "online": "ONLINE",
-  "noLogEntriesRecorded": "No log entries recorded. Initiate MAL synchronizations or crawls to stream logs."
+  "noLogEntriesRecorded": "No log entries recorded. Initiate MAL synchronizations or crawls to stream logs.",
+  "otherConnectedProfiles": "OTHER CONNECTED PROFILES",
+  "disconnectActiveProfile": "DISCONNECT ACTIVE PROFILE",
+  "quickSandboxLink": "QUICK SANDBOX LINK",
+  "linkAnotherMalOauth": "LINK ANOTHER MAL (OAUTH)",
+  "connectedSince": "Connected since",
+  "myanimelistOauth": "MYANIMELIST OAUTH",
+  "sandbox": "SANDBOX"
 }

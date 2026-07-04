@@ -36,11 +36,16 @@ class DiagnosticWindow extends HookWidget {
                     spacing: 8,
                     children: [
                       Icon(Icons.monitor_heart_outlined),
+
+                      // diagnostic window title
                       Text(
                         S.of(context).systemDiagnosticsLoggingVault,
-                        style: context.textTheme.titleLarge,
+                        style: context.textTheme.headlineSmall,
                       ),
+
                       Spacer(),
+
+                      // close button
                       TextButton(
                         onPressed: () => _onClose(context),
                         child: Text(
@@ -54,6 +59,7 @@ class DiagnosticWindow extends HookWidget {
                   Row(
                     spacing: 8,
                     children: [
+                      // LEVEL dropdown
                       _getDropdown(
                         context,
                         _DropdownType.LEVEL,
@@ -61,6 +67,8 @@ class DiagnosticWindow extends HookWidget {
                         onSelected: (value) =>
                             currLevelFilter.value = value ?? "all",
                       ),
+
+                      // CATEGORY dropdown
                       _getDropdown(context, _DropdownType.CATEGORY, [
                         "all",
                         // "web crawler",
@@ -70,19 +78,29 @@ class DiagnosticWindow extends HookWidget {
                       ]),
                     ],
                   ),
+
                   Flexible(
                     child: diagnosticsList.isNotEmpty
+                        // Logs screen
                         ? ListView.builder(
                             padding: .symmetric(horizontal: 0, vertical: 2),
                             itemCount: diagnosticsList.length,
                             itemBuilder: (context, index) =>
                                 diagnosticsList[index],
                           )
+                        // Empty list message
                         : Center(
-                            child: Text(S.of(context).noLogEntriesRecorded),
+                            child: Text(
+                              S.of(context).noLogEntriesRecorded,
+                              style: context.textTheme.bodyMedium?.copyWith(
+                                fontStyle: .italic,
+                              ),
+                            ),
                           ),
                   ),
                   Divider(),
+
+                  // Status bar
                   Row(
                     children: [
                       Text(
@@ -119,18 +137,16 @@ Widget _diagnosticLogMsgTile(
       title: Row(
         spacing: 8,
         children: [
-          Text(data.displayTime()),
+          Text(data.displayTime(), style: context.textTheme.labelSmall),
           Container(
             padding: .symmetric(horizontal: 2, vertical: 1),
             decoration: BoxDecoration(
-              border: Border.all(
-                color: context.colorScheme.surface, //TODO: surface/onSurface ??
-              ),
+              border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(2),
             ),
             child: Text(
               data.logLevel!.name.toUpperCase(),
-              style: context.textTheme.bodySmall?.copyWith(
+              style: context.textTheme.labelSmall?.copyWith(
                 color: data.getFlutterColor(TalkerScreenTheme()),
                 fontWeight: .bold,
               ),
@@ -192,7 +208,7 @@ DropdownMenu<String> _getDropdown(
       .map(
         (value) => DropdownMenuEntry(
           value: value,
-          label: value.toUpperCase(),
+          label: value.toUpperCase(), // how to translate?
           style: ButtonStyle(
             textStyle: WidgetStatePropertyAll(context.textTheme.bodySmall),
           ),

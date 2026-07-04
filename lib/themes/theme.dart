@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:komorebi/themes/theme_builder.dart';
 
-part 'obsidian_theme.dart';
-
+/// Shortcuts for BuildContext
 extension ThemeContextExtension on BuildContext {
-  // Shortcut for TextTheme
   TextTheme get textTheme => Theme.of(this).textTheme;
-
-  // Shortcut for ColorScheme
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 }
+
+////////////
+// THEMES //
+////////////
+
+/// Uses black seed. Fonts are Playfair Display, Inter and Jetbrains Mono
+final defaultMonochromeTheme = ThemeBuilder();

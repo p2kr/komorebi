@@ -1,8 +1,8 @@
 import 'dart:io';
 
+import 'package:intl/find_locale.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/utils/talker.dart';
-
 import 'package:window_manager/window_manager.dart';
 
 Future<void> doInitialConfigurations() async {
@@ -11,7 +11,7 @@ Future<void> doInitialConfigurations() async {
   // setup db
   setupDb();
   // setup i18n
-  setupI18N();
+  await setupL10N();
   // setup app window
   await setupAppWindow();
 
@@ -22,17 +22,18 @@ void setupDb() {
   //TODO: Nothing to add yet
 }
 
-void setupI18N() {
-  Intl.defaultLocale = 'en_US';
+Future<void> setupL10N() async {
+  Intl.defaultLocale = await findSystemLocale();
+  talker.debug("default locale set to ${Intl.defaultLocale}");
 }
 
+/// Apply window options only for desktop platforms
 Future<void> setupAppWindow() async {
-  await windowManager.ensureInitialized();
-  // Apply window options only for desktop platforms
   if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    await windowManager.ensureInitialized();
     WindowOptions windowOptions = WindowOptions(center: true);
 
-    windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.maximize(); //TODO: Make it configurable
       await windowManager.show();
       await windowManager.focus();

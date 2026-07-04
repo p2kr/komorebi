@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+
 import 'intl/messages_all.dart';
 
 // **************************************************************************
@@ -54,10 +55,10 @@ class S {
     return Localizations.of<S>(context, S);
   }
 
-  /// `Automated Crawler & Sync Engine`
+  /// `AUTOMATED CRAWLER & SYNC ENGINE`
   String get automatedCrawlerSyncEngine {
     return Intl.message(
-      'Automated Crawler & Sync Engine',
+      'AUTOMATED CRAWLER & SYNC ENGINE',
       name: 'automatedCrawlerSyncEngine',
       desc: '',
       args: [],
@@ -137,6 +138,71 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `OTHER CONNECTED PROFILES`
+  String get otherConnectedProfiles {
+    return Intl.message(
+      'OTHER CONNECTED PROFILES',
+      name: 'otherConnectedProfiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `DISCONNECT ACTIVE PROFILE`
+  String get disconnectActiveProfile {
+    return Intl.message(
+      'DISCONNECT ACTIVE PROFILE',
+      name: 'disconnectActiveProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `QUICK SANDBOX LINK`
+  String get quickSandboxLink {
+    return Intl.message(
+      'QUICK SANDBOX LINK',
+      name: 'quickSandboxLink',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `LINK ANOTHER MAL (OAUTH)`
+  String get linkAnotherMalOauth {
+    return Intl.message(
+      'LINK ANOTHER MAL (OAUTH)',
+      name: 'linkAnotherMalOauth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Connected since`
+  String get connectedSince {
+    return Intl.message(
+      'Connected since',
+      name: 'connectedSince',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `MYANIMELIST OAUTH`
+  String get myanimelistOauth {
+    return Intl.message(
+      'MYANIMELIST OAUTH',
+      name: 'myanimelistOauth',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `SANDBOX`
+  String get sandbox {
+    return Intl.message('SANDBOX', name: 'sandbox', desc: '', args: []);
   }
 }
 

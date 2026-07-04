@@ -27,6 +27,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      // locale: Locale("es"),
+      // themeMode: .light,
       localizationsDelegates: [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -34,11 +36,9 @@ class MyApp extends StatelessWidget {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: S.delegate.supportedLocales,
-      // locale: Locale("es"),
       title: APP_NAME,
-      theme: ObsidianTheme.lightTheme,
-      darkTheme: ObsidianTheme.darkTheme,
-      // themeMode: .light,
+      theme: defaultMonochromeTheme.lightTheme,
+      darkTheme: defaultMonochromeTheme.darkTheme,
       home: const HomePage(),
     );
   }
