@@ -9,6 +9,7 @@ MyAnimeList.**
 ![Platform](https://img.shields.io/badge/Platforms-Windows%20%7C%20Web-0078D4?style=for-the-badge&logo=windows&logoColor=white)
 ![SQLite Drift](https://img.shields.io/badge/Drift%20SQLite-2.34%2B-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/Riverpod-3.3%2B-6F42C1?style=for-the-badge&logo=dart&logoColor=white)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
 ---
 
@@ -130,7 +131,7 @@ graph TD
 3. **Run Code Generation** *(required for Drift database & localization)*:
    ```bash
    # Generate Drift database schemas
-   dart run build_runner build -delete-conflicting-outputs
+   dart run build_runner build --delete-conflicting-outputs
 
    # Generate localization (intl) files
    dart run intl_utils:generate
@@ -179,5 +180,6 @@ explore our internal documentation:
 
 ## 📄 License
 
-This project is developed for personal archival, synchronization, and media consumption from MyAnimeList.
+This project is licensed under the **MIT License** - see
+the [LICENSE](file:///c:/Users/Prince/Documents/CODE/mal_viewer/LICENSE) file for details.
 

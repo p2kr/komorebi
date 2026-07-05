@@ -33,7 +33,7 @@ jobs:
         run: flutter pub get
 
       - name: ⚙️ Generate Drift Database Schemas (build_runner)
-        run: dart run build_runner build -delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: 🌐 Generate Localization Files (intl_utils)
         run: dart run intl_utils:generate
@@ -92,7 +92,7 @@ jobs:
         run: flutter pub get
 
       - name: ⚙️ Generate Drift Database Schemas (build_runner)
-        run: dart run build_runner build -delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: 🌐 Generate Localization Files (intl_utils)
         run: dart run intl_utils:generate
@@ -128,7 +128,7 @@ jobs:
         run: flutter pub get
 
       - name: ⚙️ Generate Drift Database Schemas (build_runner)
-        run: dart run build_runner build -delete-conflicting-outputs
+        run: dart run build_runner build
 
       - name: 🌐 Generate Localization Files (intl_utils)
         run: dart run intl_utils:generate
