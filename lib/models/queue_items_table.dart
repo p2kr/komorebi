@@ -13,15 +13,22 @@ class QueueItems extends Table {
 
   TextColumn get title => text()();
 
-  TextColumn get status => text().clientDefault(
-    () => 'pending',
+  IntColumn get status => intEnum<Status>().clientDefault(
+    () => Status.PENDING.index,
   )(); // 'pending' | 'downloading' | 'completed' | 'failed'
+
   RealColumn get progress => real()();
 
-  TextColumn get priority =>
-      text().clientDefault(() => "normal")(); // 'normal' | 'high'
+  IntColumn get priority => intEnum<Priority>().clientDefault(
+    () => Priority.NORMAL.index,
+  )(); // 'normal' | 'medium' | 'high'
+
   DateTimeColumn get addedAt =>
       dateTime().clientDefault(() => DateTime.timestamp())();
 
   TextColumn get errorMessage => text().nullable()();
 }
+
+enum Status { PENDING, DOWNLOADING, COMPLETED, FAILED }
+
+enum Priority { NORMAL, MEDIUM, HIGH }

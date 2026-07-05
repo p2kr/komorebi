@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/models/database.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/screens/appbar/connected_profiles.dart';
+import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
 
 class ProfileManagementPopup extends ConsumerWidget {
@@ -48,6 +48,7 @@ class ProfileManagementPopup extends ConsumerWidget {
                     fontWeight: .bold,
                   ),
                 ),
+
                 // type of profile (sandbox or MAL)
                 Row(
                   spacing: 2,
@@ -88,7 +89,7 @@ class ProfileManagementPopup extends ConsumerWidget {
               ),
             ),
 
-            // other profiles
+            // other profiles list
             Flexible(
               child: Material(
                 type: .transparency,

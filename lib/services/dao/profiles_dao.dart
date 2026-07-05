@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:komorebi/models/database.dart';
 import 'package:komorebi/models/profiles_table.dart';
+import 'package:komorebi/services/database.dart';
 
 part 'profiles_dao.g.dart';
 

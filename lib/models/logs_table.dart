@@ -6,10 +6,13 @@ class Logs extends Table {
   DateTimeColumn get timestamp =>
       dateTime().clientDefault(() => DateTime.timestamp())();
 
-  TextColumn get level =>
-      text().clientDefault(() => "info")(); // 'info' | 'warning' | 'error'
+  TextColumn get level => text().clientDefault(
+    () => "info",
+  )(); // 'debug' | 'info' | 'warning' | 'error'
+
   TextColumn get category =>
-      text()(); // 'crawler' | 'network' | 'mal' | 'fs' | 'queue'
+      text().nullable()(); // 'crawler' | 'network' | 'mal' | 'fs' | 'queue'
+
   TextColumn get message => text()();
 
   TextColumn get details => text().nullable()();

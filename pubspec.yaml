@@ -26,6 +26,7 @@ dependencies:
   window_manager: ^0.5.1
   talker: ^5.1.17
   flutter_hooks: ^0.21.3+1
+  dio: ^5.10.0
 
 dev_dependencies:
   flutter_test:

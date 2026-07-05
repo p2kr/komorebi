@@ -137,9 +137,15 @@ Widget _diagnosticLogMsgTile(
       title: Row(
         spacing: 8,
         children: [
-          Text(data.displayTime(), style: context.textTheme.labelSmall),
+          SizedBox(
+            width: 120,
+            child: Text(
+              data.displayTime(),
+              style: context.textTheme.labelSmall,
+            ),
+          ),
           Container(
-            padding: .symmetric(horizontal: 2, vertical: 1),
+            padding: .symmetric(horizontal: 2),
             decoration: BoxDecoration(
               border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(2),

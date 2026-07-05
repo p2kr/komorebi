@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/models/database.dart';
+import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
 
 class ConnectedProfiles extends StatelessWidget {

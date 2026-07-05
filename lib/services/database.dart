@@ -4,7 +4,8 @@ import 'package:komorebi/models/config_table.dart';
 import 'package:komorebi/models/logs_table.dart';
 import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/models/queue_items_table.dart';
-import 'package:komorebi/services/DAO/profiles_dao.dart';
+import 'package:komorebi/services/dao/configs_dao.dart';
+import 'package:komorebi/services/dao/profiles_dao.dart';
 import 'package:komorebi/utils/constants.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -12,7 +13,7 @@ part 'database.g.dart';
 
 @DriftDatabase(
   tables: [Profiles, QueueItems, Logs, Configs],
-  daos: [ProfilesDao], // QueueItemsDao, LogsDao, ConfigsDao
+  daos: [ProfilesDao, ConfigsDao], // QueueItemsDao, LogsDao,
 )
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter
@@ -32,6 +33,10 @@ class AppDatabase extends _$AppDatabase {
         databaseDirectory: getApplicationSupportDirectory,
       ),
       // If you need web support, see https://drift.simonbinder.eu/platforms/web/
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse("sqlite3.wasm"),
+        driftWorker: Uri.parse("drift_worker.dart.js"),
+      ),
     );
   }
 }

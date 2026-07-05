@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:komorebi/models/database.dart';
+import 'package:komorebi/services/database.dart';
 
 final dbProvider = Provider<AppDatabase>((ref) {
   final db = AppDatabase();

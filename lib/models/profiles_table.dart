@@ -7,13 +7,19 @@ class Profiles extends Table {
 
   TextColumn get avatarUrl => text().nullable()();
 
-  TextColumn get syncType => text()(); // 'oauth' | 'sandbox'
-  DateTimeColumn get connectedAt => dateTime()();
+  IntColumn get syncType => intEnum<SyncType>().clientDefault(
+    () => SyncType.SANDBOX.index,
+  )(); // oauth | sandbox
 
-  BoolColumn get isActive => boolean()();
+  DateTimeColumn get connectedAt =>
+      dateTime().clientDefault(() => DateTime.timestamp())();
+
+  BoolColumn get isActive => boolean().clientDefault(() => true)();
 
   TextColumn get accessToken => text().nullable()();
 
   TextColumn get animeListJson =>
       text().nullable()(); // Serialized watching list data
 }
+
+enum SyncType { OAUTH, SANDBOX }
