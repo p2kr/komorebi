@@ -4,11 +4,10 @@ class Logs extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   DateTimeColumn get timestamp =>
-      dateTime().withDefault(Constant(DateTime.timestamp()))();
+      dateTime().clientDefault(() => DateTime.timestamp())();
 
-  TextColumn get level => text().withDefault(
-    const Constant("info"),
-  )(); // 'info' | 'warning' | 'error'
+  TextColumn get level =>
+      text().clientDefault(() => "info")(); // 'info' | 'warning' | 'error'
   TextColumn get category =>
       text()(); // 'crawler' | 'network' | 'mal' | 'fs' | 'queue'
   TextColumn get message => text()();

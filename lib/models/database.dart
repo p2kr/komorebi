@@ -1,33 +1,37 @@
-import 'dart:io';
 import 'package:drift/drift.dart';
-import 'package:drift/native.dart';
-import 'package:komorebi/utils/constants.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart' as p;
-
-import 'package:komorebi/models/accounts_table.dart';
+import 'package:drift_flutter/drift_flutter.dart';
 import 'package:komorebi/models/config_table.dart';
 import 'package:komorebi/models/logs_table.dart';
+import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/models/queue_items_table.dart';
+import 'package:komorebi/services/DAO/profiles_dao.dart';
+import 'package:komorebi/utils/constants.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
-// part 'accounts_table.dart';
-// part 'queue_items_table.dart';
-// part 'logs_table.dart';
-
-@DriftDatabase(tables: [Accounts, QueueItems, Logs, Config])
+@DriftDatabase(
+  tables: [Profiles, QueueItems, Logs, Configs],
+  daos: [ProfilesDao], // QueueItemsDao, LogsDao, ConfigsDao
+)
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(_openConnection());
+  // After generating code, this class needs to define a `schemaVersion` getter
+  // and a constructor telling drift where the database should be stored.
+  // These are described in the getting started guide: https://drift.simonbinder.eu/setup/
+  AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
   int get schemaVersion => 1;
-}
 
-LazyDatabase _openConnection() {
-  return LazyDatabase(() async {
-    final dbFolder = await getApplicationSupportDirectory();
-    final file = File(p.join(dbFolder.path, DB_LOCATION));
-    return NativeDatabase(file, logStatements: true);
-  });
+  static QueryExecutor _openConnection() {
+    return driftDatabase(
+      name: DB_NAME,
+      native: const DriftNativeOptions(
+        // By default, `driftDatabase` from `package:drift_flutter` stores the
+        // database files in `getApplicationDocumentsDirectory()`.
+        databaseDirectory: getApplicationSupportDirectory,
+      ),
+      // If you need web support, see https://drift.simonbinder.eu/platforms/web/
+    );
+  }
 }

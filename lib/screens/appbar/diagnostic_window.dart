@@ -4,7 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/talker.dart';
-import 'package:talker_flutter/talker_flutter.dart';
+import 'package:talker/talker.dart';
 
 class DiagnosticWindow extends HookWidget {
   const DiagnosticWindow({super.key});
@@ -147,7 +147,7 @@ Widget _diagnosticLogMsgTile(
             child: Text(
               data.logLevel!.name.toUpperCase(),
               style: context.textTheme.labelSmall?.copyWith(
-                color: data.getFlutterColor(TalkerScreenTheme()),
+                color: data.getFlutterColor(),
                 fontWeight: .bold,
               ),
             ),

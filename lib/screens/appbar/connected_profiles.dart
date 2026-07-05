@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/models/database.dart';
 import 'package:komorebi/themes/theme.dart';
 
 class ConnectedProfiles extends StatelessWidget {
-  const ConnectedProfiles({super.key, required this.index});
+  const ConnectedProfiles({super.key, required this.profile});
 
-  final int index;
+  final Profile profile;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,7 @@ class ConnectedProfiles extends StatelessWidget {
         ),
         leading: CircleAvatar(child: Icon(Icons.person)),
         title: Text(
-          "Profile Name $index",
+          profile.username,
           style: context.textTheme.headlineSmall?.copyWith(
             fontSize: context.textTheme.titleMedium?.fontSize,
           ),

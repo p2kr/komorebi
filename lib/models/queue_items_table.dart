@@ -13,15 +13,15 @@ class QueueItems extends Table {
 
   TextColumn get title => text()();
 
-  TextColumn get status => text().withDefault(
-    const Constant('pending'),
+  TextColumn get status => text().clientDefault(
+    () => 'pending',
   )(); // 'pending' | 'downloading' | 'completed' | 'failed'
   RealColumn get progress => real()();
 
   TextColumn get priority =>
-      text().withDefault(const Constant("normal"))(); // 'normal' | 'high'
+      text().clientDefault(() => "normal")(); // 'normal' | 'high'
   DateTimeColumn get addedAt =>
-      dateTime().withDefault(Constant(DateTime.timestamp()))();
+      dateTime().clientDefault(() => DateTime.timestamp())();
 
   TextColumn get errorMessage => text().nullable()();
 }

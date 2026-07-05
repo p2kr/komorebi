@@ -1,7 +1,10 @@
 import 'dart:io';
 
+import 'package:drift/drift.dart';
+import 'package:flutter/foundation.dart';
 import 'package:intl/find_locale.dart';
 import 'package:intl/intl.dart';
+import 'package:komorebi/models/database.dart';
 import 'package:komorebi/utils/talker.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -19,7 +22,12 @@ Future<void> doInitialConfigurations() async {
 }
 
 void setupDb() {
-  //TODO: Nothing to add yet
+  if (kDebugMode) {
+    // create dummy entries
+    final db = AppDatabase();
+    db.into(db.profiles).insert(ProfilesCompanion(username: Value("Dummy")));
+    db.close();
+  }
 }
 
 Future<void> setupL10N() async {

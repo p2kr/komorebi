@@ -1,11 +1,11 @@
 import 'package:drift/drift.dart';
 
-class Accounts extends Table {
+class Profiles extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get username => text()();
 
-  TextColumn get avatarUrl => text()();
+  TextColumn get avatarUrl => text().nullable()();
 
   TextColumn get syncType => text()(); // 'oauth' | 'sandbox'
   DateTimeColumn get connectedAt => dateTime()();

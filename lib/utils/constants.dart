@@ -1,4 +1,5 @@
 const APP_NAME = "Komorebi";
 const KOMOREBI = "Komorebi";
 
-const DB_LOCATION = "db.sqlite";
+const DB_NAME = "app_db";
+const DB_FILE_NAME = "$DB_NAME.sqlite";

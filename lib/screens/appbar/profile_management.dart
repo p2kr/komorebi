@@ -1,20 +1,24 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/models/database.dart';
+import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/screens/appbar/connected_profiles.dart';
 import 'package:komorebi/themes/theme.dart';
 
-class ProfileManagementPopup extends StatelessWidget {
+class ProfileManagementPopup extends ConsumerWidget {
   const ProfileManagementPopup({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
 
-    // final activeProfile -> fetch from state
+    // final activeProfile -> fetch from state & db config
     // final allProfiles -> fetch from db
+    final allProfiles = getConnectedProfiles(ref);
 
     return Dialog(
       child: Container(
@@ -73,8 +77,8 @@ class ProfileManagementPopup extends StatelessWidget {
                 ),
               ],
             ),
+            Divider(),
 
-            SizedBox(height: 24),
             // other connected profiles header text
             Align(
               alignment: .centerLeft,
@@ -85,17 +89,31 @@ class ProfileManagementPopup extends StatelessWidget {
             ),
 
             // other profiles
-            Expanded(
+            Flexible(
               child: Material(
                 type: .transparency,
-                child: ListView(
-                  // shrinkWrap: true,
-                  children: getConnectedProfiles(),
+                child: StreamBuilder(
+                  stream: allProfiles,
+                  builder: (context, asyncSnapshot) {
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: asyncSnapshot.data?.length ?? 0,
+                      itemBuilder: (context, index) {
+                        if (asyncSnapshot.hasData) {
+                          return ConnectedProfiles(
+                            profile: asyncSnapshot.data![index],
+                          );
+                        } else {
+                          return Text("No Profiles Found");
+                        }
+                      },
+                    );
+                  },
                 ),
               ),
             ),
 
-            SizedBox(height: 8),
+            Divider(),
 
             // link another mal profile using oauth button
             Column(
@@ -119,6 +137,8 @@ class ProfileManagementPopup extends StatelessWidget {
                   icon: Icon(Icons.person_add_alt, applyTextScaling: true),
                 ),
 
+                Divider(),
+
                 // Disconnect active profile button
                 TextButton.icon(
                   onPressed: () {},
@@ -132,8 +152,9 @@ class ProfileManagementPopup extends StatelessWidget {
       ),
     );
   }
-}
 
-List<Widget> getConnectedProfiles() {
-  return List.generate(100, (index) => ConnectedProfiles(index: index));
+  Stream<List<Profile>> getConnectedProfiles(WidgetRef ref) {
+    final db = ref.read(dbProvider);
+    return db.profilesDao.watchProfiles();
+  }
 }

@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-class Config extends Table {
+class Configs extends Table {
   IntColumn get id => integer().autoIncrement()();
 
   TextColumn get configKey => text()();
