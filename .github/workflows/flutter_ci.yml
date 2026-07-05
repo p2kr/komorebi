@@ -1,0 +1,144 @@
+name: Flutter CI/CD (Windows & Web)
+
+on:
+  push:
+    branches: [ "develop", "master" ]
+  pull_request:
+    branches: [ "develop", "master" ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze_and_test:
+    name: 🔍 Analyze & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: ⚙️ Generate Drift Database Schemas (build_runner)
+        run: dart run build_runner build -delete-conflicting-outputs
+
+      - name: 🌐 Generate Localization Files (intl_utils)
+        run: dart run intl_utils:generate
+
+      - name: 🔎 Verify Formatting
+        run: dart format --output=none --set-exit-if-changed .
+        continue-on-error: true
+
+      - name: 🧪 Run Static Analysis
+        run: flutter analyze
+
+      - name: 🧪 Run Unit Tests with Coverage
+        run: flutter test --coverage
+
+      - name: 🧹 Filter Generated Files from Coverage
+        run: |
+          sudo apt-get update && sudo apt-get install -y lcov
+          lcov --remove coverage/lcov.info 'lib/**/*.g.dart' 'lib/intl/generated/*' -o coverage/lcov.info --ignore-errors unused
+        continue-on-error: true
+
+      - name: 📊 Report Test Coverage to PR
+        if: github.event_name == 'pull_request'
+        uses: zgosalvez/github-actions-report-lcov@v4
+        with:
+          coverage-files: coverage/lcov.info
+          minimum-coverage: 0
+          artifact-name: code-coverage-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          update-comment: true
+
+      - name: 📤 Upload Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ github.sha }}
+          path: coverage/
+          if-no-files-found: ignore
+
+  build_web:
+    name: 🌐 Build Web
+    needs: analyze_and_test
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: ⚙️ Enable Web Support
+        run: flutter config --enable-web
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: ⚙️ Generate Drift Database Schemas (build_runner)
+        run: dart run build_runner build -delete-conflicting-outputs
+
+      - name: 🌐 Generate Localization Files (intl_utils)
+        run: dart run intl_utils:generate
+
+      - name: 🏗️ Build Web Release Bundle
+        run: flutter build web --release
+
+      - name: 📤 Upload Web Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build-${{ github.sha }}
+          path: build/web
+          if-no-files-found: error
+
+  build_windows:
+    name: 🖥️ Build Windows Desktop
+    needs: analyze_and_test
+    runs-on: windows-latest
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐦 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: ⚙️ Enable Windows Desktop Support
+        run: flutter config --enable-windows-desktop
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: ⚙️ Generate Drift Database Schemas (build_runner)
+        run: dart run build_runner build -delete-conflicting-outputs
+
+      - name: 🌐 Generate Localization Files (intl_utils)
+        run: dart run intl_utils:generate
+
+      - name: 🏗️ Build Windows Release Bundle
+        run: flutter build windows --release
+
+      - name: 📤 Upload Windows Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-${{ github.sha }}
+          path: build/windows/x64/runner/Release/
+          if-no-files-found: error
