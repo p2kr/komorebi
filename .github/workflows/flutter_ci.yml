@@ -16,8 +16,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  analyze_and_test:
-    name: 🔍 Analyze & Test
+  test_and_build_web:
+    name: 🔍 Test & 🌐 Build Web
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout repository
@@ -28,6 +28,20 @@ jobs:
         with:
           channel: 'stable'
           cache: true
+
+      - name: 💾 Cache Pub & Build Runner (Linux)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pub-cache
+            .dart_tool/build
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-
+            ${{ runner.os }}-pub-
+
+      - name: ⚙️ Enable Web Support
+        run: flutter config --enable-web
 
       - name: 📦 Install dependencies
         run: flutter pub get
@@ -60,42 +74,16 @@ jobs:
         with:
           coverage-files: coverage/lcov.info
           minimum-coverage: 0
-          artifact-name: code-coverage-report
+          artifact-name: komorebi-code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
           update-comment: true
 
       - name: 📤 Upload Coverage Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{ github.sha }}
+          name: komorebi-coverage-report
           path: coverage/
           if-no-files-found: ignore
-
-  build_web:
-    name: 🌐 Build Web
-    needs: analyze_and_test
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: ⚙️ Enable Web Support
-        run: flutter config --enable-web
-
-      - name: 📦 Install dependencies
-        run: flutter pub get
-
-      - name: ⚙️ Generate Drift Database Schemas (build_runner)
-        run: dart run build_runner build
-
-      - name: 🌐 Generate Localization Files (intl_utils)
-        run: dart run intl_utils:generate
 
       - name: 🏗️ Build Web Release Bundle
         run: flutter build web --release
@@ -103,13 +91,12 @@ jobs:
       - name: 📤 Upload Web Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: web-build-${{ github.sha }}
+          name: komorebi-web-build
           path: build/web
           if-no-files-found: error
 
   build_windows:
     name: 🖥️ Build Windows Desktop
-    needs: analyze_and_test
     runs-on: windows-latest
     steps:
       - name: 📥 Checkout repository
@@ -120,6 +107,17 @@ jobs:
         with:
           channel: 'stable'
           cache: true
+
+      - name: 💾 Cache Pub & Build Runner (Windows)
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:\Users\runneradmin\AppData\Local\Pub\Cache
+            .dart_tool\build
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-
+            ${{ runner.os }}-pub-
 
       - name: ⚙️ Enable Windows Desktop Support
         run: flutter config --enable-windows-desktop
@@ -139,6 +137,6 @@ jobs:
       - name: 📤 Upload Windows Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: windows-build-${{ github.sha }}
+          name: komorebi-windows-build
           path: build/windows/x64/runner/Release/
           if-no-files-found: error
