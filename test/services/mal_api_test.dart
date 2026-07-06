@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/services/mal_api.dart';
+import 'package:komorebi/utils/mal_api.dart';
 
 class MockHttpClientAdapter implements HttpClientAdapter {
   final Future<ResponseBody> Function(RequestOptions options) handler;

@@ -12,10 +12,15 @@ class DiagnosticWindow extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final currLevelFilter = useState("all");
+    final currCategoryFilter = useState("all");
 
-    final diagnosticsList = getDiagnosticMessage(
-      context,
-      level: currLevelFilter.value,
+    final diagnosticsList = useMemoized(
+      () => getDiagnosticMessage(
+        context,
+        level: currLevelFilter.value,
+        category: currCategoryFilter.value,
+      ),
+      [currLevelFilter.value, currCategoryFilter.value],
     );
 
     final size = MediaQuery.of(context).size;
@@ -69,13 +74,22 @@ class DiagnosticWindow extends HookWidget {
                       ),
 
                       // CATEGORY dropdown
-                      _getDropdown(context, _DropdownType.CATEGORY, [
-                        "all",
-                        // "web crawler",
-                        // "mal sync",
-                        // "file system",
-                        // "queue engine",
-                      ]),
+                      _getDropdown(
+                        context,
+                        _DropdownType.CATEGORY,
+                        [
+                          "all",
+                          "system",
+                          "riverpod",
+                          "dio",
+                          // "web crawler",
+                          // "mal sync",
+                          // "file system",
+                          // "queue engine",
+                        ],
+                        onSelected: (value) =>
+                            currCategoryFilter.value = value ?? "all",
+                      ),
                     ],
                   ),
 
@@ -131,19 +145,23 @@ Widget _diagnosticLogMsgTile(
   String? category,
 }) {
   return Card(
-    child: ListTile(
+    child: ExpansionTile(
+      expandedAlignment: .topLeft,
+      childrenPadding: .symmetric(horizontal: 16),
       dense: true,
-      titleTextStyle: context.textTheme.bodySmall,
+      // titleTextStyle: context.textTheme.bodySmall,
       title: Row(
         spacing: 8,
         children: [
           SizedBox(
-            width: 120,
+            width: 110,
             child: Text(
               data.displayTime(),
               style: context.textTheme.labelSmall,
             ),
           ),
+
+          // Log level
           Container(
             padding: .symmetric(horizontal: 2),
             decoration: BoxDecoration(
@@ -158,12 +176,30 @@ Widget _diagnosticLogMsgTile(
               ),
             ),
           ),
+
+          // category chip
+          Container(
+            padding: .symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              border: Border.all(color: Theme.of(context).dividerColor),
+              borderRadius: BorderRadius.circular(2),
+            ),
+            child: Text(
+              getCategoryName(data),
+              style: context.textTheme.labelSmall,
+            ),
+          ),
         ],
       ),
       subtitle: Text(
         data.displayMessage + data.displayError + data.displayException,
         style: context.textTheme.bodyMedium,
       ),
+      enabled: data.logLevel?.name == 'error',
+      showTrailingIcon: data.logLevel?.name == 'error',
+      children: [
+        Text(data.generateTextMessage(), style: context.textTheme.labelSmall),
+      ],
     ),
   );
 }
@@ -183,7 +219,13 @@ List<Widget> getDiagnosticMessage(
           cond = cond && (t.logLevel!.name == level);
         }
         if (category != null && category != "all") {
-          cond = cond && (t.title.toString() == category);
+          if (category != "system") {
+            cond = cond && (t.title!.contains(category));
+          } else {
+            cond =
+                cond &&
+                (['info', 'debug', 'warning', 'error'].contains(t.title));
+          }
         }
         return cond;
       })
@@ -235,4 +277,12 @@ DropdownMenu<String> _getDropdown(
     selectOnly: true,
     onSelected: onSelected,
   );
+}
+
+String getCategoryName(TalkerData data) {
+  if (data.logLevel!.name != data.title) {
+    return data.title!.toUpperCase();
+  } else {
+    return "SYSTEM";
+  }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:talker/talker.dart';
 
+/// Default talker instance for this app
 final talker = Talker(
   settings: TalkerSettings(
     //...
@@ -15,8 +16,8 @@ final talker = Talker(
 extension TalkerDataFlutterExt on TalkerData {
   Color getFlutterColor() {
     Color? color;
-    if (key != null) {
-      color = levelVsColorMap[key];
+    if (logLevel != null) {
+      color = levelVsColorMap[logLevel!.name];
     }
     return color ?? Colors.grey;
   }

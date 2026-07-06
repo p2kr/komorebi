@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 ///
 /// ### Quick Start
 /// ```dart
-/// final appTheme = AppThemeBuilder();
+/// final appTheme = ThemeBuilder();
 ///
 /// MaterialApp(
 ///   themeMode: ThemeMode.system,
@@ -38,6 +38,9 @@ class ThemeBuilder {
   /// Proportional scaling: keep this larger than [buttonRadius] for visual harmony.
   final double dialogRadius;
 
+  /// The border radius applied to all cards.
+  final double cardRadius;
+
   /// Applied to Display and Headline text styles. Best for elegant titles.
   final String fontSerif;
 
@@ -56,6 +59,7 @@ class ThemeBuilder {
     this.variant = DynamicSchemeVariant.monochrome,
     this.buttonRadius = 4.0,
     this.dialogRadius = 8.0,
+    this.cardRadius = 8.0,
     this.fontSerif = 'Playfair Display',
     this.fontSans = 'Inter',
     this.fontMono = 'JetBrains Mono',
@@ -102,8 +106,13 @@ class ThemeBuilder {
     final buttonShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(buttonRadius),
     );
+
     final dialogShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(dialogRadius),
+    );
+
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(cardRadius),
     );
 
     return ThemeData(
@@ -121,6 +130,8 @@ class ThemeBuilder {
       ),
 
       dialogTheme: DialogThemeData(shape: dialogShape),
+      cardTheme: CardThemeData(shape: cardShape),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(shape: buttonShape),
       ),

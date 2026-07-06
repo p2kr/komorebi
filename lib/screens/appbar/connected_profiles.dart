@@ -1,7 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
+import 'package:komorebi/utils/utils.dart';
 
 class ConnectedProfiles extends StatelessWidget {
   const ConnectedProfiles({super.key, required this.profile});
@@ -18,7 +19,15 @@ class ConnectedProfiles extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           side: BorderSide(color: Theme.of(context).dividerColor),
         ),
-        leading: CircleAvatar(child: Icon(Icons.person)),
+        leading: CircleAvatar(
+          foregroundImage:
+              profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+              ? CachedNetworkImageProvider(profile.avatarUrl!)
+              : null,
+          child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+              ? Text(getInitials(profile.username))
+              : null,
+        ),
         title: Text(
           profile.username,
           style: context.textTheme.headlineSmall?.copyWith(
@@ -28,8 +37,8 @@ class ConnectedProfiles extends StatelessWidget {
         subtitle: Row(
           spacing: 4,
           children: [
-            Icon(Icons.person_add_alt, size: 12, applyTextScaling: true),
-            Text(S.of(context).sandbox, style: context.textTheme.labelSmall),
+            getSyncTypeIcon(profile.syncType),
+            Text(profile.syncType.name, style: context.textTheme.labelSmall),
           ],
         ),
         trailing: IconButton(

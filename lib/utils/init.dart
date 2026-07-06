@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/find_locale.dart';
 import 'package:intl/intl.dart';
+import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';
 import 'package:komorebi/utils/talker.dart';
@@ -64,4 +66,9 @@ Future<void> setupAppWindow() async {
       await windowManager.focus();
     });
   }
+}
+
+void initializeSettings(WidgetRef ref) {
+  // Load current profile
+  ref.watch(currentProfileProvider);
 }

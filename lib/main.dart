@@ -7,6 +7,7 @@ import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/constants.dart';
 import 'package:komorebi/utils/init.dart';
 import 'package:komorebi/utils/talker.dart';
+import 'package:talker_riverpod_logger/talker_riverpod_logger.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,12 @@ void main() async {
     talker.error("Exception in doInitialConfigurations: ", e, stack);
   }
 
-  runApp(ProviderScope(child: const MyApp()));
+  runApp(
+    ProviderScope(
+      observers: [TalkerRiverpodObserver(talker: talker)],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

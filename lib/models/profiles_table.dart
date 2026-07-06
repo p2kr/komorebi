@@ -11,7 +11,7 @@ class Profiles extends Table {
     () => SyncType.SANDBOX.index,
   )(); // oauth | sandbox
 
-  DateTimeColumn get connectedAt =>
+  DateTimeColumn get connectedOn =>
       dateTime().clientDefault(() => DateTime.timestamp())();
 
   BoolColumn get isActive => boolean().clientDefault(() => true)();
