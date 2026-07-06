@@ -71,4 +71,5 @@ Future<void> setupAppWindow() async {
 void initializeSettings(WidgetRef ref) {
   // Load current profile
   ref.watch(currentProfileProvider);
+  ref.watch(allProfilesProvider);
 }

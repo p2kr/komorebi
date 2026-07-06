@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
@@ -19,15 +18,7 @@ class ConnectedProfiles extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           side: BorderSide(color: Theme.of(context).dividerColor),
         ),
-        leading: CircleAvatar(
-          foregroundImage:
-              profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-              ? CachedNetworkImageProvider(profile.avatarUrl!)
-              : null,
-          child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-              ? Text(getInitials(profile.username))
-              : null,
-        ),
+        leading: getAvatar(profile),
         title: Text(
           profile.username,
           style: context.textTheme.headlineSmall?.copyWith(

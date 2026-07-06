@@ -14,7 +14,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(appBar: appBar(context), body: const NavBar());
+    return Scaffold(appBar: appBar(context, ref), body: const NavBar());
   }
 
   @override

@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/screens/appbar/diagnostic_window.dart';
 import 'package:komorebi/screens/appbar/profile_management.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/constants.dart';
+import 'package:komorebi/utils/utils.dart';
 
-AppBar appBar(BuildContext context) {
+AppBar appBar(BuildContext context, WidgetRef ref) {
+  final activeProfile = ref.watch(currentProfileProvider);
+
   return AppBar(
     title: Row(
       children: [
@@ -41,11 +46,27 @@ AppBar appBar(BuildContext context) {
               icon: const Icon(Icons.notifications_none),
               label: Text(S.of(context).checkNewEpisodes),
             ),
-            OutlinedButton.icon(
-              style: OutlinedButton.styleFrom(padding: EdgeInsets.zero),
-              onPressed: () => onManageAccountsPressed(context),
-              icon: const Icon(Icons.manage_accounts_outlined), // TODO: Dynamic
-              label: Text("???"), // TODO: Dynamic
+            Container(
+              constraints: BoxConstraints(maxWidth: 150),
+              child: OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(
+                  padding: .only(
+                    right: 4,
+                    left: activeProfile.hasValue ? 0 : 4,
+                  ),
+                  shape: StadiumBorder(),
+                ),
+                onPressed: () => onManageAccountsPressed(context),
+                icon: activeProfile.hasValue
+                    ? getAvatar(activeProfile.value!, maxRadius: 15)
+                    : Icon(Icons.manage_accounts_outlined),
+                label: Text(
+                  overflow: TextOverflow.ellipsis,
+                  activeProfile.hasValue
+                      ? activeProfile.value!.username
+                      : "???",
+                ),
+              ),
             ),
           ],
         ),

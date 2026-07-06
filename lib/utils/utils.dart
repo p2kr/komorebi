@@ -1,8 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/models/profiles_table.dart';
+import 'package:komorebi/services/database.dart';
 
 String getInitials(String name) {
   if (name.isEmpty) return "??";
@@ -22,3 +24,20 @@ Widget getSyncTypeIcon(SyncType? syncType) => switch (syncType) {
   .SANDBOX => Icon(Icons.person_add_alt, size: 14, applyTextScaling: true),
   _ => Icon(Icons.no_accounts_outlined, size: 14, applyTextScaling: true),
 };
+
+CircleAvatar getAvatar(
+  Profile profile, {
+  double? minRadius,
+  double? maxRadius,
+  double? radius,
+}) => CircleAvatar(
+  foregroundImage: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+      ? CachedNetworkImageProvider(profile.avatarUrl!)
+      : null,
+  radius: radius,
+  minRadius: minRadius,
+  maxRadius: maxRadius,
+  child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+      ? Text(getInitials(profile.username))
+      : null,
+);

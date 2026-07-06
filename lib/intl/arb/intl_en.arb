@@ -18,5 +18,8 @@
   "linkAnotherMalOauth": "LINK ANOTHER MAL (OAUTH)",
   "connectedSince": "Connected since",
   "myanimelistOauth": "MYANIMELIST OAUTH",
-  "sandbox": "SANDBOX"
+  "sandbox": "SANDBOX",
+  "noProfilesFound": "NO PROFILES FOUND",
+  "noActiveProfile": "NO ACTIVE PROFILE",
+  "errorFetchingProfiles": "ERROR FETCHING PROFILES"
 }
