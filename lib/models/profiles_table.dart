@@ -18,8 +18,13 @@ class Profiles extends Table {
 
   TextColumn get accessToken => text().nullable()();
 
-  TextColumn get animeListJson =>
-      text().nullable()(); // Serialized watching list data
+  /// Serialized watching list data
+  TextColumn get animeListJson => text().nullable()();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+    {username, syncType, isActive},
+  ];
 }
 
 enum SyncType { OAUTH, SANDBOX }

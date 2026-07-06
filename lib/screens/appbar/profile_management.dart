@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
-import 'package:komorebi/screens/appbar/connected_profiles.dart';
+import 'package:komorebi/screens/appbar/connected_profiles_tile.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/utils.dart';
 
@@ -37,48 +37,51 @@ class ProfileManagementPopup extends ConsumerWidget {
               child: Center(
                 child: activeProfileAsync.when(
                   data: (activeProfile) => Column(
-                    spacing: 4,
+                    spacing: 8,
                     mainAxisSize: .min,
                     mainAxisAlignment: .center,
-                    children: [
-                      // avatar icon (fetch from api)
-                      getAvatar(activeProfile, minRadius: 32),
+                    children: activeProfile == null
+                        ? noActiveProfileWidget(context)
+                        : [
+                            // avatar icon (fetch from api)
+                            getAvatar(activeProfile, minRadius: 32),
 
-                      // profile name
+                            // profile name
                       Text(
                         activeProfile.username,
                         style: context.textTheme.headlineSmall?.copyWith(
-                          fontSize: context.textTheme.titleMedium?.fontSize,
+                          fontSize:
+                          context.textTheme.titleMedium?.fontSize,
                           fontWeight: .bold,
                         ),
                       ),
 
-                      // type of profile (sandbox or oauth)
-                      Row(
-                        spacing: 2,
-                        mainAxisSize: .min,
-                        children: [
-                          getSyncTypeIcon(activeProfile.syncType),
-                          Text(
-                            activeProfile.syncType.name,
-                            style: context.textTheme.labelSmall,
-                          ),
-                        ],
-                      ),
+                            // type of profile (sandbox or oauth)
+                            Row(
+                              spacing: 2,
+                              mainAxisSize: .min,
+                              children: [
+                                getSyncTypeIcon(activeProfile.syncType),
+                                Text(
+                                  activeProfile.syncType.name,
+                                  style: context.textTheme.labelSmall,
+                                ),
+                              ],
+                            ),
 
-                      // profile creation in local db date-time
+                            // profile creation in local db date-time
                       Text(
-                        "${S.of(context).connectedSince} ${getDateOnly(activeProfile.connectedOn)}",
+                        "${S
+                            .of(context)
+                            .connectedSince} ${getDateOnly(activeProfile
+                            .connectedOn)}",
                         style: context.textTheme.labelSmall,
                       ),
                     ],
                   ),
                   error: (error, stackTrace) => Column(
                     spacing: 8,
-                    children: [
-                      CircleAvatar(child: Icon(Icons.no_accounts_outlined)),
-                      Text(S.of(context).noActiveProfile),
-                    ],
+                    children: noActiveProfileWidget(context),
                   ),
                   loading: () => CircularProgressIndicator(),
                 ),
@@ -106,8 +109,9 @@ class ProfileManagementPopup extends ConsumerWidget {
                     child: ListView.builder(
                       shrinkWrap: true,
                       itemCount: profiles.length,
-                      itemBuilder: (context, index) =>
-                          ConnectedProfiles(profile: profiles[index]),
+                      itemBuilder: (context, index) {
+                        return ConnectedProfilesTile(profile: profiles[index]);
+                      },
                     ),
                   ),
                 ),
@@ -120,7 +124,10 @@ class ProfileManagementPopup extends ConsumerWidget {
                       mainAxisSize: .min,
                       children: [
                         IconButton(
-                          onPressed: () => ref.refresh(allProfilesProvider),
+                          onPressed: () {
+                            ref.invalidate(allProfilesProvider);
+                            ref.invalidate(currentProfileProvider);
+                          },
                           icon: Icon(Icons.refresh_outlined),
                         ),
                         Text(
@@ -176,4 +183,11 @@ class ProfileManagementPopup extends ConsumerWidget {
       ),
     );
   }
+}
+
+List<Widget> noActiveProfileWidget(BuildContext context) {
+  return [
+    CircleAvatar(child: Icon(Icons.no_accounts_outlined)),
+    Text(S.of(context).noActiveProfile),
+  ];
 }

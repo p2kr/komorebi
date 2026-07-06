@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/utils.dart';
 
-class ConnectedProfiles extends StatelessWidget {
-  const ConnectedProfiles({super.key, required this.profile});
+class ConnectedProfilesTile extends ConsumerWidget {
+  const ConnectedProfilesTile({super.key, required this.profile});
 
   final Profile profile;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currProfile = ref.watch(currentProfileProvider);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: ListTile(
+        enabled: !isCurrentProfileTile(profile, currProfile),
         dense: true,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
@@ -44,4 +49,8 @@ class ConnectedProfiles extends StatelessWidget {
       ),
     );
   }
+}
+
+bool isCurrentProfileTile(Profile profile, AsyncValue<Profile?> currProfile) {
+  return currProfile.value != null ? currProfile.value!.id == profile.id : true;
 }

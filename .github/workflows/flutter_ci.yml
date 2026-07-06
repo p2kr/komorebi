@@ -91,6 +91,15 @@ jobs:
           path: coverage/
           if-no-files-found: ignore
 
+      - name: ☂️ Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+
       - name: 🏗️ Build Web Release Bundle
         # Note: By default, GitHub Pages serves project repositories at https://<user>.github.io/<repo-name>/
         # Passing --base-href "/${{ github.event.repository.name }}/" ensures routing and assets work correctly.

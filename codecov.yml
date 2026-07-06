@@ -1,0 +1,25 @@
+codecov:
+  notify:
+    require_ci_to_pass: yes
+
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: auto
+        threshold: 1%
+
+ignore:
+  - "lib/**/*.g.dart"
+  - "lib/**/*.freezed.dart"
+  - "lib/intl/generated/**/*"
+  - "test/**/*"
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false

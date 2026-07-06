@@ -57,12 +57,12 @@ AppBar appBar(BuildContext context, WidgetRef ref) {
                   shape: StadiumBorder(),
                 ),
                 onPressed: () => onManageAccountsPressed(context),
-                icon: activeProfile.hasValue
+                icon: activeProfile.value != null
                     ? getAvatar(activeProfile.value!, maxRadius: 15)
                     : Icon(Icons.manage_accounts_outlined),
                 label: Text(
                   overflow: TextOverflow.ellipsis,
-                  activeProfile.hasValue
+                  activeProfile.value != null
                       ? activeProfile.value!.username
                       : "???",
                 ),

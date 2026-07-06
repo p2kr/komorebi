@@ -13,7 +13,7 @@ String getInitials(String name) {
 
 String getDateOnly(DateTime? dateTime) {
   if (dateTime == null) return "???";
-  return DateFormat().add_yMd().format(dateTime);
+  return DateFormat().add_yMd().format(dateTime.toLocal());
 }
 
 Widget getSyncTypeIcon(SyncType? syncType) => switch (syncType) {
@@ -25,19 +25,22 @@ Widget getSyncTypeIcon(SyncType? syncType) => switch (syncType) {
   _ => Icon(Icons.no_accounts_outlined, size: 14, applyTextScaling: true),
 };
 
-CircleAvatar getAvatar(
-  Profile profile, {
+CircleAvatar getAvatar(Profile? profile, {
   double? minRadius,
   double? maxRadius,
   double? radius,
 }) => CircleAvatar(
-  foregroundImage: profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+  foregroundImage:
+      profile != null &&
+          profile.avatarUrl != null &&
+          profile.avatarUrl!.isNotEmpty
       ? CachedNetworkImageProvider(profile.avatarUrl!)
       : null,
   radius: radius,
   minRadius: minRadius,
   maxRadius: maxRadius,
-  child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-      ? Text(getInitials(profile.username))
+  child:
+      profile == null || profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+      ? Text(getInitials(profile!.username))
       : null,
 );

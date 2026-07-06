@@ -10,18 +10,26 @@ class ProfilesDao extends DatabaseAccessor<AppDatabase>
   ProfilesDao(super.attachedDatabase);
 
   /// Stream all Profiles present in DB. Exclude inactive ones.
-  Stream<List<Profile>> watchProfiles() {
+  Stream<List<Profile>> getAllProfiles() {
     return (select(profiles)..where((t) => t.isActive)).watch();
   }
 
   /// Fetch profile by id
-  Stream<Profile> watchProfile(int id) {
-    return (select(profiles)..where((t) => t.id.equals(id) & t.isActive))
-        .watchSingle(); //SingleOrNull();
+  Future<Profile?> getProfile(int id) {
+    return (select(
+      profiles,
+    )..where((t) => t.id.equals(id) & t.isActive)).getSingleOrNull();
+  }
+
+  /// Stream profile by id
+  Stream<Profile?> watchProfile(int id) {
+    return (select(
+      profiles,
+    )..where((t) => t.id.equals(id) & t.isActive)).watchSingleOrNull();
   }
 
   /// Fetch latest created profile
-  Stream<Profile> watchLatestProfile() {
+  Future<Profile?> getLatestProfile() {
     return (select(profiles)
           ..where((t) => t.isActive)
           ..orderBy([
@@ -31,7 +39,21 @@ class ProfilesDao extends DatabaseAccessor<AppDatabase>
             ),
           ])
           ..limit(1))
-        .watchSingle();
+        .getSingleOrNull();
+  }
+
+  /// Stream latest created profile
+  Stream<Profile?> watchLatestProfile() {
+    return (select(profiles)
+          ..where((t) => t.isActive)
+          ..orderBy([
+            (p) => OrderingTerm(
+              expression: p.connectedOn,
+              mode: OrderingMode.desc,
+            ),
+          ])
+          ..limit(1))
+        .watchSingleOrNull();
   }
 
   /// Insert new profile

@@ -40,3 +40,14 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 }
+
+extension ForceDbRefresh on AppDatabase {
+  /// Simple helper to quickly bust the cache of a specific table
+  void forceRefreshTable(TableInfo table) {
+    notifyUpdates({TableUpdate.onTable(table)});
+  }
+
+  void forceRefreshTables(Set<TableInfo> tables) {
+    notifyUpdates(tables.map((table) => TableUpdate.onTable(table)).toSet());
+  }
+}
