@@ -6,8 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/services/database.dart';
 
-String getInitials(String name) {
-  if (name.isEmpty) return "??";
+String getInitials(String? name) {
+  if (name == null || name.isEmpty) return "??";
   return name.substring(0, math.min(2, name.length)).toUpperCase();
 }
 
@@ -25,7 +25,8 @@ Widget getSyncTypeIcon(SyncType? syncType) => switch (syncType) {
   _ => Icon(Icons.no_accounts_outlined, size: 14, applyTextScaling: true),
 };
 
-CircleAvatar getAvatar(Profile? profile, {
+CircleAvatar getAvatar(
+  Profile? profile, {
   double? minRadius,
   double? maxRadius,
   double? radius,
@@ -40,7 +41,8 @@ CircleAvatar getAvatar(Profile? profile, {
   minRadius: minRadius,
   maxRadius: maxRadius,
   child:
-      profile == null || profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-      ? Text(getInitials(profile!.username))
+      profile != null &&
+          (profile.avatarUrl == null || profile.avatarUrl!.isEmpty)
+      ? Text(getInitials(profile.username))
       : null,
 );

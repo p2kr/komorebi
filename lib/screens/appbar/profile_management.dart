@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/screens/appbar/connected_profiles_tile.dart';
+import 'package:komorebi/services/handle_sync.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/utils.dart';
 
@@ -47,14 +48,14 @@ class ProfileManagementPopup extends ConsumerWidget {
                             getAvatar(activeProfile, minRadius: 32),
 
                             // profile name
-                      Text(
-                        activeProfile.username,
-                        style: context.textTheme.headlineSmall?.copyWith(
-                          fontSize:
-                          context.textTheme.titleMedium?.fontSize,
-                          fontWeight: .bold,
-                        ),
-                      ),
+                            Text(
+                              activeProfile.username,
+                              style: context.textTheme.headlineSmall?.copyWith(
+                                fontSize:
+                                    context.textTheme.titleMedium?.fontSize,
+                                fontWeight: .bold,
+                              ),
+                            ),
 
                             // type of profile (sandbox or oauth)
                             Row(
@@ -70,14 +71,11 @@ class ProfileManagementPopup extends ConsumerWidget {
                             ),
 
                             // profile creation in local db date-time
-                      Text(
-                        "${S
-                            .of(context)
-                            .connectedSince} ${getDateOnly(activeProfile
-                            .connectedOn)}",
-                        style: context.textTheme.labelSmall,
-                      ),
-                    ],
+                            Text(
+                              "${S.of(context).connectedSince} ${getDateOnly(activeProfile.connectedOn)}",
+                              style: context.textTheme.labelSmall,
+                            ),
+                          ],
                   ),
                   error: (error, stackTrace) => Column(
                     spacing: 8,
@@ -151,7 +149,9 @@ class ProfileManagementPopup extends ConsumerWidget {
               children: [
                 // add another profile
                 FilledButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    signInWithOAuth(ref);
+                  },
                   label: Text(S.of(context).linkAnotherMalOauth),
                   icon: Transform.rotate(
                     angle: -math.pi / 4,

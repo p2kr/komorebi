@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
 
 /// Exception thrown when MyAnimeList API returns an error status code or fails to execute.
@@ -34,7 +35,7 @@ class MalApi {
   final String? defaultClientId;
 
   MalApi({Dio? dio, this.defaultAccessToken, this.defaultClientId})
-    : _dio = dio ?? Dio(BaseOptions(baseUrl: baseUrl)) {
+    : _dio = dio ?? getDioWithLogger(BaseOptions(baseUrl: baseUrl)) {
     _dio.options.baseUrl = baseUrl;
     _dio.options.headers[Headers.acceptHeader] = 'application/json';
   }

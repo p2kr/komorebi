@@ -8,7 +8,7 @@ import 'package:komorebi/utils/talker.dart';
 class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
   @override
   Future<Profile?> build() async {
-    // ref.keepAlive();
+    ref.keepAlive();
 
     final db = ref.watch(dbProvider);
 
@@ -16,25 +16,24 @@ class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
     final lastUsedProfileConfig = await db.configsDao.getConfig(
       Settings.LAST_USED_PROFILE.name,
     );
-    final configId = lastUsedProfileConfig?.configValue != null
-        ? int.tryParse(lastUsedProfileConfig!.configValue!)
-        : null;
+    final configVal = lastUsedProfileConfig?.configValue;
+    final configId = configVal != null ? int.tryParse(configVal) : null;
 
     if (configId != null) {
       final configuredProfile = await db.profilesDao.getProfile(configId);
       if (configuredProfile != null) {
-        talker.info("fetched last used profile from config: $configId");
+        talker.debug("fetched last used profile from config: $configId");
         return configuredProfile;
       } else {
-        talker.info(
+        talker.debug(
           "configured profile $configId is no longer available; falling back to latest profile",
         );
       }
     }
 
-    talker.info("using latest profile as last used profile");
     final latestProfile = await db.profilesDao.getLatestProfile();
     if (latestProfile != null) {
+      talker.debug("using latest profile as last used profile");
       await db.configsDao.setConfig(
         Settings.LAST_USED_PROFILE.name,
         latestProfile.id.toString(),
@@ -46,11 +45,18 @@ class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
   /// Updates the current profile as [LAST_USED_PROFILE]
   Future<void> updateCurrentProfile(Profile newProfile) async {
     final db = ref.read(dbProvider);
-    await db.configsDao.setConfig(
-      Settings.LAST_USED_PROFILE.name,
-      newProfile.id.toString(),
-    );
-    ref.invalidateSelf();
+
+    state = await AsyncValue.guard(() async {
+      await db.configsDao.setConfig(
+        Settings.LAST_USED_PROFILE.name,
+        newProfile.id.toString(),
+      );
+      talker.info(
+        "Updated active profile to ${newProfile.username}[${newProfile.id}]",
+      );
+      return newProfile;
+    });
+    // ref.invalidateSelf();
   }
 }
 
@@ -68,7 +74,6 @@ final allProfilesProvider = StreamProvider<List<Profile>>((ref) {
 
   if (kDebugMode) {
     ref.onResume(() {
-      talker.debug("allProfilesProvider refreshed!");
       db.forceRefreshTable(db.profiles);
     });
   }

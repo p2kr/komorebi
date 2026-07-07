@@ -9,15 +9,17 @@ import 'package:komorebi/utils/init.dart';
 import 'package:komorebi/utils/talker.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   talker.info("app starting...");
 
   try {
-    await doInitialConfigurations();
+    await doInitialConfigurations(args);
   } catch (e, stack) {
     talker.error("Exception in doInitialConfigurations: ", e, stack);
   }
+
+  talker.info("app started.");
 
   runApp(
     ProviderScope(

@@ -44,7 +44,9 @@ class ConnectedProfilesTile extends ConsumerWidget {
           },
         ),
         onTap: () {
-          // Handle tap event
+          ref
+              .read(currentProfileProvider.notifier)
+              .updateCurrentProfile(profile);
         },
       ),
     );

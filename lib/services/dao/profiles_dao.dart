@@ -61,6 +61,64 @@ class ProfilesDao extends DatabaseAccessor<AppDatabase>
     return transaction(() => into(profiles).insert(profile));
   }
 
+  /// Insert or update profile on conflict by username, removing any duplicates
+  Future<int> insertOrUpdateProfile(ProfilesCompanion profile) async {
+    return transaction(() async {
+      final usernameVal = profile.username.value;
+      final existingList = await (select(
+        profiles,
+      )..where((t) => t.username.equals(usernameVal))).get();
+      if (existingList.isNotEmpty) {
+        // Keep the first one and delete any duplicate rows with the same username
+        final primary = existingList.first;
+        if (existingList.length > 1) {
+          final duplicateIds = existingList.skip(1).map((e) => e.id).toList();
+          await (delete(profiles)..where((t) => t.id.isIn(duplicateIds))).go();
+        }
+        await (update(
+          profiles,
+        )..where((t) => t.id.equals(primary.id))).write(profile);
+        return primary.id;
+      } else {
+        return await into(profiles).insert(profile);
+      }
+    });
+  }
+
+  /// Remove duplicate profiles with the same username, keeping only the most relevant one.
+  Future<void> cleanDuplicateProfiles() async {
+    await transaction(() async {
+      final all = await select(profiles).get();
+      final seenUsernames = <String, Profile>{};
+      final duplicateIds = <int>[];
+
+      for (final profile in all) {
+        if (seenUsernames.containsKey(profile.username)) {
+          final existing = seenUsernames[profile.username]!;
+          final existingIsOauth = existing.syncType == SyncType.OAUTH;
+          final profileIsOauth = profile.syncType == SyncType.OAUTH;
+          if (profileIsOauth && !existingIsOauth) {
+            duplicateIds.add(existing.id);
+            seenUsernames[profile.username] = profile;
+          } else if (!profileIsOauth && existingIsOauth) {
+            duplicateIds.add(profile.id);
+          } else if (profile.connectedOn.isAfter(existing.connectedOn)) {
+            duplicateIds.add(existing.id);
+            seenUsernames[profile.username] = profile;
+          } else {
+            duplicateIds.add(profile.id);
+          }
+        } else {
+          seenUsernames[profile.username] = profile;
+        }
+      }
+
+      if (duplicateIds.isNotEmpty) {
+        await (delete(profiles)..where((t) => t.id.isIn(duplicateIds))).go();
+      }
+    });
+  }
+
   ///  Delete a profile
   Future<int> deleteProfile(int id) {
     return transaction(
