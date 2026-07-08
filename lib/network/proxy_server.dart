@@ -10,7 +10,9 @@ class LocalAdblockProxy {
 
   Future<void> start() async {
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, port);
-    talker.debug("Embedded Adblock Proxy Server listening on http://localhost:$port");
+    talker.debug(
+      "Embedded Adblock Proxy Server listening on http://localhost:$port",
+    );
 
     _server!.listen((HttpRequest request) async {
       if (request.uri.path == '/proxy') {
@@ -26,8 +28,10 @@ class LocalAdblockProxy {
         try {
           final client = HttpClient();
           final targetReq = await client.getUrl(Uri.parse(targetUrl));
-          targetReq.headers.set(HttpHeaders.userAgentHeader,
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+          targetReq.headers.set(
+            HttpHeaders.userAgentHeader,
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          );
 
           final targetRes = await targetReq.close();
 
@@ -66,15 +70,24 @@ class LocalAdblockProxy {
     // 2. Remove frames linked to standard advertising hosts
     document.querySelectorAll('iframe').forEach((el) {
       final src = (el.attributes['src'] ?? '').toLowerCase();
-      if (src.contains('ads') || src.contains('pop') || src.contains('click') || src.contains('banner')) {
+      if (src.contains('ads') ||
+          src.contains('pop') ||
+          src.contains('click') ||
+          src.contains('banner')) {
         el.remove();
       }
     });
 
     // 3. Purge element nodes matching ad-selectors
     final adSelectors = [
-      '.adsbygoogle', '.ad-banner', '.banner-ad', '#banner-ad',
-      '#ads', '.ads', '[class*="popunder"]', '.native-ads'
+      '.adsbygoogle',
+      '.ad-banner',
+      '.banner-ad',
+      '#banner-ad',
+      '#ads',
+      '.ads',
+      '[class*="popunder"]',
+      '.native-ads',
     ];
     for (var selector in adSelectors) {
       document.querySelectorAll(selector).forEach((el) => el.remove());

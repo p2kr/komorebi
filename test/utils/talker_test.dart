@@ -19,24 +19,27 @@ void main() {
       }
     });
 
-    test('writes logs asynchronously to custom file without blocking', () async {
-      final observer = FileTalkerObserver(file: testFile);
-      final talker = Talker(observer: observer);
+    test(
+      'writes logs asynchronously to custom file without blocking',
+      () async {
+        final observer = FileTalkerObserver(file: testFile);
+        final talker = Talker(observer: observer);
 
-      talker.info('Test info message');
-      talker.warning('Test warning message');
+        talker.info('Test info message');
+        talker.warning('Test warning message');
 
-      // Wait for async queue to process
-      await Future.delayed(const Duration(milliseconds: 300));
+        // Wait for async queue to process
+        await Future.delayed(const Duration(milliseconds: 300));
 
-      expect(testFile.existsSync(), isTrue);
-      final content = testFile.readAsStringSync();
-      expect(content, contains('Test info message'));
-      expect(content, contains('Test warning message'));
-      expect(content, contains('┌─'));
-      expect(content, contains('│ '));
-      expect(content, contains('└─'));
-    });
+        expect(testFile.existsSync(), isTrue);
+        final content = testFile.readAsStringSync();
+        expect(content, contains('Test info message'));
+        expect(content, contains('Test warning message'));
+        expect(content, contains('┌─'));
+        expect(content, contains('│ '));
+        expect(content, contains('└─'));
+      },
+    );
 
     test('handles onError and onException', () async {
       final observer = FileTalkerObserver(file: testFile);
@@ -62,7 +65,9 @@ void main() {
       );
       final talker = Talker(observer: observer);
 
-      talker.info('First long log message that will exceed 100 bytes easily when formatted');
+      talker.info(
+        'First long log message that will exceed 100 bytes easily when formatted',
+      );
       await Future.delayed(const Duration(milliseconds: 300));
 
       talker.info('Second long log message that will trigger rotation to .1');

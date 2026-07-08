@@ -22,13 +22,15 @@ class CrawlerEngine {
     for (var element in elements) {
       // package:html's Element doesn't provide `matches`, so fall back to
       // checking whether the document's selector result contains this element.
-      var titleElement = element.querySelector(titleSelector) ??
+      var titleElement =
+          element.querySelector(titleSelector) ??
           (document.querySelectorAll(titleSelector).contains(element)
               ? element
               : null);
       final title = titleElement?.text.trim() ?? element.text.trim();
 
-      var linkElement = element.querySelector(linkSelector) ??
+      var linkElement =
+          element.querySelector(linkSelector) ??
           (document.querySelectorAll(linkSelector).contains(element)
               ? element
               : null);

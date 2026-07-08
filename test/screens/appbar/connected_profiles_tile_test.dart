@@ -21,147 +21,159 @@ void main() {
   });
 
   group('isCurrentProfileTile Helper Tests', () {
-    test('given matching profile ID when isCurrentProfileTile called then returns true', () {
-      // Given
-      final profile = Profile(
-        id: 1,
-        username: 'Dash',
-        avatarUrl: null,
-        syncType: SyncType.SANDBOX,
-        connectedOn: DateTime.now(),
-        isActive: true,
-        accessToken: null,
-        animeListJson: null,
-      );
-      final asyncProfile = AsyncValue.data(profile);
+    test(
+      'given matching profile ID when isCurrentProfileTile called then returns true',
+      () {
+        // Given
+        final profile = Profile(
+          id: 1,
+          username: 'Dash',
+          avatarUrl: null,
+          syncType: SyncType.SANDBOX,
+          connectedOn: DateTime.now(),
+          isActive: true,
+          accessToken: null,
+          animeListJson: null,
+        );
+        final asyncProfile = AsyncValue.data(profile);
 
-      // When
-      final result = isCurrentProfileTile(profile, asyncProfile);
+        // When
+        final result = isCurrentProfileTile(profile, asyncProfile);
 
-      // Then
-      expect(result, isTrue);
-    });
+        // Then
+        expect(result, isTrue);
+      },
+    );
 
-    test('given different profile ID when isCurrentProfileTile called then returns false', () {
-      // Given
-      final profile1 = Profile(
-        id: 1,
-        username: 'Dash',
-        avatarUrl: null,
-        syncType: SyncType.SANDBOX,
-        connectedOn: DateTime.now(),
-        isActive: true,
-        accessToken: null,
-        animeListJson: null,
-      );
-      final profile2 = Profile(
-        id: 2,
-        username: 'Komorebi',
-        avatarUrl: null,
-        syncType: SyncType.SANDBOX,
-        connectedOn: DateTime.now(),
-        isActive: true,
-        accessToken: null,
-        animeListJson: null,
-      );
-      final asyncProfile = AsyncValue.data(profile2);
+    test(
+      'given different profile ID when isCurrentProfileTile called then returns false',
+      () {
+        // Given
+        final profile1 = Profile(
+          id: 1,
+          username: 'Dash',
+          avatarUrl: null,
+          syncType: SyncType.SANDBOX,
+          connectedOn: DateTime.now(),
+          isActive: true,
+          accessToken: null,
+          animeListJson: null,
+        );
+        final profile2 = Profile(
+          id: 2,
+          username: 'Komorebi',
+          avatarUrl: null,
+          syncType: SyncType.SANDBOX,
+          connectedOn: DateTime.now(),
+          isActive: true,
+          accessToken: null,
+          animeListJson: null,
+        );
+        final asyncProfile = AsyncValue.data(profile2);
 
-      // When
-      final result = isCurrentProfileTile(profile1, asyncProfile);
+        // When
+        final result = isCurrentProfileTile(profile1, asyncProfile);
 
-      // Then
-      expect(result, isFalse);
-    });
+        // Then
+        expect(result, isFalse);
+      },
+    );
 
-    test('given null active profile when isCurrentProfileTile called then returns true', () {
-      // Given
-      final profile = Profile(
-        id: 1,
-        username: 'Dash',
-        avatarUrl: null,
-        syncType: SyncType.SANDBOX,
-        connectedOn: DateTime.now(),
-        isActive: true,
-        accessToken: null,
-        animeListJson: null,
-      );
-      const asyncProfile = AsyncValue<Profile?>.data(null);
+    test(
+      'given null active profile when isCurrentProfileTile called then returns true',
+      () {
+        // Given
+        final profile = Profile(
+          id: 1,
+          username: 'Dash',
+          avatarUrl: null,
+          syncType: SyncType.SANDBOX,
+          connectedOn: DateTime.now(),
+          isActive: true,
+          accessToken: null,
+          animeListJson: null,
+        );
+        const asyncProfile = AsyncValue<Profile?>.data(null);
 
-      // When
-      final result = isCurrentProfileTile(profile, asyncProfile);
+        // When
+        final result = isCurrentProfileTile(profile, asyncProfile);
 
-      // Then
-      expect(result, isTrue);
-    });
+        // Then
+        expect(result, isTrue);
+      },
+    );
   });
 
   group('ConnectedProfilesTile Widget Tests', () {
-    testWidgets('given profile when rendered then displays username and syncType and handles tap', (WidgetTester tester) async {
-      // Given
-      tester.view.physicalSize = const Size(1920, 1080);
-      tester.view.devicePixelRatio = 1.0;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
+    testWidgets(
+      'given profile when rendered then displays username and syncType and handles tap',
+      (WidgetTester tester) async {
+        // Given
+        tester.view.physicalSize = const Size(1920, 1080);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.resetPhysicalSize);
+        addTearDown(tester.view.resetDevicePixelRatio);
 
-      final profile1 = Profile(
-        id: 10,
-        username: 'ActiveUser',
-        avatarUrl: null,
-        syncType: SyncType.SANDBOX,
-        connectedOn: DateTime.now(),
-        isActive: true,
-        accessToken: null,
-        animeListJson: null,
-      );
-      final profile2 = Profile(
-        id: 20,
-        username: 'OtherUser',
-        avatarUrl: null,
-        syncType: SyncType.OAUTH,
-        connectedOn: DateTime.now(),
-        isActive: true,
-        accessToken: null,
-        animeListJson: null,
-      );
-
-      await db.profilesDao.insertProfile(
-        ProfilesCompanion.insert(
+        final profile1 = Profile(
+          id: 10,
           username: 'ActiveUser',
-          syncType: const drift.Value(SyncType.SANDBOX),
-        ),
-      );
-      await db.profilesDao.insertProfile(
-        ProfilesCompanion.insert(
+          avatarUrl: null,
+          syncType: SyncType.SANDBOX,
+          connectedOn: DateTime.now(),
+          isActive: true,
+          accessToken: null,
+          animeListJson: null,
+        );
+        final profile2 = Profile(
+          id: 20,
           username: 'OtherUser',
-          syncType: const drift.Value(SyncType.OAUTH),
-        ),
-      );
+          avatarUrl: null,
+          syncType: SyncType.OAUTH,
+          connectedOn: DateTime.now(),
+          isActive: true,
+          accessToken: null,
+          animeListJson: null,
+        );
 
-      // When
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            dbProvider.overrideWithValue(db),
-            currentProfileProvider.overrideWith(() => MockCurrentProfileNotifier(profile1)),
-          ],
-          child: MaterialApp(
-            home: Scaffold(
-              body: ConnectedProfilesTile(profile: profile2),
+        await db.profilesDao.insertProfile(
+          ProfilesCompanion.insert(
+            username: 'ActiveUser',
+            syncType: const drift.Value(SyncType.SANDBOX),
+          ),
+        );
+        await db.profilesDao.insertProfile(
+          ProfilesCompanion.insert(
+            username: 'OtherUser',
+            syncType: const drift.Value(SyncType.OAUTH),
+          ),
+        );
+
+        // When
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              dbProvider.overrideWithValue(db),
+              currentProfileProvider.overrideWith(
+                () => MockCurrentProfileNotifier(profile1),
+              ),
+            ],
+            child: MaterialApp(
+              home: Scaffold(body: ConnectedProfilesTile(profile: profile2)),
             ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      // Then
-      expect(find.text('OtherUser'), findsOneWidget);
-      expect(find.text('OAUTH'), findsOneWidget);
-      expect(find.byIcon(Icons.delete_outline), findsOneWidget);
+        // Then
+        expect(find.text('OtherUser'), findsOneWidget);
+        expect(find.text('OAUTH'), findsOneWidget);
+        expect(find.byIcon(Icons.delete_outline), findsOneWidget);
 
-      // Tap on tile
-      await tester.tap(find.text('OtherUser'));
-      await tester.pump();
-    });
+        // Tap on tile
+        await tester.tap(find.text('OtherUser'));
+        await tester.pump();
+      },
+    );
   });
 }
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
-import 'package:komorebi/services/database.dart';
+import 'package:komorebi/services/handle_delete.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/utils.dart';
 
@@ -37,12 +38,15 @@ class ConnectedProfilesTile extends ConsumerWidget {
             Text(profile.syncType.name, style: context.textTheme.labelSmall),
           ],
         ),
-        trailing: IconButton(
-          icon: Icon(Icons.delete_outline),
-          onPressed: () {
-            // Handle delete event
-          },
-        ),
+        trailing: isCurrentProfileTile(profile, currProfile)
+            ? null
+            : IconButton(
+                icon: Icon(Icons.delete_outline),
+                onPressed: () {
+                  // Handle delete event
+                  onDeleteProfile(context, ref, profile);
+                },
+              ),
         onTap: () {
           ref
               .read(currentProfileProvider.notifier)
@@ -51,6 +55,30 @@ class ConnectedProfilesTile extends ConsumerWidget {
       ),
     );
   }
+}
+
+void onDeleteProfile(BuildContext context, WidgetRef ref, Profile profile) {
+  // ask for confirmation
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text("DELETE @${profile.username} ?"),
+      actions: [
+        ElevatedButton(
+          onPressed: () async {
+            await handleProfileDeletion(ref, profile.id);
+            if (!context.mounted) return;
+            Navigator.pop(context);
+          },
+          child: Text("YES"),
+        ),
+        OutlinedButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text("NO"),
+        ),
+      ],
+    ),
+  );
 }
 
 bool isCurrentProfileTile(Profile profile, AsyncValue<Profile?> currProfile) {

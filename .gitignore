@@ -47,4 +47,6 @@ app.*.map.json
 # Custom
 .env
 *.g.dart
+*.freezed.dart
+*.mapper.dart
 lib/intl/generated/

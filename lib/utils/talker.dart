@@ -75,7 +75,8 @@ class FileTalkerObserver extends TalkerObserver {
       final batch = _queue.join('');
       _queue.clear();
       try {
-        if (await file.exists() && (await file.length()) + batch.length > maxFileSize) {
+        if (await file.exists() &&
+            (await file.length()) + batch.length > maxFileSize) {
           await _rollFile(file);
         }
         await file.writeAsString(batch, mode: FileMode.append);

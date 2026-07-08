@@ -1,15 +1,16 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/screens/appbar/connected_profiles_tile.dart';
+import 'package:komorebi/screens/appbar/sanbox_new_user_popup.dart';
 import 'package:komorebi/services/handle_sync.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/utils.dart';
 
-class ProfileManagementPopup extends ConsumerWidget {
+class ProfileManagementPopup extends HookConsumerWidget {
   const ProfileManagementPopup({super.key});
 
   @override
@@ -161,7 +162,9 @@ class ProfileManagementPopup extends ConsumerWidget {
 
                 // Sandbox link button
                 OutlinedButton.icon(
-                  onPressed: () {},
+                  onPressed: () {
+                    onQuickSandboxLinkPressed(context, ref);
+                  },
                   label: Text(S.of(context).quickSandboxLink),
                   icon: Icon(Icons.person_add_alt, applyTextScaling: true),
                 ),
@@ -190,6 +193,15 @@ List<Widget> noActiveProfileWidget(BuildContext context) {
     CircleAvatar(child: Icon(Icons.no_accounts_outlined)),
     Text(S.of(context).noActiveProfile),
   ];
+}
+
+void onQuickSandboxLinkPressed(BuildContext context, WidgetRef ref) {
+  // final userName = useState("");
+  showDialog(
+    barrierDismissible: false,
+    context: context,
+    builder: (context) => SanboxNewUserPopup(),
+  );
 }
 
 void onLinkWithOAuthPressed(BuildContext context, WidgetRef ref) {

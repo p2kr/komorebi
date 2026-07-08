@@ -16,7 +16,8 @@ import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:windows_single_instance/windows_single_instance.dart';
 
-final StreamController<Uri> deepLinkController = StreamController<Uri>.broadcast();
+final StreamController<Uri> deepLinkController =
+    StreamController<Uri>.broadcast();
 
 void _processAndAddDeepLink(String rawInput, String source) {
   talker.info("Processing potential deep link from $source: $rawInput");
@@ -34,10 +35,16 @@ void _processAndAddDeepLink(String rawInput, String source) {
       talker.info("Successfully parsed deep link URI ($source): $uri");
       deepLinkController.add(uri);
     } catch (e, stack) {
-      talker.error("Failed to parse deep link URI ($source): $uriString", e, stack);
+      talker.error(
+        "Failed to parse deep link URI ($source): $uriString",
+        e,
+        stack,
+      );
     }
   } else {
-    talker.debug("Input from $source did not contain custom deep link scheme: $rawInput");
+    talker.debug(
+      "Input from $source did not contain custom deep link scheme: $rawInput",
+    );
   }
 }
 
@@ -90,7 +97,11 @@ Future<void> setupSingleInstanceAndArgs(List<String> args) async {
         },
       );
     } catch (e, stack) {
-      talker.warning("WindowsSingleInstance pipe creation failed (likely a background process is holding the handle): ", e, stack);
+      talker.warning(
+        "WindowsSingleInstance pipe creation failed (likely a background process is holding the handle): ",
+        e,
+        stack,
+      );
     }
   }
 
@@ -126,7 +137,7 @@ Future<void> setupDb() async {
     if (count == 0) {
       await db
           .into(db.profiles)
-          .insert(ProfilesCompanion(username: Value("Debug Dummy")));
+          .insert(ProfilesCompanion(username: Value("Kineta")));
     }
   }
   await db.close();
@@ -144,22 +155,23 @@ Future<void> setupAppWindow() async {
     try {
       await protocolHandler.register('komorebi');
       await protocolHandler.register('mal_viewer');
-      talker.debug("Registered custom protocol schemes: komorebi:// and mal_viewer://");
+      talker.debug(
+        "Registered custom protocol schemes: komorebi:// and mal_viewer://",
+      );
     } catch (e, t) {
       talker.warning("Failed to register custom protocol schemes: ", e, t);
     }
     WindowOptions windowOptions = WindowOptions(center: true);
 
-    unawaited(windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.maximize(); //TODO: Make it configurable
-      await windowManager.show();
-      await windowManager.focus();
-    }));
+    await windowManager.waitUntilReadyToShow(windowOptions);
+    await windowManager.show();
+    await windowManager.focus();
+    await windowManager.maximize(); //TODO: Make it configurable
   }
 }
 
 void initializeSettings(WidgetRef ref) {
   // Load current profile
-  ref.watch(currentProfileProvider);
-  ref.watch(allProfilesProvider);
+  ref.read(currentProfileProvider);
+  ref.read(allProfilesProvider);
 }

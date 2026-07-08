@@ -65,15 +65,32 @@ class ProfilesDao extends DatabaseAccessor<AppDatabase>
   Future<int> insertOrUpdateProfile(ProfilesCompanion profile) async {
     return transaction(() async {
       final usernameVal = profile.username.value;
-      final existingList = await (select(
-        profiles,
-      )..where((t) => t.username.equals(usernameVal))).get();
+      final existingList =
+          await (select(profiles)
+                ..where((t) => t.username.equals(usernameVal))
+                ..orderBy([
+                  (t) => OrderingTerm(
+                    expression: t.syncType,
+                    mode: OrderingMode.asc,
+                  ),
+                  (t) => OrderingTerm(
+                    expression: t.connectedOn,
+                    mode: OrderingMode.desc,
+                  ),
+                ]))
+              .get();
       if (existingList.isNotEmpty) {
-        // Keep the first one and delete any duplicate rows with the same username
+        // First entry is guaranteed to be primary (OAUTH over SANDBOX, latest connectedOn)
         final primary = existingList.first;
         if (existingList.length > 1) {
           final duplicateIds = existingList.skip(1).map((e) => e.id).toList();
           await (delete(profiles)..where((t) => t.id.isIn(duplicateIds))).go();
+        }
+        // Prioritize oauth entry over sandbox: do not overwrite an existing OAUTH profile with SANDBOX
+        if (primary.syncType == SyncType.OAUTH &&
+            profile.syncType.present &&
+            profile.syncType.value == SyncType.SANDBOX) {
+          return primary.id;
         }
         await (update(
           profiles,

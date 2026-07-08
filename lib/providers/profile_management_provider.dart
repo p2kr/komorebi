@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';
@@ -56,7 +57,7 @@ class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
       );
       return newProfile;
     });
-    // ref.invalidateSelf();
+    // ref.invalidateSelf(); // not required since we are directly watching db
   }
 }
 

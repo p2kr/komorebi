@@ -4,7 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/models/profiles_table.dart';
-import 'package:komorebi/services/database.dart';
 
 String getInitials(String? name) {
   if (name == null || name.isEmpty) return "??";

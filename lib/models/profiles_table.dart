@@ -1,5 +1,9 @@
-import 'package:drift/drift.dart';
+import 'package:drift/drift.dart' hide JsonKey;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+part 'profiles_table.freezed.dart';
+
+@UseRowClass(Profile)
 class Profiles extends Table {
   IntColumn get id => integer().autoIncrement()();
 
@@ -23,8 +27,29 @@ class Profiles extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-    {username, syncType, isActive},
+    {username, isActive},
   ];
 }
 
 enum SyncType { OAUTH, SANDBOX }
+
+@Freezed(addImplicitFinal: true)
+abstract class Profile with _$Profile {
+  const Profile._();
+
+  const factory Profile({
+    required int id,
+    required String username,
+    String? avatarUrl,
+    required SyncType syncType,
+    required DateTime connectedOn,
+    required bool isActive,
+    String? accessToken,
+    String? animeListJson,
+  }) = _Profile;
+
+  @override
+  String toString() {
+    return "Profile(id: $id, username: $username, syncType: $syncType, isActive: $isActive)";
+  }
+}

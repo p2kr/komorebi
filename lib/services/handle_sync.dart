@@ -171,6 +171,27 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
   }
 }
 
+Future<void> doSandboxSignIn(WidgetRef ref, String userName) async {
+  final db = ref.read(dbProvider);
+
+  // verify if valid user
+  final api = MalApi(defaultClientId: Env.malClientId);
+
+  try {
+    await api.getUserAnimeList(username: userName);
+  } catch (e, t) {
+    talker.warning("User not found", e, t);
+    return;
+  }
+
+  await db.profilesDao.insertOrUpdateProfile(
+    ProfilesCompanion(
+      username: Value(userName),
+      syncType: Value(SyncType.SANDBOX),
+    ),
+  );
+}
+
 Future<void> _exchangeCodeAndSaveProfile(
   WidgetRef ref,
   String authCode,
