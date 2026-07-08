@@ -13,6 +13,7 @@ import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
+import 'package:komorebi/utils/constants.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/init.dart';
 import 'package:komorebi/utils/mal_api.dart';
@@ -23,6 +24,7 @@ import 'package:url_launcher/url_launcher.dart';
 const authUrl = "https://myanimelist.net/v1/oauth2/authorize";
 const tokenUrl = "https://myanimelist.net/v1/oauth2/token";
 final clientId = Env.malClientId;
+const desktopOauthTimeout = Duration(minutes: 5);
 
 String _generateCodeVerifier() {
   final random = Random.secure();
@@ -100,7 +102,7 @@ Future<void> signInWithOAuthWeb(WidgetRef ref) async {
 /// Desktop-specific OAuth flow using default browser and custom protocol deep linking
 Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
   final codeVerifier = _generateCodeVerifier();
-  const redirectUrl = "komorebi://auth-callback";
+  const redirectUrl = MAL_OAUTH_REDIRECT_URL;
 
   final loginUri = Uri.parse(authUrl).replace(
     queryParameters: {
@@ -118,8 +120,8 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
     );
 
     try {
-      await protocolHandler.register('komorebi');
-      await protocolHandler.register('mal_viewer');
+      await protocolHandler.register(KOMOREBI);
+      // await protocolHandler.register('mal_viewer'); // not required now as komorebi is used
     } catch (e, t) {
       talker.warning("Could not register custom schemes: ", e, t);
     }
@@ -127,11 +129,11 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
     final callbackFuture = deepLinkController.stream
         .firstWhere(
           (uri) =>
-              (uri.scheme == 'komorebi' || uri.scheme == 'mal_viewer') &&
+              (uri.scheme == KOMOREBI /* || uri.scheme == 'mal_viewer' */ ) &&
               _extractOAuthCode(uri) != null,
         )
         .timeout(
-          const Duration(minutes: 5),
+          desktopOauthTimeout,
           onTimeout: () => throw TimeoutException(
             "OAuth authentication timed out waiting for browser callback.",
           ),

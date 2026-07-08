@@ -33,6 +33,9 @@ void main() {
       final content = testFile.readAsStringSync();
       expect(content, contains('Test info message'));
       expect(content, contains('Test warning message'));
+      expect(content, contains('┌─'));
+      expect(content, contains('│ '));
+      expect(content, contains('└─'));
     });
 
     test('handles onError and onException', () async {
@@ -49,6 +52,30 @@ void main() {
       expect(content, contains('Test error'));
       expect(content, contains('something broke'));
       expect(content, contains('fatal exception'));
+    });
+
+    test('rolls log file when maxFileSize is exceeded', () async {
+      final observer = FileTalkerObserver(
+        file: testFile,
+        maxFileSize: 100,
+        maxBackups: 2,
+      );
+      final talker = Talker(observer: observer);
+
+      talker.info('First long log message that will exceed 100 bytes easily when formatted');
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      talker.info('Second long log message that will trigger rotation to .1');
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      talker.info('Third long log message that will trigger rotation to .2');
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      expect(testFile.existsSync(), isTrue);
+      final backup1 = File('${testFile.path}.1');
+      final backup2 = File('${testFile.path}.2');
+      expect(backup1.existsSync(), isTrue);
+      expect(backup2.existsSync(), isTrue);
     });
   });
 }

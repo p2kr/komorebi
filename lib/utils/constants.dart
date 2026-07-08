@@ -1,8 +1,13 @@
 const APP_NAME = "Komorebi";
-const KOMOREBI = "Komorebi";
+
+/// komorebi (all lower case)
+const KOMOREBI = "komorebi";
 
 const DB_NAME = "app_db";
 const DB_FILE_NAME = "$DB_NAME.sqlite";
+
+/// komorebi://auth-callback
+const MAL_OAUTH_REDIRECT_URL = "komorebi://auth-callback";
 
 /// Set of configs stored in db
 enum Settings {

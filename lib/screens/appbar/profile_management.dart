@@ -150,7 +150,7 @@ class ProfileManagementPopup extends ConsumerWidget {
                 // add another profile
                 FilledButton.icon(
                   onPressed: () {
-                    signInWithOAuth(ref);
+                    onLinkWithOAuthPressed(context, ref);
                   },
                   label: Text(S.of(context).linkAnotherMalOauth),
                   icon: Transform.rotate(
@@ -190,4 +190,19 @@ List<Widget> noActiveProfileWidget(BuildContext context) {
     CircleAvatar(child: Icon(Icons.no_accounts_outlined)),
     Text(S.of(context).noActiveProfile),
   ];
+}
+
+void onLinkWithOAuthPressed(BuildContext context, WidgetRef ref) {
+  signInWithOAuth(ref)
+      .then((value) {
+        if (!context.mounted) return;
+
+        Navigator.pop(context);
+      })
+      .onError((e, t) {
+        if (!context.mounted) return;
+
+        final snackbar = SnackBar(content: Text(e.toString()));
+        ScaffoldMessenger.of(context).showSnackBar(snackbar);
+      });
 }
