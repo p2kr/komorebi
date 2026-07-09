@@ -7,6 +7,7 @@ import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
+import 'package:komorebi/services/handle_delete.dart';
 import 'package:komorebi/utils/constants.dart';
 
 void main() {
@@ -181,4 +182,85 @@ void main() {
       },
     );
   });
+
+  group('handleProfileDeletion Tests', () {
+    test(
+      'given active profile and another profile exist when handleProfileDeletion called then invalidates currentProfileProvider, falls back to latest profile and updates Settings.LAST_USED_PROFILE',
+      () async {
+        // Given
+        final id1 = await db.profilesDao.insertProfile(
+          ProfilesCompanion.insert(
+            username: 'ActiveUser',
+            connectedOn: drift.Value(DateTime(2025, 1, 1)),
+          ),
+        );
+        final id2 = await db.profilesDao.insertProfile(
+          ProfilesCompanion.insert(
+            username: 'LatestFallbackUser',
+            connectedOn: drift.Value(DateTime(2026, 1, 1)),
+          ),
+        );
+        await db.configsDao.setConfig(
+          Settings.LAST_USED_PROFILE.name,
+          id1.toString(),
+        );
+
+        // Verify initial state read returns ActiveUser
+        var currentProfile = await container.read(
+          currentProfileProvider.future,
+        );
+        expect(currentProfile?.id, equals(id1));
+        expect(currentProfile?.username, equals('ActiveUser'));
+
+        // When
+        await handleProfileDeletion(container, id1);
+        currentProfile = await container.read(currentProfileProvider.future);
+        final configVal = await db.configsDao.getConfig(
+          Settings.LAST_USED_PROFILE.name,
+        );
+
+        // Then
+        expect(currentProfile, isNotNull);
+        expect(currentProfile?.id, equals(id2));
+        expect(currentProfile?.username, equals('LatestFallbackUser'));
+        expect(configVal?.configValue, equals(id2.toString()));
+      },
+    );
+
+    test(
+      'given only active profile exists when handleProfileDeletion called then invalidates currentProfileProvider, deletes Settings.LAST_USED_PROFILE config and returns null',
+      () async {
+        // Given
+        final id1 = await db.profilesDao.insertProfile(
+          ProfilesCompanion.insert(
+            username: 'SingleUser',
+            connectedOn: drift.Value(DateTime(2025, 1, 1)),
+          ),
+        );
+        await db.configsDao.setConfig(
+          Settings.LAST_USED_PROFILE.name,
+          id1.toString(),
+        );
+
+        // Verify initial state read returns SingleUser
+        var currentProfile = await container.read(
+          currentProfileProvider.future,
+        );
+        expect(currentProfile?.id, equals(id1));
+        expect(currentProfile?.username, equals('SingleUser'));
+
+        // When
+        await handleProfileDeletion(container, id1);
+        currentProfile = await container.read(currentProfileProvider.future);
+        final configVal = await db.configsDao.getConfig(
+          Settings.LAST_USED_PROFILE.name,
+        );
+
+        // Then
+        expect(currentProfile, isNull);
+        expect(configVal, isNull);
+      },
+    );
+  });
 }
+

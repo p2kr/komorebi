@@ -1,4 +1,4 @@
-name: komorebi
+﻿name: komorebi
 description: "An all in one app to consume manga and anime from MyAnimeList"
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -50,6 +50,7 @@ dev_dependencies:
   intl_utils: any
   envied_generator: ^1.3.8
   freezed: ^3.2.5
+  mocktail: ^1.0.5
 
 flutter:
   uses-material-design: true

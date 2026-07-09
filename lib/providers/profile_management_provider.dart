@@ -39,6 +39,8 @@ class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
         Settings.LAST_USED_PROFILE.name,
         latestProfile.id.toString(),
       );
+    } else if (configId != null) {
+      await db.configsDao.deleteConfig(Settings.LAST_USED_PROFILE.name);
     }
     return latestProfile;
   }

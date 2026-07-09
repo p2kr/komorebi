@@ -21,5 +21,13 @@
   "sandbox": "SANDBOX",
   "noProfilesFound": "NO SE ENCONTRARON PERFILES",
   "noActiveProfile": "SIN PERFIL ACTIVO",
-  "errorFetchingProfiles": "ERROR AL OBTENER PERFILES"
+  "errorFetchingProfiles": "ERROR AL OBTENER PERFILES",
+  "createAReadonlySandboxAccount": "Create a read-only sandbox account?",
+  "enterUsername": "Enter username...",
+  "yes": "YES",
+  "no": "NO",
+  "profileUsernamevalueLinkedSuccessfully": "Profile ${userName.value} linked successfully",
+  "unableToLinkProfileUsernamevalue": "Unable to link profile ${userName.value}",
+  "profileLinkedSuccessfully": "Profile linked successfully",
+  "unableToLinkProfile": "Unable to link profile"
 }

@@ -1,35 +1,29 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/utils/mal_api.dart';
+import 'package:mocktail/mocktail.dart';
 
-class MockHttpClientAdapter implements HttpClientAdapter {
-  final Future<ResponseBody> Function(RequestOptions options) handler;
-
-  MockHttpClientAdapter(this.handler);
-
-  @override
-  Future<ResponseBody> fetch(
-    RequestOptions options,
-    Stream<Uint8List>? requestStream,
-    Future<void>? cancelFuture,
-  ) async {
-    return await handler(options);
-  }
-
-  @override
-  void close({bool force = false}) {}
-}
+class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(RequestOptions(path: ''));
+    registerFallbackValue(Stream<Uint8List>.empty());
+    registerFallbackValue(Future<void>.value());
+  });
+
   group('MalApi service requests using Dio', () {
     late MalApi api;
     late Dio dio;
+    late MockHttpClientAdapter mockAdapter;
 
     setUp(() {
+      mockAdapter = MockHttpClientAdapter();
       dio = Dio();
+      dio.httpClientAdapter = mockAdapter;
       api = MalApi(dio: dio, defaultClientId: 'default_client_id');
     });
 
@@ -40,7 +34,11 @@ void main() {
     test(
       'getMyUserInfo sends GET request to /users/@me with Authorization header',
       () async {
-        dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+        when(
+          () => mockAdapter.fetch(any(), any(), any()),
+        ).thenAnswer((invocation) async {
+          final options =
+              invocation.positionalArguments[0] as RequestOptions;
           expect(options.method, 'GET');
           expect(options.path, '/users/@me');
           expect(options.headers['Authorization'], 'Bearer my_test_token');
@@ -75,7 +73,11 @@ void main() {
     test(
       'getUserAnimeList sends query parameters and client ID correctly',
       () async {
-        dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+        when(
+          () => mockAdapter.fetch(any(), any(), any()),
+        ).thenAnswer((invocation) async {
+          final options =
+              invocation.positionalArguments[0] as RequestOptions;
           expect(options.method, 'GET');
           expect(options.path, '/users/prince/animelist');
           expect(options.headers['X-MAL-CLIENT-ID'], 'default_client_id');
@@ -120,7 +122,11 @@ void main() {
     test(
       'updateMyAnimeListStatus sends PATCH request with form-urlencoded body',
       () async {
-        dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+        when(
+          () => mockAdapter.fetch(any(), any(), any()),
+        ).thenAnswer((invocation) async {
+          final options =
+              invocation.positionalArguments[0] as RequestOptions;
           expect(options.method, 'PATCH');
           expect(options.path, '/anime/5/my_list_status');
           expect(options.headers['Authorization'], 'Bearer auth_token');
@@ -164,7 +170,10 @@ void main() {
 
     test('deleteMyAnimeListStatus sends DELETE request', () async {
       bool deleteCalled = false;
-      dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+      when(
+        () => mockAdapter.fetch(any(), any(), any()),
+      ).thenAnswer((invocation) async {
+        final options = invocation.positionalArguments[0] as RequestOptions;
         expect(options.method, 'DELETE');
         expect(options.path, '/anime/5/my_list_status');
         expect(options.headers['Authorization'], 'Bearer auth_token');
@@ -186,7 +195,9 @@ void main() {
     test(
       'throws MalApiException with structured error on 401 Unauthorized',
       () async {
-        dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+        when(
+          () => mockAdapter.fetch(any(), any(), any()),
+        ).thenAnswer((_) async {
           return ResponseBody.fromString(
             jsonEncode({
               'error': 'invalid_token',
@@ -216,7 +227,9 @@ void main() {
     );
 
     test('throws MalApiException on 404 Not Found', () async {
-      dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+      when(
+        () => mockAdapter.fetch(any(), any(), any()),
+      ).thenAnswer((_) async {
         return ResponseBody.fromString(
           jsonEncode({'error': 'not_found', 'message': 'Anime not found'}),
           404,
@@ -237,7 +250,10 @@ void main() {
     });
 
     test('throws MalApiException on network/adapter exception', () async {
-      dio.httpClientAdapter = MockHttpClientAdapter((options) async {
+      when(
+        () => mockAdapter.fetch(any(), any(), any()),
+      ).thenAnswer((invocation) async {
+        final options = invocation.positionalArguments[0] as RequestOptions;
         throw DioException(
           requestOptions: options,
           error: 'Connection refused',

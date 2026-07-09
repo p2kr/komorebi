@@ -171,7 +171,7 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
   }
 }
 
-Future<void> doSandboxSignIn(WidgetRef ref, String userName) async {
+Future<bool> doSandboxSignIn(WidgetRef ref, String userName) async {
   final db = ref.read(dbProvider);
 
   // verify if valid user
@@ -181,7 +181,7 @@ Future<void> doSandboxSignIn(WidgetRef ref, String userName) async {
     await api.getUserAnimeList(username: userName);
   } catch (e, t) {
     talker.warning("User not found", e, t);
-    return;
+    return false;
   }
 
   await db.profilesDao.insertOrUpdateProfile(
@@ -190,6 +190,7 @@ Future<void> doSandboxSignIn(WidgetRef ref, String userName) async {
       syncType: Value(SyncType.SANDBOX),
     ),
   );
+  return true;
 }
 
 Future<void> _exchangeCodeAndSaveProfile(

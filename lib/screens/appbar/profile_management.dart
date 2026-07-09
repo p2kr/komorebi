@@ -46,7 +46,7 @@ class ProfileManagementPopup extends HookConsumerWidget {
                         ? noActiveProfileWidget(context)
                         : [
                             // avatar icon (fetch from api)
-                            getAvatar(activeProfile, minRadius: 32),
+                            getAvatar(activeProfile, radius: 32),
 
                             // profile name
                             Text(
@@ -174,7 +174,9 @@ class ProfileManagementPopup extends HookConsumerWidget {
                 // Disconnect active profile button
                 TextButton.icon(
                   onPressed: () {
-                    //...
+                    if (activeProfileAsync.value != null) {
+                      onDeleteProfile(context, ref, activeProfileAsync.value!);
+                    }
                   },
                   label: Text(S.of(context).disconnectActiveProfile),
                   icon: Icon(Icons.logout_outlined, applyTextScaling: true),
@@ -208,13 +210,17 @@ void onLinkWithOAuthPressed(BuildContext context, WidgetRef ref) {
   signInWithOAuth(ref)
       .then((value) {
         if (!context.mounted) return;
-
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).profileLinkedSuccessfully)),
+        );
         Navigator.pop(context);
       })
       .onError((e, t) {
         if (!context.mounted) return;
 
-        final snackbar = SnackBar(content: Text(e.toString()));
+        final snackbar = SnackBar(
+          content: Text("${S.of(context).unableToLinkProfile}: $e"),
+        );
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
       });
 }
