@@ -1,4 +1,11 @@
-// Helper parsing methods to avoid any use of 'dynamic' and ensure type safety.
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'mal_models.freezed.dart';
+part 'mal_models.g.dart';
+
+// =============================================================================
+// Helper Functions
+// =============================================================================
 
 int? _parseInt(Object? value) {
   if (value == null) return null;
@@ -7,6 +14,8 @@ int? _parseInt(Object? value) {
   if (value is String) return int.tryParse(value);
   return null;
 }
+
+int _parseIntRequired(Object? value) => _parseInt(value) ?? 0;
 
 double? _parseDouble(Object? value) {
   if (value == null) return null;
@@ -23,17 +32,8 @@ bool? _parseBool(Object? value) {
   return null;
 }
 
-String? _parseString(Object? value) {
-  if (value == null) return null;
-  return value.toString();
-}
+bool _parseBoolRequired(Object? value) => _parseBool(value) ?? false;
 
-List<T>? _parseList<T>(Object? value, T Function(Object? item) parser) {
-  if (value == null || value is! List) return null;
-  return value.map(parser).toList();
-}
-
-/// Converts an arbitrary Object (usually from JSON decoding) into a type-safe Map.
 Map<String, Object?> asMap(Object? json) {
   if (json is Map) {
     return json.map((key, value) => MapEntry(key.toString(), value));
@@ -42,642 +42,344 @@ Map<String, Object?> asMap(Object? json) {
 }
 
 // =============================================================================
-// Paging & Common Models
+// Common / Shared Models
 // =============================================================================
 
-class MalPaging {
-  final String? previous;
-  final String? next;
+/// Pagination offsets/links returned by list-based MyAnimeList endpoints.
+@freezed
+abstract class MalPaging with _$MalPaging {
+  const factory MalPaging({
+    String? previous,
+    String? next,
+  }) = _MalPaging;
 
-  MalPaging({this.previous, this.next});
-
-  factory MalPaging.fromMap(Map<String, Object?> map) {
-    return MalPaging(
-      previous: _parseString(map['previous']),
-      next: _parseString(map['next']),
-    );
-  }
+  factory MalPaging.fromJson(Map<String, dynamic> json) => _$MalPagingFromJson(json);
 }
 
-class MalPicture {
-  final String? medium;
-  final String? large;
+/// Medium and large URL paths to a specific cover image or avatar graphic.
+@freezed
+abstract class MalPicture with _$MalPicture {
+  const factory MalPicture({
+    String? medium,
+    String? large,
+  }) = _MalPicture;
 
-  MalPicture({this.medium, this.large});
-
-  factory MalPicture.fromMap(Map<String, Object?> map) {
-    return MalPicture(
-      medium: _parseString(map['medium']),
-      large: _parseString(map['large']),
-    );
-  }
+  factory MalPicture.fromJson(Map<String, dynamic> json) => _$MalPictureFromJson(json);
 }
 
-class MalAlternativeTitles {
-  final List<String> synonyms;
-  final String? en;
-  final String? ja;
+/// Alternative titles associated with an anime or manga resource (e.g. English, Japanese, Synonyms).
+@freezed
+abstract class MalAlternativeTitles with _$MalAlternativeTitles {
+  const factory MalAlternativeTitles({
+    @Default([]) List<String> synonyms,
+    String? en,
+    String? ja,
+  }) = _MalAlternativeTitles;
 
-  MalAlternativeTitles({required this.synonyms, this.en, this.ja});
-
-  factory MalAlternativeTitles.fromMap(Map<String, Object?> map) {
-    return MalAlternativeTitles(
-      synonyms: _parseList(map['synonyms'], (i) => _parseString(i) ?? '') ?? [],
-      en: _parseString(map['en']),
-      ja: _parseString(map['ja']),
-    );
-  }
+  factory MalAlternativeTitles.fromJson(Map<String, dynamic> json) => _$MalAlternativeTitlesFromJson(json);
 }
 
-class MalNamedNode {
-  final int id;
-  final String name;
+/// Standardized entity representing a node with a unique ID and name string.
+@freezed
+abstract class MalNamedNode with _$MalNamedNode {
+  const factory MalNamedNode({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    @Default('') String name,
+  }) = _MalNamedNode;
 
-  MalNamedNode({required this.id, required this.name});
-
-  factory MalNamedNode.fromMap(Map<String, Object?> map) {
-    return MalNamedNode(
-      id: _parseInt(map['id']) ?? 0,
-      name: _parseString(map['name']) ?? '',
-    );
-  }
+  factory MalNamedNode.fromJson(Map<String, dynamic> json) => _$MalNamedNodeFromJson(json);
 }
 
-class MalAuthor {
-  final MalNamedNode node;
-  final String? role;
+/// Information about a manga author node and their contribution role.
+@freezed
+abstract class MalAuthor with _$MalAuthor {
+  const factory MalAuthor({
+    required MalNamedNode node,
+    String? role,
+  }) = _MalAuthor;
 
-  MalAuthor({required this.node, this.role});
-
-  factory MalAuthor.fromMap(Map<String, Object?> map) {
-    return MalAuthor(
-      node: MalNamedNode.fromMap(asMap(map['node'])),
-      role: _parseString(map['role']),
-    );
-  }
+  factory MalAuthor.fromJson(Map<String, dynamic> json) => _$MalAuthorFromJson(json);
 }
 
-class MalBroadcast {
-  final String? dayOfTheWeek;
-  final String? startTime;
+/// Broadcast schedule metadata detailing the day of the week and local start time.
+@freezed
+abstract class MalBroadcast with _$MalBroadcast {
+  const factory MalBroadcast({
+    String? dayOfTheWeek,
+    String? startTime,
+  }) = _MalBroadcast;
 
-  MalBroadcast({this.dayOfTheWeek, this.startTime});
-
-  factory MalBroadcast.fromMap(Map<String, Object?> map) {
-    return MalBroadcast(
-      dayOfTheWeek: _parseString(map['day_of_the_week']),
-      startTime: _parseString(map['start_time']),
-    );
-  }
+  factory MalBroadcast.fromJson(Map<String, dynamic> json) => _$MalBroadcastFromJson(json);
 }
 
-class MalSeason {
-  final int? year;
-  final String? season;
+/// Release season indicators including calendar year and segment name (e.g. spring, fall).
+@freezed
+abstract class MalSeason with _$MalSeason {
+  const factory MalSeason({
+    @JsonKey(fromJson: _parseInt) int? year,
+    String? season,
+  }) = _MalSeason;
 
-  MalSeason({this.year, this.season});
-
-  factory MalSeason.fromMap(Map<String, Object?> map) {
-    return MalSeason(
-      year: _parseInt(map['year']),
-      season: _parseString(map['season']),
-    );
-  }
+  factory MalSeason.fromJson(Map<String, dynamic> json) => _$MalSeasonFromJson(json);
 }
 
-class MalRanking {
-  final int rank;
-  final int? previousRank;
+/// Ranking position data indicating the item position and previous ranking offsets.
+@freezed
+abstract class MalRanking with _$MalRanking {
+  const factory MalRanking({
+    @JsonKey(fromJson: _parseIntRequired) required int rank,
+    @JsonKey(fromJson: _parseInt) int? previousRank,
+  }) = _MalRanking;
 
-  MalRanking({required this.rank, this.previousRank});
-
-  factory MalRanking.fromMap(Map<String, Object?> map) {
-    return MalRanking(
-      rank: _parseInt(map['rank']) ?? 0,
-      previousRank: _parseInt(map['previous_rank']),
-    );
-  }
+  factory MalRanking.fromJson(Map<String, dynamic> json) => _$MalRankingFromJson(json);
 }
 
 // =============================================================================
-// User & List Status Models
+// User Models
 // =============================================================================
 
-class MalUser {
-  final int id;
-  final String name;
-  final String? picture;
-  final String? gender;
-  final String? birthday;
-  final String? location;
-  final String? joinedAt;
-  final String? timeZone;
-  final bool? isSupporter;
+/// Basic profile information details representing a MyAnimeList user account.
+@freezed
+abstract class MalUser with _$MalUser {
+  const factory MalUser({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    required String name,
+    String? picture,
+    String? gender,
+    String? birthday,
+    String? location,
+    String? joinedAt,
+    String? timeZone,
+    @JsonKey(fromJson: _parseBool) bool? isSupporter,
+  }) = _MalUser;
 
-  MalUser({
-    required this.id,
-    required this.name,
-    this.picture,
-    this.gender,
-    this.birthday,
-    this.location,
-    this.joinedAt,
-    this.timeZone,
-    this.isSupporter,
-  });
-
-  factory MalUser.fromMap(Map<String, Object?> map) {
-    return MalUser(
-      id: _parseInt(map['id']) ?? 0,
-      name: _parseString(map['name']) ?? '',
-      picture: _parseString(map['picture']),
-      gender: _parseString(map['gender']),
-      birthday: _parseString(map['birthday']),
-      location: _parseString(map['location']),
-      joinedAt: _parseString(map['joined_at']),
-      timeZone: _parseString(map['time_zone']),
-      isSupporter: _parseBool(map['is_supporter']),
-    );
-  }
-}
-
-class MalAnimeListStatus {
-  final String? status;
-  final int score;
-  final int numEpisodesWatched;
-  final bool isRewatching;
-  final String? updatedAt;
-  final int? priority;
-  final int? numTimesRewatched;
-  final int? rewatchValue;
-  final List<String> tags;
-  final String? comments;
-
-  MalAnimeListStatus({
-    this.status,
-    required this.score,
-    required this.numEpisodesWatched,
-    required this.isRewatching,
-    this.updatedAt,
-    this.priority,
-    this.numTimesRewatched,
-    this.rewatchValue,
-    required this.tags,
-    this.comments,
-  });
-
-  factory MalAnimeListStatus.fromMap(Map<String, Object?> map) {
-    return MalAnimeListStatus(
-      status: _parseString(map['status']),
-      score: _parseInt(map['score']) ?? 0,
-      numEpisodesWatched: _parseInt(map['num_episodes_watched']) ?? 0,
-      isRewatching: _parseBool(map['is_rewatching']) ?? false,
-      updatedAt: _parseString(map['updated_at']),
-      priority: _parseInt(map['priority']),
-      numTimesRewatched: _parseInt(map['num_times_rewatched']),
-      rewatchValue: _parseInt(map['rewatch_value']),
-      tags: _parseList(map['tags'], (i) => _parseString(i) ?? '') ?? [],
-      comments: _parseString(map['comments']),
-    );
-  }
-}
-
-class MalMangaListStatus {
-  final String? status;
-  final int score;
-  final int numVolumesRead;
-  final int numChaptersRead;
-  final bool isRereading;
-  final String? updatedAt;
-  final int? priority;
-  final int? numTimesReread;
-  final int? rereadValue;
-  final List<String> tags;
-  final String? comments;
-
-  MalMangaListStatus({
-    this.status,
-    required this.score,
-    required this.numVolumesRead,
-    required this.numChaptersRead,
-    required this.isRereading,
-    this.updatedAt,
-    this.priority,
-    this.numTimesReread,
-    this.rereadValue,
-    required this.tags,
-    this.comments,
-  });
-
-  factory MalMangaListStatus.fromMap(Map<String, Object?> map) {
-    return MalMangaListStatus(
-      status: _parseString(map['status']),
-      score: _parseInt(map['score']) ?? 0,
-      numVolumesRead: _parseInt(map['num_volumes_read']) ?? 0,
-      numChaptersRead: _parseInt(map['num_chapters_read']) ?? 0,
-      isRereading: _parseBool(map['is_rereading']) ?? false,
-      updatedAt: _parseString(map['updated_at']),
-      priority: _parseInt(map['priority']),
-      numTimesReread: _parseInt(map['num_times_reread']),
-      rereadValue: _parseInt(map['reread_value']),
-      tags: _parseList(map['tags'], (i) => _parseString(i) ?? '') ?? [],
-      comments: _parseString(map['comments']),
-    );
-  }
+  factory MalUser.fromJson(Map<String, dynamic> json) => _$MalUserFromJson(json);
 }
 
 // =============================================================================
-// Relation & Recommendation Models
+// Library Status Models
 // =============================================================================
 
-class MalRelatedAnime {
-  final MalAnimeNode node;
-  final String relationType;
-  final String relationTypeFormatted;
+/// Library metadata representing an anime entry inside the user's personal animelist.
+@freezed
+abstract class MalAnimeListStatus with _$MalAnimeListStatus {
+  const factory MalAnimeListStatus({
+    String? status,
+    @JsonKey(fromJson: _parseIntRequired) required int score,
+    @JsonKey(fromJson: _parseIntRequired) required int numEpisodesWatched,
+    @JsonKey(fromJson: _parseBoolRequired) required bool isRewatching,
+    String? updatedAt,
+    @JsonKey(fromJson: _parseInt) int? priority,
+    @JsonKey(fromJson: _parseInt) int? numTimesRewatched,
+    @JsonKey(fromJson: _parseInt) int? rewatchValue,
+    @Default([]) List<String> tags,
+    String? comments,
+  }) = _MalAnimeListStatus;
 
-  MalRelatedAnime({
-    required this.node,
-    required this.relationType,
-    required this.relationTypeFormatted,
-  });
-
-  factory MalRelatedAnime.fromMap(Map<String, Object?> map) {
-    return MalRelatedAnime(
-      node: MalAnimeNode.fromMap(asMap(map['node'])),
-      relationType: _parseString(map['relation_type']) ?? '',
-      relationTypeFormatted: _parseString(map['relation_type_formatted']) ?? '',
-    );
-  }
+  factory MalAnimeListStatus.fromJson(Map<String, dynamic> json) => _$MalAnimeListStatusFromJson(json);
 }
 
-class MalRelatedManga {
-  final MalMangaNode node;
-  final String relationType;
-  final String relationTypeFormatted;
+/// Library metadata representing a manga entry inside the user's personal mangalist.
+@freezed
+abstract class MalMangaListStatus with _$MalMangaListStatus {
+  const factory MalMangaListStatus({
+    String? status,
+    @JsonKey(fromJson: _parseIntRequired) required int score,
+    @JsonKey(fromJson: _parseIntRequired) required int numVolumesRead,
+    @JsonKey(fromJson: _parseIntRequired) required int numChaptersRead,
+    @JsonKey(fromJson: _parseBoolRequired) required bool isRereading,
+    String? updatedAt,
+    @JsonKey(fromJson: _parseInt) int? priority,
+    @JsonKey(fromJson: _parseInt) int? numTimesReread,
+    @JsonKey(fromJson: _parseInt) int? rereadValue,
+    @Default([]) List<String> tags,
+    String? comments,
+  }) = _MalMangaListStatus;
 
-  MalRelatedManga({
-    required this.node,
-    required this.relationType,
-    required this.relationTypeFormatted,
-  });
-
-  factory MalRelatedManga.fromMap(Map<String, Object?> map) {
-    return MalRelatedManga(
-      node: MalMangaNode.fromMap(asMap(map['node'])),
-      relationType: _parseString(map['relation_type']) ?? '',
-      relationTypeFormatted: _parseString(map['relation_type_formatted']) ?? '',
-    );
-  }
-}
-
-class MalAnimeRecommendation {
-  final MalAnimeNode node;
-  final int numRecommendations;
-
-  MalAnimeRecommendation({
-    required this.node,
-    required this.numRecommendations,
-  });
-
-  factory MalAnimeRecommendation.fromMap(Map<String, Object?> map) {
-    return MalAnimeRecommendation(
-      node: MalAnimeNode.fromMap(asMap(map['node'])),
-      numRecommendations: _parseInt(map['num_recommendations']) ?? 0,
-    );
-  }
-}
-
-class MalMangaRecommendation {
-  final MalMangaNode node;
-  final int numRecommendations;
-
-  MalMangaRecommendation({
-    required this.node,
-    required this.numRecommendations,
-  });
-
-  factory MalMangaRecommendation.fromMap(Map<String, Object?> map) {
-    return MalMangaRecommendation(
-      node: MalMangaNode.fromMap(asMap(map['node'])),
-      numRecommendations: _parseInt(map['num_recommendations']) ?? 0,
-    );
-  }
+  factory MalMangaListStatus.fromJson(Map<String, dynamic> json) => _$MalMangaListStatusFromJson(json);
 }
 
 // =============================================================================
-// Anime & Manga Node Models
+// Anime Models
 // =============================================================================
 
-class MalAnimeNode {
-  final int id;
-  final String title;
-  final MalPicture? mainPicture;
-  final MalAlternativeTitles? alternativeTitles;
-  final String? startDate;
-  final String? endDate;
-  final String? synopsis;
-  final double? mean;
-  final int? rank;
-  final int? popularity;
-  final int? numListUsers;
-  final int? numScoringUsers;
-  final String? nsfw;
-  final String? createdAt;
-  final String? updatedAt;
-  final String? mediaType;
-  final String? status;
-  final List<MalNamedNode> genres;
-  final MalAnimeListStatus? myListStatus;
-  final int? numEpisodes;
-  final MalSeason? startSeason;
-  final MalBroadcast? broadcast;
-  final String? source;
-  final int? averageEpisodeDuration;
-  final String? rating;
-  final List<MalPicture> pictures;
-  final String? background;
-  final List<MalRelatedAnime> relatedAnime;
-  final List<MalRelatedManga> relatedManga;
-  final List<MalAnimeRecommendation> recommendations;
-  final List<MalNamedNode> studios;
+/// Complete information details representing an anime entity on MyAnimeList.
+@freezed
+abstract class MalAnimeNode with _$MalAnimeNode {
+  const factory MalAnimeNode({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    required String title,
+    MalPicture? mainPicture,
+    MalAlternativeTitles? alternativeTitles,
+    String? startDate,
+    String? endDate,
+    String? synopsis,
+    @JsonKey(fromJson: _parseDouble) double? mean,
+    @JsonKey(fromJson: _parseInt) int? rank,
+    @JsonKey(fromJson: _parseInt) int? popularity,
+    @JsonKey(fromJson: _parseInt) int? numListUsers,
+    @JsonKey(fromJson: _parseInt) int? numScoringUsers,
+    String? nsfw,
+    String? createdAt,
+    String? updatedAt,
+    String? mediaType,
+    String? status,
+    @Default([]) List<MalNamedNode> genres,
+    MalAnimeListStatus? myListStatus,
+    @JsonKey(fromJson: _parseInt) int? numEpisodes,
+    MalSeason? startSeason,
+    MalBroadcast? broadcast,
+    String? source,
+    @JsonKey(fromJson: _parseInt) int? averageEpisodeDuration,
+    String? rating,
+    @Default([]) List<MalPicture> pictures,
+    String? background,
+    @Default([]) List<MalRelatedAnime> relatedAnime,
+    @Default([]) List<MalRelatedManga> relatedManga,
+    @Default([]) List<MalAnimeRecommendation> recommendations,
+    @Default([]) List<MalNamedNode> studios,
+  }) = _MalAnimeNode;
 
-  MalAnimeNode({
-    required this.id,
-    required this.title,
-    this.mainPicture,
-    this.alternativeTitles,
-    this.startDate,
-    this.endDate,
-    this.synopsis,
-    this.mean,
-    this.rank,
-    this.popularity,
-    this.numListUsers,
-    this.numScoringUsers,
-    this.nsfw,
-    this.createdAt,
-    this.updatedAt,
-    this.mediaType,
-    this.status,
-    required this.genres,
-    this.myListStatus,
-    this.numEpisodes,
-    this.startSeason,
-    this.broadcast,
-    this.source,
-    this.averageEpisodeDuration,
-    this.rating,
-    required this.pictures,
-    this.background,
-    required this.relatedAnime,
-    required this.relatedManga,
-    required this.recommendations,
-    required this.studios,
-  });
-
-  factory MalAnimeNode.fromMap(Map<String, Object?> map) {
-    return MalAnimeNode(
-      id: _parseInt(map['id']) ?? 0,
-      title: _parseString(map['title']) ?? '',
-      mainPicture: map['main_picture'] != null
-          ? MalPicture.fromMap(asMap(map['main_picture']))
-          : null,
-      alternativeTitles: map['alternative_titles'] != null
-          ? MalAlternativeTitles.fromMap(asMap(map['alternative_titles']))
-          : null,
-      startDate: _parseString(map['start_date']),
-      endDate: _parseString(map['end_date']),
-      synopsis: _parseString(map['synopsis']),
-      mean: _parseDouble(map['mean']),
-      rank: _parseInt(map['rank']),
-      popularity: _parseInt(map['popularity']),
-      numListUsers: _parseInt(map['num_list_users']),
-      numScoringUsers: _parseInt(map['num_scoring_users']),
-      nsfw: _parseString(map['nsfw']),
-      createdAt: _parseString(map['created_at']),
-      updatedAt: _parseString(map['updated_at']),
-      mediaType: _parseString(map['media_type']),
-      status: _parseString(map['status']),
-      genres:
-          _parseList(map['genres'], (i) => MalNamedNode.fromMap(asMap(i))) ??
-          [],
-      myListStatus: map['my_list_status'] != null
-          ? MalAnimeListStatus.fromMap(asMap(map['my_list_status']))
-          : null,
-      numEpisodes: _parseInt(map['num_episodes']),
-      startSeason: map['start_season'] != null
-          ? MalSeason.fromMap(asMap(map['start_season']))
-          : null,
-      broadcast: map['broadcast'] != null
-          ? MalBroadcast.fromMap(asMap(map['broadcast']))
-          : null,
-      source: _parseString(map['source']),
-      averageEpisodeDuration: _parseInt(map['average_episode_duration']),
-      rating: _parseString(map['rating']),
-      pictures:
-          _parseList(map['pictures'], (i) => MalPicture.fromMap(asMap(i))) ??
-          [],
-      background: _parseString(map['background']),
-      relatedAnime:
-          _parseList(
-            map['related_anime'],
-            (i) => MalRelatedAnime.fromMap(asMap(i)),
-          ) ??
-          [],
-      relatedManga:
-          _parseList(
-            map['related_manga'],
-            (i) => MalRelatedManga.fromMap(asMap(i)),
-          ) ??
-          [],
-      recommendations:
-          _parseList(
-            map['recommendations'],
-            (i) => MalAnimeRecommendation.fromMap(asMap(i)),
-          ) ??
-          [],
-      studios:
-          _parseList(map['studios'], (i) => MalNamedNode.fromMap(asMap(i))) ??
-          [],
-    );
-  }
+  factory MalAnimeNode.fromJson(Map<String, dynamic> json) => _$MalAnimeNodeFromJson(json);
 }
 
-class MalMangaNode {
-  final int id;
-  final String title;
-  final MalPicture? mainPicture;
-  final MalAlternativeTitles? alternativeTitles;
-  final String? startDate;
-  final String? endDate;
-  final String? synopsis;
-  final double? mean;
-  final int? rank;
-  final int? popularity;
-  final int? numListUsers;
-  final int? numScoringUsers;
-  final String? nsfw;
-  final String? createdAt;
-  final String? updatedAt;
-  final String? mediaType;
-  final String? status;
-  final List<MalNamedNode> genres;
-  final MalMangaListStatus? myListStatus;
-  final int? numVolumes;
-  final int? numChapters;
-  final List<MalAuthor> authors;
-  final List<MalPicture> pictures;
-  final String? background;
-  final List<MalRelatedAnime> relatedAnime;
-  final List<MalRelatedManga> relatedManga;
-  final List<MalMangaRecommendation> recommendations;
-  final List<MalNamedNode> serialization;
+/// Anime list row item representation enclosing the base node and user's listing details.
+@freezed
+abstract class MalAnimeListItem with _$MalAnimeListItem {
+  const MalAnimeListItem._();
 
-  MalMangaNode({
-    required this.id,
-    required this.title,
-    this.mainPicture,
-    this.alternativeTitles,
-    this.startDate,
-    this.endDate,
-    this.synopsis,
-    this.mean,
-    this.rank,
-    this.popularity,
-    this.numListUsers,
-    this.numScoringUsers,
-    this.nsfw,
-    this.createdAt,
-    this.updatedAt,
-    this.mediaType,
-    this.status,
-    required this.genres,
-    this.myListStatus,
-    this.numVolumes,
-    this.numChapters,
-    required this.authors,
-    required this.pictures,
-    this.background,
-    required this.relatedAnime,
-    required this.relatedManga,
-    required this.recommendations,
-    required this.serialization,
-  });
+  const factory MalAnimeListItem({
+    required MalAnimeNode node,
+    MalAnimeListStatus? listStatus,
+    MalRanking? ranking,
+  }) = _MalAnimeListItem;
 
-  factory MalMangaNode.fromMap(Map<String, Object?> map) {
-    return MalMangaNode(
-      id: _parseInt(map['id']) ?? 0,
-      title: _parseString(map['title']) ?? '',
-      mainPicture: map['main_picture'] != null
-          ? MalPicture.fromMap(asMap(map['main_picture']))
-          : null,
-      alternativeTitles: map['alternative_titles'] != null
-          ? MalAlternativeTitles.fromMap(asMap(map['alternative_titles']))
-          : null,
-      startDate: _parseString(map['start_date']),
-      endDate: _parseString(map['end_date']),
-      synopsis: _parseString(map['synopsis']),
-      mean: _parseDouble(map['mean']),
-      rank: _parseInt(map['rank']),
-      popularity: _parseInt(map['popularity']),
-      numListUsers: _parseInt(map['num_list_users']),
-      numScoringUsers: _parseInt(map['num_scoring_users']),
-      nsfw: _parseString(map['nsfw']),
-      createdAt: _parseString(map['created_at']),
-      updatedAt: _parseString(map['updated_at']),
-      mediaType: _parseString(map['media_type']),
-      status: _parseString(map['status']),
-      genres:
-          _parseList(map['genres'], (i) => MalNamedNode.fromMap(asMap(i))) ??
-          [],
-      myListStatus: map['my_list_status'] != null
-          ? MalMangaListStatus.fromMap(asMap(map['my_list_status']))
-          : null,
-      numVolumes: _parseInt(map['num_volumes']),
-      numChapters: _parseInt(map['num_chapters']),
-      authors:
-          _parseList(map['authors'], (i) => MalAuthor.fromMap(asMap(i))) ?? [],
-      pictures:
-          _parseList(map['pictures'], (i) => MalPicture.fromMap(asMap(i))) ??
-          [],
-      background: _parseString(map['background']),
-      relatedAnime:
-          _parseList(
-            map['related_anime'],
-            (i) => MalRelatedAnime.fromMap(asMap(i)),
-          ) ??
-          [],
-      relatedManga:
-          _parseList(
-            map['related_manga'],
-            (i) => MalRelatedManga.fromMap(asMap(i)),
-          ) ??
-          [],
-      recommendations:
-          _parseList(
-            map['recommendations'],
-            (i) => MalMangaRecommendation.fromMap(asMap(i)),
-          ) ??
-          [],
-      serialization:
-          _parseList(
-            map['serialization'],
-            (i) => MalNamedNode.fromMap(asMap(i)),
-          ) ??
-          [],
-    );
-  }
+  factory MalAnimeListItem.fromJson(Map<String, dynamic> json) => _$MalAnimeListItemFromJson(json);
+
+  factory MalAnimeListItem.fromMap(Map<String, Object?> map) =>
+      MalAnimeListItem.fromJson(asMap(map).cast<String, dynamic>());
+}
+
+/// Relationship details indicating connection properties to another anime resource.
+@freezed
+abstract class MalRelatedAnime with _$MalRelatedAnime {
+  const factory MalRelatedAnime({
+    required MalAnimeNode node,
+    @Default('') String relationType,
+    @Default('') String relationTypeFormatted,
+  }) = _MalRelatedAnime;
+
+  factory MalRelatedAnime.fromJson(Map<String, dynamic> json) => _$MalRelatedAnimeFromJson(json);
+}
+
+/// Recommendation indicator linking a recommended anime to the target anime node.
+@freezed
+abstract class MalAnimeRecommendation with _$MalAnimeRecommendation {
+  const factory MalAnimeRecommendation({
+    required MalAnimeNode node,
+    @JsonKey(fromJson: _parseIntRequired) required int numRecommendations,
+  }) = _MalAnimeRecommendation;
+
+  factory MalAnimeRecommendation.fromJson(Map<String, dynamic> json) => _$MalAnimeRecommendationFromJson(json);
 }
 
 // =============================================================================
-// Paginated List Items & Wrapper
+// Manga Models
 // =============================================================================
 
-class MalAnimeListItem {
-  final MalAnimeNode node;
-  final MalAnimeListStatus? listStatus;
-  final MalRanking? ranking;
+/// Complete information details representing a manga entity on MyAnimeList.
+@freezed
+abstract class MalMangaNode with _$MalMangaNode {
+  const factory MalMangaNode({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    required String title,
+    MalPicture? mainPicture,
+    MalAlternativeTitles? alternativeTitles,
+    String? startDate,
+    String? endDate,
+    String? synopsis,
+    @JsonKey(fromJson: _parseDouble) double? mean,
+    @JsonKey(fromJson: _parseInt) int? rank,
+    @JsonKey(fromJson: _parseInt) int? popularity,
+    @JsonKey(fromJson: _parseInt) int? numListUsers,
+    @JsonKey(fromJson: _parseInt) int? numScoringUsers,
+    String? nsfw,
+    String? createdAt,
+    String? updatedAt,
+    String? mediaType,
+    String? status,
+    @Default([]) List<MalNamedNode> genres,
+    MalMangaListStatus? myListStatus,
+    @JsonKey(fromJson: _parseInt) int? numVolumes,
+    @JsonKey(fromJson: _parseInt) int? numChapters,
+    @Default([]) List<MalAuthor> authors,
+    @Default([]) List<MalPicture> pictures,
+    String? background,
+    @Default([]) List<MalRelatedAnime> relatedAnime,
+    @Default([]) List<MalRelatedManga> relatedManga,
+    @Default([]) List<MalMangaRecommendation> recommendations,
+    @Default([]) List<MalNamedNode> serialization,
+  }) = _MalMangaNode;
 
-  MalAnimeListItem({required this.node, this.listStatus, this.ranking});
-
-  factory MalAnimeListItem.fromMap(Map<String, Object?> map) {
-    return MalAnimeListItem(
-      node: MalAnimeNode.fromMap(asMap(map['node'])),
-      listStatus: map['list_status'] != null
-          ? MalAnimeListStatus.fromMap(asMap(map['list_status']))
-          : null,
-      ranking: map['ranking'] != null
-          ? MalRanking.fromMap(asMap(map['ranking']))
-          : null,
-    );
-  }
+  factory MalMangaNode.fromJson(Map<String, dynamic> json) => _$MalMangaNodeFromJson(json);
 }
 
-class MalMangaListItem {
-  final MalMangaNode node;
-  final MalMangaListStatus? listStatus;
-  final MalRanking? ranking;
+/// Manga list row item representation enclosing the base node and user's listing details.
+@freezed
+abstract class MalMangaListItem with _$MalMangaListItem {
+  const MalMangaListItem._();
 
-  MalMangaListItem({required this.node, this.listStatus, this.ranking});
+  const factory MalMangaListItem({
+    required MalMangaNode node,
+    MalMangaListStatus? listStatus,
+    MalRanking? ranking,
+  }) = _MalMangaListItem;
 
-  factory MalMangaListItem.fromMap(Map<String, Object?> map) {
-    return MalMangaListItem(
-      node: MalMangaNode.fromMap(asMap(map['node'])),
-      listStatus: map['list_status'] != null
-          ? MalMangaListStatus.fromMap(asMap(map['list_status']))
-          : null,
-      ranking: map['ranking'] != null
-          ? MalRanking.fromMap(asMap(map['ranking']))
-          : null,
-    );
-  }
+  factory MalMangaListItem.fromJson(Map<String, dynamic> json) => _$MalMangaListItemFromJson(json);
+
+  factory MalMangaListItem.fromMap(Map<String, Object?> map) =>
+      MalMangaListItem.fromJson(asMap(map).cast<String, dynamic>());
 }
 
-class MalPaginated<T> {
-  final List<T> data;
-  final MalPaging? paging;
+/// Relationship details indicating connection properties to another manga resource.
+@freezed
+abstract class MalRelatedManga with _$MalRelatedManga {
+  const factory MalRelatedManga({
+    required MalMangaNode node,
+    @Default('') String relationType,
+    @Default('') String relationTypeFormatted,
+  }) = _MalRelatedManga;
 
-  MalPaginated({required this.data, this.paging});
+  factory MalRelatedManga.fromJson(Map<String, dynamic> json) => _$MalRelatedMangaFromJson(json);
+}
+
+/// Recommendation indicator linking a recommended manga to the target manga node.
+@freezed
+abstract class MalMangaRecommendation with _$MalMangaRecommendation {
+  const factory MalMangaRecommendation({
+    required MalMangaNode node,
+    @JsonKey(fromJson: _parseIntRequired) required int numRecommendations,
+  }) = _MalMangaRecommendation;
+
+  factory MalMangaRecommendation.fromJson(Map<String, dynamic> json) => _$MalMangaRecommendationFromJson(json);
+}
+
+// =============================================================================
+// Paginated Wrapper
+// =============================================================================
+
+/// Generic wrapper enclosing listing payloads with an item data array and paging offset properties.
+@Freezed(genericArgumentFactories: true)
+abstract class MalPaginated<T> with _$MalPaginated<T> {
+  const MalPaginated._();
+
+  const factory MalPaginated({
+    required List<T> data,
+    MalPaging? paging,
+  }) = _MalPaginated<T>;
+
+  factory MalPaginated.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
+      _$MalPaginatedFromJson(json, fromJsonT);
 
   factory MalPaginated.fromMap(
     Map<String, Object?> map,
@@ -693,7 +395,7 @@ class MalPaginated<T> {
     final rawPaging = map['paging'];
     return MalPaginated<T>(
       data: dataList,
-      paging: rawPaging != null ? MalPaging.fromMap(asMap(rawPaging)) : null,
+      paging: rawPaging != null ? MalPaging.fromJson(asMap(rawPaging).cast<String, dynamic>()) : null,
     );
   }
 }
@@ -702,187 +404,119 @@ class MalPaginated<T> {
 // Forum Models
 // =============================================================================
 
-class MalForumSubboard {
-  final int id;
-  final String title;
+/// Subboard categorization container mapping individual forum discussion topics.
+@freezed
+abstract class MalForumSubboard with _$MalForumSubboard {
+  const factory MalForumSubboard({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    @Default('') String title,
+  }) = _MalForumSubboard;
 
-  MalForumSubboard({required this.id, required this.title});
-
-  factory MalForumSubboard.fromMap(Map<String, Object?> map) {
-    return MalForumSubboard(
-      id: _parseInt(map['id']) ?? 0,
-      title: _parseString(map['title']) ?? '',
-    );
-  }
+  factory MalForumSubboard.fromJson(Map<String, dynamic> json) => _$MalForumSubboardFromJson(json);
 }
 
-class MalForumBoard {
-  final int id;
-  final String title;
-  final String? description;
-  final List<MalForumSubboard> subboards;
+/// Forum board details including subboards and text descriptions.
+@freezed
+abstract class MalForumBoard with _$MalForumBoard {
+  const factory MalForumBoard({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    @Default('') String title,
+    String? description,
+    @Default([]) List<MalForumSubboard> subboards,
+  }) = _MalForumBoard;
 
-  MalForumBoard({
-    required this.id,
-    required this.title,
-    this.description,
-    required this.subboards,
-  });
-
-  factory MalForumBoard.fromMap(Map<String, Object?> map) {
-    return MalForumBoard(
-      id: _parseInt(map['id']) ?? 0,
-      title: _parseString(map['title']) ?? '',
-      description: _parseString(map['description']),
-      subboards:
-          _parseList(
-            map['subboards'],
-            (i) => MalForumSubboard.fromMap(asMap(i)),
-          ) ??
-          [],
-    );
-  }
+  factory MalForumBoard.fromJson(Map<String, dynamic> json) => _$MalForumBoardFromJson(json);
 }
 
-class MalForumCategory {
-  final String title;
-  final List<MalForumBoard> boards;
+/// Forum category collection mapping lists of available boards.
+@freezed
+abstract class MalForumCategory with _$MalForumCategory {
+  const factory MalForumCategory({
+    @Default('') String title,
+    @Default([]) List<MalForumBoard> boards,
+  }) = _MalForumCategory;
 
-  MalForumCategory({required this.title, required this.boards});
-
-  factory MalForumCategory.fromMap(Map<String, Object?> map) {
-    return MalForumCategory(
-      title: _parseString(map['title']) ?? '',
-      boards:
-          _parseList(map['boards'], (i) => MalForumBoard.fromMap(asMap(i))) ??
-          [],
-    );
-  }
+  factory MalForumCategory.fromJson(Map<String, dynamic> json) => _$MalForumCategoryFromJson(json);
 }
 
-class MalForumPostCreator {
-  final int id;
-  final String name;
-  final String? avatarUrl;
+/// Public profile details summary representing the creator of a forum post.
+@freezed
+abstract class MalForumPostCreator with _$MalForumPostCreator {
+  const factory MalForumPostCreator({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    @Default('') String name,
+    String? avatarUrl,
+  }) = _MalForumPostCreator;
 
-  MalForumPostCreator({required this.id, required this.name, this.avatarUrl});
-
-  factory MalForumPostCreator.fromMap(Map<String, Object?> map) {
-    return MalForumPostCreator(
-      id: _parseInt(map['id']) ?? 0,
-      name: _parseString(map['name']) ?? '',
-      avatarUrl: _parseString(map['avatar_url']),
-    );
-  }
+  factory MalForumPostCreator.fromJson(Map<String, dynamic> json) => _$MalForumPostCreatorFromJson(json);
 }
 
-class MalForumPost {
-  final int id;
-  final int number;
-  final String? createdAt;
-  final MalForumPostCreator? createdBy;
-  final String body;
-  final String? signature;
+/// Individual reply post element containing content text, numbering, and timestamps.
+@freezed
+abstract class MalForumPost with _$MalForumPost {
+  const factory MalForumPost({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    @JsonKey(fromJson: _parseIntRequired) required int number,
+    String? createdAt,
+    MalForumPostCreator? createdBy,
+    @Default('') String body,
+    String? signature,
+  }) = _MalForumPost;
 
-  MalForumPost({
-    required this.id,
-    required this.number,
-    this.createdAt,
-    this.createdBy,
-    required this.body,
-    this.signature,
-  });
-
-  factory MalForumPost.fromMap(Map<String, Object?> map) {
-    return MalForumPost(
-      id: _parseInt(map['id']) ?? 0,
-      number: _parseInt(map['number']) ?? 0,
-      createdAt: _parseString(map['created_at']),
-      createdBy: map['created_by'] != null
-          ? MalForumPostCreator.fromMap(asMap(map['created_by']))
-          : null,
-      body: _parseString(map['body']) ?? '',
-      signature: _parseString(map['signature']),
-    );
-  }
+  factory MalForumPost.fromJson(Map<String, dynamic> json) => _$MalForumPostFromJson(json);
 }
 
-class MalForumTopicDetail {
-  final String title;
-  final List<MalForumPost> posts;
-  final MalPaging? paging;
+/// Complete discussion topic details structure enclosing title headers and paginated posts.
+@freezed
+abstract class MalForumTopicDetail with _$MalForumTopicDetail {
+  const MalForumTopicDetail._();
 
-  MalForumTopicDetail({required this.title, required this.posts, this.paging});
+  const factory MalForumTopicDetail({
+    @Default('') String title,
+    @Default([]) List<MalForumPost> posts,
+    MalPaging? paging,
+  }) = _MalForumTopicDetail;
 
-  factory MalForumTopicDetail.fromMap(Map<String, Object?> map) {
-    final dataMap = asMap(map['data']);
+  factory MalForumTopicDetail.fromJson(Map<String, dynamic> json) {
+    final dataMap = asMap(json['data']);
+    final title = dataMap['title']?.toString() ?? json['title']?.toString() ?? '';
+    final rawPosts = dataMap['posts'] ?? json['posts'];
+    final postsList = rawPosts is List
+        ? rawPosts.map((i) => MalForumPost.fromJson(asMap(i).cast<String, dynamic>())).toList()
+        : <MalForumPost>[];
+    final pagingVal = json['paging'] != null ? MalPaging.fromJson(asMap(json['paging']).cast<String, dynamic>()) : null;
     return MalForumTopicDetail(
-      title: _parseString(dataMap['title']) ?? _parseString(map['title']) ?? '',
-      posts:
-          _parseList(
-            dataMap['posts'] ?? map['posts'],
-            (i) => MalForumPost.fromMap(asMap(i)),
-          ) ??
-          [],
-      paging: map['paging'] != null
-          ? MalPaging.fromMap(asMap(map['paging']))
-          : null,
+      title: title,
+      posts: postsList,
+      paging: pagingVal,
     );
   }
 }
 
-class MalForumTopic {
-  final int id;
-  final String title;
-  final String? createdAt;
-  final MalForumPostCreator? createdBy;
-  final int numberOfPosts;
-  final String? lastPostCreatedAt;
-  final MalForumPostCreator? lastPostCreatedBy;
-  final bool isLocked;
+/// Topic details summary detailing reply counts, locked states, and last active details.
+@freezed
+abstract class MalForumTopic with _$MalForumTopic {
+  const factory MalForumTopic({
+    @JsonKey(fromJson: _parseIntRequired) required int id,
+    @Default('') String title,
+    String? createdAt,
+    MalForumPostCreator? createdBy,
+    @JsonKey(fromJson: _parseIntRequired) required int numberOfPosts,
+    String? lastPostCreatedAt,
+    MalForumPostCreator? lastPostCreatedBy,
+    @JsonKey(fromJson: _parseBoolRequired) required bool isLocked,
+  }) = _MalForumTopic;
 
-  MalForumTopic({
-    required this.id,
-    required this.title,
-    this.createdAt,
-    this.createdBy,
-    required this.numberOfPosts,
-    this.lastPostCreatedAt,
-    this.lastPostCreatedBy,
-    required this.isLocked,
-  });
-
-  factory MalForumTopic.fromMap(Map<String, Object?> map) {
-    return MalForumTopic(
-      id: _parseInt(map['id']) ?? 0,
-      title: _parseString(map['title']) ?? '',
-      createdAt: _parseString(map['created_at']),
-      createdBy: map['created_by'] != null
-          ? MalForumPostCreator.fromMap(asMap(map['created_by']))
-          : null,
-      numberOfPosts: _parseInt(map['number_of_posts']) ?? 0,
-      lastPostCreatedAt: _parseString(map['last_post_created_at']),
-      lastPostCreatedBy: map['last_post_created_by'] != null
-          ? MalForumPostCreator.fromMap(asMap(map['last_post_created_by']))
-          : null,
-      isLocked: _parseBool(map['is_locked']) ?? false,
-    );
-  }
+  factory MalForumTopic.fromJson(Map<String, dynamic> json) => _$MalForumTopicFromJson(json);
 }
 
-class MalForumTopicsResponse {
-  final List<MalForumTopic> data;
-  final MalPaging? paging;
+/// Paginated collection response representing a set of query matching discussion topics.
+@freezed
+abstract class MalForumTopicsResponse with _$MalForumTopicsResponse {
+  const factory MalForumTopicsResponse({
+    @Default([]) List<MalForumTopic> data,
+    MalPaging? paging,
+  }) = _MalForumTopicsResponse;
 
-  MalForumTopicsResponse({required this.data, this.paging});
-
-  factory MalForumTopicsResponse.fromMap(Map<String, Object?> map) {
-    return MalForumTopicsResponse(
-      data:
-          _parseList(map['data'], (i) => MalForumTopic.fromMap(asMap(i))) ?? [],
-      paging: map['paging'] != null
-          ? MalPaging.fromMap(asMap(map['paging']))
-          : null,
-    );
-  }
+  factory MalForumTopicsResponse.fromJson(Map<String, dynamic> json) => _$MalForumTopicsResponseFromJson(json);
 }

@@ -5,6 +5,7 @@ analyzer:
     - lib/intl/generated/**
   errors:
     avoid_print: error
+    invalid_annotation_target: ignore
 
 linter:
   rules:

@@ -3,6 +3,10 @@ import 'package:komorebi/models/mal_models.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
 
+// =============================================================================
+// Exceptions & Helpers
+// =============================================================================
+
 /// Exception thrown when MyAnimeList API returns an error status code or fails to execute.
 class MalApiException implements Exception {
   final int statusCode;
@@ -24,6 +28,10 @@ class MalApiException implements Exception {
 
 typedef MalApiHelper = MalApi;
 
+// =============================================================================
+// Main API Client Service
+// =============================================================================
+
 /// Strongly-typed helper class for interacting with the MyAnimeList API v2 using Dio.
 ///
 /// Reference: https://myanimelist.net/apiconfig/references/api/v2
@@ -44,10 +52,6 @@ class MalApi {
   void dispose() {
     _dio.close();
   }
-
-  // ===========================================================================
-  // Internal Request Sender & Helpers
-  // ===========================================================================
 
   Future<Object?> _sendRequest({
     required String method,
@@ -127,9 +131,9 @@ class MalApi {
     }
   }
 
-  // ===========================================================================
+  // =============================================================================
   // User Endpoints
-  // ===========================================================================
+  // =============================================================================
 
   /// Get information about the currently authenticated user (`@me`).
   Future<MalUser> getMyUserInfo({
@@ -146,10 +150,10 @@ class MalApi {
       queryParameters: query,
       accessToken: accessToken,
     );
-    return MalUser.fromMap(asMap(res));
+    return MalUser.fromJson(asMap(res).cast<String, dynamic>());
   }
 
-  /// Get anime list of a user.
+  /// Get the anime list of a user.
   Future<MalPaginated<MalAnimeListItem>> getUserAnimeList({
     required String username,
     String? status,
@@ -183,7 +187,7 @@ class MalApi {
     );
   }
 
-  /// Get manga list of a user.
+  /// Get the manga list of a user.
   Future<MalPaginated<MalMangaListItem>> getUserMangaList({
     required String username,
     String? status,
@@ -217,11 +221,11 @@ class MalApi {
     );
   }
 
-  // ===========================================================================
+  // =============================================================================
   // Anime Endpoints
-  // ===========================================================================
+  // =============================================================================
 
-  /// Search anime by title/query.
+  /// Search anime by title query.
   Future<MalPaginated<MalAnimeListItem>> searchAnime({
     required String query,
     int limit = 100,
@@ -252,7 +256,7 @@ class MalApi {
     );
   }
 
-  /// Get detailed information about a specific anime.
+  /// Get detailed information about a specific anime by ID.
   Future<MalAnimeNode> getAnimeDetails({
     required int animeId,
     List<String>? fields,
@@ -271,10 +275,10 @@ class MalApi {
       accessToken: accessToken,
       clientId: clientId,
     );
-    return MalAnimeNode.fromMap(asMap(res));
+    return MalAnimeNode.fromJson(asMap(res).cast<String, dynamic>());
   }
 
-  /// Get anime ranking list.
+  /// Get anime ranking lists (e.g. all, airing, upcoming, special).
   Future<MalPaginated<MalAnimeListItem>> getAnimeRanking({
     required String rankingType,
     int limit = 100,
@@ -305,7 +309,7 @@ class MalApi {
     );
   }
 
-  /// Get anime suggestions for the authenticated user.
+  /// Get suggested anime recommendations for the authenticated user.
   Future<MalPaginated<MalAnimeListItem>> getAnimeSuggestions({
     int limit = 100,
     int offset = 0,
@@ -332,7 +336,7 @@ class MalApi {
     );
   }
 
-  /// Add or update anime list status for the authenticated user.
+  /// Add or update the anime list status (e.g. watch status, score, comments) for the user.
   Future<MalAnimeListStatus> updateMyAnimeListStatus({
     required int animeId,
     required String accessToken,
@@ -367,10 +371,10 @@ class MalApi {
       body: body,
       accessToken: accessToken,
     );
-    return MalAnimeListStatus.fromMap(asMap(res));
+    return MalAnimeListStatus.fromJson(asMap(res).cast<String, dynamic>());
   }
 
-  /// Delete an anime from the authenticated user's list.
+  /// Delete an anime from the user's personal list.
   Future<void> deleteMyAnimeListStatus({
     required int animeId,
     required String accessToken,
@@ -382,11 +386,11 @@ class MalApi {
     );
   }
 
-  // ===========================================================================
+  // =============================================================================
   // Manga Endpoints
-  // ===========================================================================
+  // =============================================================================
 
-  /// Search manga by title/query.
+  /// Search manga by title query.
   Future<MalPaginated<MalMangaListItem>> searchManga({
     required String query,
     int limit = 100,
@@ -417,7 +421,7 @@ class MalApi {
     );
   }
 
-  /// Get detailed information about a specific manga.
+  /// Get detailed information about a specific manga by ID.
   Future<MalMangaNode> getMangaDetails({
     required int mangaId,
     List<String>? fields,
@@ -436,10 +440,10 @@ class MalApi {
       accessToken: accessToken,
       clientId: clientId,
     );
-    return MalMangaNode.fromMap(asMap(res));
+    return MalMangaNode.fromJson(asMap(res).cast<String, dynamic>());
   }
 
-  /// Get manga ranking list.
+  /// Get manga ranking lists (e.g. all, manga, novels, oneshots).
   Future<MalPaginated<MalMangaListItem>> getMangaRanking({
     required String rankingType,
     int limit = 100,
@@ -470,7 +474,7 @@ class MalApi {
     );
   }
 
-  /// Add or update manga list status for the authenticated user.
+  /// Add or update the manga list status (e.g. read status, chapters, comments) for the user.
   Future<MalMangaListStatus> updateMyMangaListStatus({
     required int mangaId,
     required String accessToken,
@@ -509,10 +513,10 @@ class MalApi {
       body: body,
       accessToken: accessToken,
     );
-    return MalMangaListStatus.fromMap(asMap(res));
+    return MalMangaListStatus.fromJson(asMap(res).cast<String, dynamic>());
   }
 
-  /// Delete a manga from the authenticated user's list.
+  /// Delete a manga from the user's personal list.
   Future<void> deleteMyMangaListStatus({
     required int mangaId,
     required String accessToken,
@@ -524,11 +528,11 @@ class MalApi {
     );
   }
 
-  // ===========================================================================
+  // =============================================================================
   // Forum Endpoints
-  // ===========================================================================
+  // =============================================================================
 
-  /// Get forum boards.
+  /// Get the list of all available forum categories and boards.
   Future<List<MalForumCategory>> getForumBoards({
     String? accessToken,
     String? clientId,
@@ -542,12 +546,12 @@ class MalApi {
     final map = asMap(res);
     final categories = map['categories'];
     if (categories is List) {
-      return categories.map((i) => MalForumCategory.fromMap(asMap(i))).toList();
+      return categories.map((i) => MalForumCategory.fromJson(asMap(i).cast<String, dynamic>())).toList();
     }
     return [];
   }
 
-  /// Get forum topic detail.
+  /// Get the detailed post listing for a specific forum discussion topic ID.
   Future<MalForumTopicDetail> getForumTopic({
     required int topicId,
     int limit = 100,
@@ -566,10 +570,10 @@ class MalApi {
       accessToken: accessToken,
       clientId: clientId,
     );
-    return MalForumTopicDetail.fromMap(asMap(res));
+    return MalForumTopicDetail.fromJson(asMap(res).cast<String, dynamic>());
   }
 
-  /// Get forum topics.
+  /// Search or query general forum topics with filter criteria.
   Future<MalForumTopicsResponse> getForumTopics({
     int? boardId,
     int? subboardId,
@@ -600,6 +604,6 @@ class MalApi {
       accessToken: accessToken,
       clientId: clientId,
     );
-    return MalForumTopicsResponse.fromMap(asMap(res));
+    return MalForumTopicsResponse.fromJson(asMap(res).cast<String, dynamic>());
   }
 }

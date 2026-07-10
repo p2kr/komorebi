@@ -28,7 +28,7 @@ void main() {
         'is_supporter': true,
       };
 
-      final user = MalUser.fromMap(fullJson);
+      final user = MalUser.fromJson(fullJson);
       expect(user.id, 100);
       expect(user.name, 'KomorebiUser');
       expect(user.picture, 'https://example.com/avatar.png');
@@ -37,7 +37,7 @@ void main() {
 
       // Partial data (only required fields)
       final partialJson = {'id': 101, 'name': 'MinimalUser'};
-      final minimalUser = MalUser.fromMap(partialJson);
+      final minimalUser = MalUser.fromJson(partialJson);
       expect(minimalUser.id, 101);
       expect(minimalUser.name, 'MinimalUser');
       expect(minimalUser.picture, isNull);
@@ -51,7 +51,7 @@ void main() {
         'is_supporter': 'true', // string instead of bool
       };
 
-      final user = MalUser.fromMap(weirdJson);
+      final user = MalUser.fromJson(weirdJson);
       expect(user.id, 200);
       expect(user.name, 'WeirdUser');
       expect(user.isSupporter, true);
@@ -67,7 +67,7 @@ void main() {
         'tags': ['action', 'favorite'],
       };
 
-      final status = MalAnimeListStatus.fromMap(statusJson);
+      final status = MalAnimeListStatus.fromJson(statusJson);
       expect(status.status, 'watching');
       expect(status.score, 8);
       expect(status.numEpisodesWatched, 5);
@@ -109,7 +109,7 @@ void main() {
           ],
         };
 
-        final anime = MalAnimeNode.fromMap(animeJson);
+        final anime = MalAnimeNode.fromJson(animeJson);
         expect(anime.id, 1);
         expect(anime.title, 'Cowboy Bebop');
         expect(anime.mainPicture?.medium, 'https://example.com/med.jpg');
@@ -144,9 +144,9 @@ void main() {
         'paging': {'next': 'https://api.myanimelist.net/v2/anime?offset=2'},
       };
 
-      final paginated = MalPaginated<MalAnimeListItem>.fromMap(
+      final paginated = MalPaginated<MalAnimeListItem>.fromJson(
         paginatedJson,
-        MalAnimeListItem.fromMap,
+        (item) => MalAnimeListItem.fromJson(asMap(item)),
       );
 
       expect(paginated.data.length, 2);
@@ -181,7 +181,7 @@ void main() {
         },
       };
 
-      final topicDetail = MalForumTopicDetail.fromMap(forumJson);
+      final topicDetail = MalForumTopicDetail.fromJson(forumJson);
       expect(topicDetail.title, 'Episode 1 Discussion');
       expect(topicDetail.posts.length, 1);
       expect(topicDetail.posts[0].id, 500);
