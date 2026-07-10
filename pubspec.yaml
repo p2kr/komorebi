@@ -1,4 +1,4 @@
-﻿name: komorebi
+name: komorebi
 description: "An all in one app to consume manga and anime from MyAnimeList"
 
 publish_to: "none" # Remove this line if you wish to publish to pub.dev
@@ -39,7 +39,11 @@ dependencies:
   windows_single_instance: ^1.1.0
   go_router: ^17.3.0
   freezed_annotation: ^3.1.0
-
+  gradient_borders: ^1.0.4
+  easy_sidemenu: ^1.0.0
+  animated_tree_view: ^2.3.0
+  popover: ^0.4.0
+  flutter_localized_locales: ^2.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/screens/home.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/constants.dart';
@@ -29,20 +31,24 @@ void main(List<String> args) async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final locale = ref.watch(localeProvider);
+
     return MaterialApp(
-      // locale: Locale("es"),
-      // themeMode: .light,
+      locale: locale,
+      themeMode: themeMode,
       debugShowCheckedModeBanner: false,
-      localizationsDelegates: [
+      localizationsDelegates: const [
         S.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
+        LocaleNamesLocalizationsDelegate(),
       ],
       supportedLocales: S.delegate.supportedLocales,
       title: APP_NAME,

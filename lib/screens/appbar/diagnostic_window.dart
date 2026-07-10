@@ -81,7 +81,7 @@ class DiagnosticWindow extends HookWidget {
                           "all",
                           "system",
                           "riverpod",
-                          "dio",
+                          "http",
                           // "web crawler",
                           // "mal sync",
                           // "file system",

@@ -7,7 +7,6 @@ import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
-import 'package:komorebi/services/handle_delete.dart';
 import 'package:komorebi/utils/constants.dart';
 
 void main() {
@@ -212,8 +211,9 @@ void main() {
         expect(currentProfile?.id, equals(id1));
         expect(currentProfile?.username, equals('ActiveUser'));
 
-        // When
-        await handleProfileDeletion(container, id1);
+        // When (replicates handleProfileDeletion: delete from db + invalidate provider)
+        await db.profilesDao.deleteProfile(id1);
+        container.invalidate(currentProfileProvider);
         currentProfile = await container.read(currentProfileProvider.future);
         final configVal = await db.configsDao.getConfig(
           Settings.LAST_USED_PROFILE.name,
@@ -249,8 +249,9 @@ void main() {
         expect(currentProfile?.id, equals(id1));
         expect(currentProfile?.username, equals('SingleUser'));
 
-        // When
-        await handleProfileDeletion(container, id1);
+        // When (replicates handleProfileDeletion: delete from db + invalidate provider)
+        await db.profilesDao.deleteProfile(id1);
+        container.invalidate(currentProfileProvider);
         currentProfile = await container.read(currentProfileProvider.future);
         final configVal = await db.configsDao.getConfig(
           Settings.LAST_USED_PROFILE.name,

@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -45,3 +46,13 @@ CircleAvatar getAvatar(
       ? Text(getInitials(profile.username))
       : null,
 );
+
+Color getRandomColor() {
+  final Random random = Random();
+  return HSVColor.fromAHSV(
+    1.0, // Alpha
+    random.nextDouble() * 360, // Hue (0.0 - 360.0)
+    0.6, // Saturation (Keep it vivid)
+    0.9, // Value/Brightness (Keep it bright)
+  ).toColor();
+}

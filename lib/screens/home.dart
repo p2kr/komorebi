@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/screens/appbar/appbar.dart';
-import 'package:komorebi/screens/navbar.dart';
+import 'package:komorebi/screens/nav_bar/navbar.dart';
 import 'package:komorebi/utils/init.dart';
 
 class HomePage extends ConsumerStatefulWidget {

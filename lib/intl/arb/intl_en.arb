@@ -29,5 +29,13 @@
   "profileUsernamevalueLinkedSuccessfully": "Profile {userName} linked successfully",
   "unableToLinkProfileUsernamevalue": "Unable to link profile {userName}",
   "profileLinkedSuccessfully": "Profile linked successfully",
-  "unableToLinkProfile": "Unable to link profile"
+  "unableToLinkProfile": "Unable to link profile",
+  "dashboard": "Dashboard",
+  "crawlers": "Crawlers",
+  "smartMatcher": "Smart Matcher",
+  "parserSources": "Parser Sources",
+  "selectedSandbox": "Selected Sandbox",
+  "collections": "Collections",
+  "browser": "Browser",
+  "selectLanguage": "Select Language"
 }

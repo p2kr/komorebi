@@ -5,6 +5,9 @@ import 'package:komorebi/themes/theme_builder.dart';
 extension ThemeContextExtension on BuildContext {
   TextTheme get textTheme => Theme.of(this).textTheme;
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
+
+  /// All theme configs
+  ThemeData get theme => Theme.of(this);
 }
 
 ////////////
