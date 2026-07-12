@@ -45,6 +45,7 @@ class DashboardAnimeNotifier extends _$DashboardAnimeNotifier {
         "num_episodes",
         "popularity",
         "alternative_titles",
+        "genres",
       ],
     );
   }

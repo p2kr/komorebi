@@ -35,11 +35,10 @@ void main() {
     test(
       'getMyUserInfo sends GET request to /users/@me with Authorization header',
       () async {
-        when(
-          () => mockAdapter.fetch(any(), any(), any()),
-        ).thenAnswer((invocation) async {
-          final options =
-              invocation.positionalArguments[0] as RequestOptions;
+        when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((
+          invocation,
+        ) async {
+          final options = invocation.positionalArguments[0] as RequestOptions;
           expect(options.method, 'GET');
           expect(options.path, '/users/@me');
           expect(options.headers['Authorization'], 'Bearer my_test_token');
@@ -74,11 +73,10 @@ void main() {
     test(
       'getUserAnimeList sends query parameters and client ID correctly',
       () async {
-        when(
-          () => mockAdapter.fetch(any(), any(), any()),
-        ).thenAnswer((invocation) async {
-          final options =
-              invocation.positionalArguments[0] as RequestOptions;
+        when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((
+          invocation,
+        ) async {
+          final options = invocation.positionalArguments[0] as RequestOptions;
           expect(options.method, 'GET');
           expect(options.path, '/users/prince/animelist');
           expect(options.headers['X-MAL-CLIENT-ID'], 'default_client_id');
@@ -123,11 +121,10 @@ void main() {
     test(
       'updateMyAnimeListStatus sends PATCH request with form-urlencoded body',
       () async {
-        when(
-          () => mockAdapter.fetch(any(), any(), any()),
-        ).thenAnswer((invocation) async {
-          final options =
-              invocation.positionalArguments[0] as RequestOptions;
+        when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((
+          invocation,
+        ) async {
+          final options = invocation.positionalArguments[0] as RequestOptions;
           expect(options.method, 'PATCH');
           expect(options.path, '/anime/5/my_list_status');
           expect(options.headers['Authorization'], 'Bearer auth_token');
@@ -171,9 +168,9 @@ void main() {
 
     test('deleteMyAnimeListStatus sends DELETE request', () async {
       bool deleteCalled = false;
-      when(
-        () => mockAdapter.fetch(any(), any(), any()),
-      ).thenAnswer((invocation) async {
+      when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((
+        invocation,
+      ) async {
         final options = invocation.positionalArguments[0] as RequestOptions;
         expect(options.method, 'DELETE');
         expect(options.path, '/anime/5/my_list_status');
@@ -196,9 +193,9 @@ void main() {
     test(
       'throws MalApiException with structured error on 401 Unauthorized',
       () async {
-        when(
-          () => mockAdapter.fetch(any(), any(), any()),
-        ).thenAnswer((_) async {
+        when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((
+          _,
+        ) async {
           return ResponseBody.fromString(
             jsonEncode({
               'error': 'invalid_token',
@@ -228,9 +225,7 @@ void main() {
     );
 
     test('throws MalApiException on 404 Not Found', () async {
-      when(
-        () => mockAdapter.fetch(any(), any(), any()),
-      ).thenAnswer((_) async {
+      when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((_) async {
         return ResponseBody.fromString(
           jsonEncode({'error': 'not_found', 'message': 'Anime not found'}),
           404,
@@ -251,9 +246,9 @@ void main() {
     });
 
     test('throws MalApiException on network/adapter exception', () async {
-      when(
-        () => mockAdapter.fetch(any(), any(), any()),
-      ).thenAnswer((invocation) async {
+      when(() => mockAdapter.fetch(any(), any(), any())).thenAnswer((
+        invocation,
+      ) async {
         final options = invocation.positionalArguments[0] as RequestOptions;
         throw DioException(
           requestOptions: options,

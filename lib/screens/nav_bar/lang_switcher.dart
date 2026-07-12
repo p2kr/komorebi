@@ -53,7 +53,9 @@ class LangSwitcher extends ConsumerWidget {
               height: 32,
               padding: const EdgeInsets.symmetric(horizontal: 10),
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color: colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.5,
+                ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: colorScheme.outline.withValues(alpha: 0.5),
@@ -97,60 +99,54 @@ class _LangPopoverContent extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children:
-            supportedLocales.map((locale) {
-              final isSelected =
-                  currentLocale.languageCode == locale.languageCode;
+        children: supportedLocales.map((locale) {
+          final isSelected = currentLocale.languageCode == locale.languageCode;
 
-              // Auto-fetch native language name from CLDR database
-              final nativeName =
-                  LocaleNamesLocalizationsDelegate.nativeLocaleNames[locale
-                      .languageCode] ??
-                  locale.languageCode.toUpperCase();
-              final label =
-                  nativeName.isNotEmpty
-                      ? '${nativeName[0].toUpperCase()}${nativeName.substring(1)}'
-                      : nativeName;
+          // Auto-fetch native language name from CLDR database
+          final nativeName =
+              LocaleNamesLocalizationsDelegate.nativeLocaleNames[locale
+                  .languageCode] ??
+              locale.languageCode.toUpperCase();
+          final label = nativeName.isNotEmpty
+              ? '${nativeName[0].toUpperCase()}${nativeName.substring(1)}'
+              : nativeName;
 
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(8),
-                  onTap: () {
-                    ref.read(localeProvider.notifier).update(locale);
-                    Navigator.of(context).pop();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration:
-                        isSelected
-                            ? BoxDecoration(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.primary.withValues(alpha: 0.15),
-                              borderRadius: BorderRadius.circular(8),
-                            )
-                            : null,
-                    child: Text(
-                      label,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight:
-                            isSelected ? FontWeight.bold : FontWeight.w500,
-                        fontSize: 14,
-                        color:
-                            isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).textTheme.bodyMedium?.color,
-                      ),
-                    ),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2.0),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(8),
+              onTap: () {
+                ref.read(localeProvider.notifier).update(locale);
+                Navigator.of(context).pop();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                decoration: isSelected
+                    ? BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                      )
+                    : null,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                    fontSize: 14,
+                    color: isSelected
+                        ? Theme.of(context).colorScheme.primary
+                        : Theme.of(context).textTheme.bodyMedium?.color,
                   ),
                 ),
-              );
-            }).toList(),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }

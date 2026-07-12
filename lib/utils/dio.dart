@@ -13,4 +13,3 @@ Dio getDioWithLogger([BaseOptions? options]) => Dio(options)
       ),
     ),
   );
-

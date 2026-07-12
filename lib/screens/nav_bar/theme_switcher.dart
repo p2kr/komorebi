@@ -29,7 +29,10 @@ class ThemeSwitcher extends ConsumerWidget {
           inactiveTrackColor: colorScheme.surfaceContainerHighest,
           thumbIcon: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.selected)) {
-              return Icon(Icons.light_mode_outlined, color: colorScheme.primary);
+              return Icon(
+                Icons.light_mode_outlined,
+                color: colorScheme.primary,
+              );
             }
             return Icon(
               Icons.dark_mode_outlined,
