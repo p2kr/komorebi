@@ -1,12 +1,15 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';
 import 'package:komorebi/utils/talker.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
+part 'profile_management_provider.g.dart';
+
+@Riverpod(keepAlive: true)
+class CurrentProfileNotifier extends _$CurrentProfileNotifier {
   @override
   Future<Profile?> build() async {
     ref.keepAlive();
@@ -63,14 +66,8 @@ class CurrentProfileNotifier extends AsyncNotifier<Profile?> {
   }
 }
 
-// PROVIDERS
-
-final currentProfileProvider =
-    AsyncNotifierProvider<CurrentProfileNotifier, Profile?>(
-      CurrentProfileNotifier.new,
-    );
-
-final allProfilesProvider = StreamProvider<List<Profile>>((ref) {
+@riverpod
+Stream<List<Profile>> allProfiles(Ref ref) {
   // ref.keepAlive();
 
   final db = ref.watch(dbProvider);
@@ -82,4 +79,4 @@ final allProfilesProvider = StreamProvider<List<Profile>>((ref) {
   }
 
   return db.profilesDao.getAllProfiles();
-});
+}

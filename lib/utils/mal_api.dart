@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:komorebi/models/env.dart';
 import 'package:komorebi/models/mal_models.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
@@ -42,8 +43,9 @@ class MalApi {
   final String? defaultAccessToken;
   final String? defaultClientId;
 
-  MalApi({Dio? dio, this.defaultAccessToken, this.defaultClientId})
-    : _dio = dio ?? getDioWithLogger(BaseOptions(baseUrl: baseUrl)) {
+  MalApi({Dio? dio, this.defaultAccessToken, String? defaultClientId})
+    : _dio = dio ?? getDioWithLogger(BaseOptions(baseUrl: baseUrl)),
+      defaultClientId = defaultClientId ?? Env.malClientId {
     _dio.options.baseUrl = baseUrl;
     _dio.options.headers[Headers.acceptHeader] = 'application/json';
   }
@@ -156,9 +158,9 @@ class MalApi {
   /// Get the anime list of a user.
   Future<MalPaginated<MalAnimeListItem>> getUserAnimeList({
     required String username,
-    String? status,
+    MalAnimeStatus? status,
     String? sort,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     String? accessToken,
@@ -168,7 +170,7 @@ class MalApi {
       'limit': limit.toString(),
       'offset': offset.toString(),
     };
-    if (status != null) query['status'] = status;
+    if (status != null) query['status'] = status.jsonValue;
     if (sort != null) query['sort'] = sort;
     if (fields != null && fields.isNotEmpty) {
       query['fields'] = fields.join(',');
@@ -190,9 +192,9 @@ class MalApi {
   /// Get the manga list of a user.
   Future<MalPaginated<MalMangaListItem>> getUserMangaList({
     required String username,
-    String? status,
+    MalMangaStatus? status,
     String? sort,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     String? accessToken,
@@ -202,7 +204,7 @@ class MalApi {
       'limit': limit.toString(),
       'offset': offset.toString(),
     };
-    if (status != null) query['status'] = status;
+    if (status != null) query['status'] = status.jsonValue;
     if (sort != null) query['sort'] = sort;
     if (fields != null && fields.isNotEmpty) {
       query['fields'] = fields.join(',');
@@ -228,7 +230,7 @@ class MalApi {
   /// Search anime by title query.
   Future<MalPaginated<MalAnimeListItem>> searchAnime({
     required String query,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     String? accessToken,
@@ -281,7 +283,7 @@ class MalApi {
   /// Get anime ranking lists (e.g. all, airing, upcoming, special).
   Future<MalPaginated<MalAnimeListItem>> getAnimeRanking({
     required String rankingType,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     String? accessToken,
@@ -311,7 +313,7 @@ class MalApi {
 
   /// Get suggested anime recommendations for the authenticated user.
   Future<MalPaginated<MalAnimeListItem>> getAnimeSuggestions({
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     required String accessToken,
@@ -340,7 +342,7 @@ class MalApi {
   Future<MalAnimeListStatus> updateMyAnimeListStatus({
     required int animeId,
     required String accessToken,
-    String? status,
+    MalAnimeStatus? status,
     bool? isRewatching,
     int? score,
     int? numWatchedEpisodes,
@@ -351,7 +353,7 @@ class MalApi {
     String? comments,
   }) async {
     final body = <String, String>{};
-    if (status != null) body['status'] = status;
+    if (status != null) body['status'] = status.jsonValue;
     if (isRewatching != null) body['is_rewatching'] = isRewatching.toString();
     if (score != null) body['score'] = score.toString();
     if (numWatchedEpisodes != null) {
@@ -393,7 +395,7 @@ class MalApi {
   /// Search manga by title query.
   Future<MalPaginated<MalMangaListItem>> searchManga({
     required String query,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     String? accessToken,
@@ -446,7 +448,7 @@ class MalApi {
   /// Get manga ranking lists (e.g. all, manga, novels, oneshots).
   Future<MalPaginated<MalMangaListItem>> getMangaRanking({
     required String rankingType,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     List<String>? fields,
     String? accessToken,
@@ -478,7 +480,7 @@ class MalApi {
   Future<MalMangaListStatus> updateMyMangaListStatus({
     required int mangaId,
     required String accessToken,
-    String? status,
+    MalMangaStatus? status,
     bool? isRereading,
     int? score,
     int? numVolumesRead,
@@ -490,7 +492,7 @@ class MalApi {
     String? comments,
   }) async {
     final body = <String, String>{};
-    if (status != null) body['status'] = status;
+    if (status != null) body['status'] = status.jsonValue;
     if (isRereading != null) body['is_rereading'] = isRereading.toString();
     if (score != null) body['score'] = score.toString();
     if (numVolumesRead != null) {
@@ -546,7 +548,11 @@ class MalApi {
     final map = asMap(res);
     final categories = map['categories'];
     if (categories is List) {
-      return categories.map((i) => MalForumCategory.fromJson(asMap(i).cast<String, dynamic>())).toList();
+      return categories
+          .map(
+            (i) => MalForumCategory.fromJson(asMap(i).cast<String, dynamic>()),
+          )
+          .toList();
     }
     return [];
   }
@@ -554,7 +560,7 @@ class MalApi {
   /// Get the detailed post listing for a specific forum discussion topic ID.
   Future<MalForumTopicDetail> getForumTopic({
     required int topicId,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     String? accessToken,
     String? clientId,
@@ -577,7 +583,7 @@ class MalApi {
   Future<MalForumTopicsResponse> getForumTopics({
     int? boardId,
     int? subboardId,
-    int limit = 100,
+    int limit = 10,
     int offset = 0,
     String? sort,
     String? query,

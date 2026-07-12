@@ -68,7 +68,7 @@ void main() {
       };
 
       final status = MalAnimeListStatus.fromJson(statusJson);
-      expect(status.status, 'watching');
+      expect(status.status, MalAnimeStatus.watching);
       expect(status.score, 8);
       expect(status.numEpisodesWatched, 5);
       expect(status.isRewatching, false);
@@ -151,7 +151,7 @@ void main() {
 
       expect(paginated.data.length, 2);
       expect(paginated.data[0].node.title, 'Naruto');
-      expect(paginated.data[0].listStatus?.status, 'completed');
+      expect(paginated.data[0].listStatus?.status, MalAnimeStatus.completed);
       expect(paginated.data[0].listStatus?.numEpisodesWatched, 220);
       expect(paginated.data[1].node.title, 'Bleach');
       expect(paginated.data[1].listStatus, isNull);

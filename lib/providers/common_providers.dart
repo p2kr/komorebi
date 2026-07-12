@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/services/database.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final dbProvider = Provider<AppDatabase>((ref) {
+part 'common_providers.g.dart';
+
+@Riverpod(keepAlive: true)
+AppDatabase db(Ref ref) {
   final db = AppDatabase();
   ref.onDispose(() {
     db.close();
   });
   return db;
-});
+}
 
-class ThemeModeNotifier extends Notifier<ThemeMode> {
+@Riverpod(keepAlive: true)
+class ThemeModeNotifier extends _$ThemeModeNotifier {
   @override
   ThemeMode build() {
     return ThemeMode.dark;
@@ -27,11 +31,8 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
   }
 }
 
-final themeModeProvider = NotifierProvider<ThemeModeNotifier, ThemeMode>(
-  ThemeModeNotifier.new,
-);
-
-class LocaleNotifier extends Notifier<Locale> {
+@Riverpod(keepAlive: true)
+class LocaleNotifier extends _$LocaleNotifier {
   @override
   Locale build() {
     final systemCode = Intl.defaultLocale?.split('_').first;
@@ -49,7 +50,3 @@ class LocaleNotifier extends Notifier<Locale> {
     state = locale;
   }
 }
-
-final localeProvider = NotifierProvider<LocaleNotifier, Locale>(
-  LocaleNotifier.new,
-);

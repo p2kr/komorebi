@@ -103,6 +103,8 @@ class ThemeBuilder {
         ? ThemeData.light()
         : ThemeData.dark();
 
+    final textTheme = _buildTextTheme(base.textTheme);
+
     final buttonShape = RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(buttonRadius),
     );
@@ -120,7 +122,7 @@ class ThemeBuilder {
       colorScheme: scheme,
       fontFamily: fontSans,
       scaffoldBackgroundColor: scheme.surface,
-      textTheme: _buildTextTheme(base.textTheme),
+      textTheme: textTheme,
 
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
@@ -143,6 +145,12 @@ class ThemeBuilder {
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(shape: buttonShape),
+      ),
+
+      chipTheme: ChipThemeData(
+        padding: .zero,
+        labelPadding: .symmetric(horizontal: 4),
+        // labelStyle: textTheme.labelSmall,
       ),
     );
   }

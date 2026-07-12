@@ -41,6 +41,14 @@ Map<String, Object?> asMap(Object? json) {
   return <String, Object?>{};
 }
 
+/// Extension to convert enum names to snake_case for JSON payloads.
+extension EnumSnakeCase on Enum {
+  String get jsonValue => name.replaceAllMapped(
+    RegExp(r'[A-Z]'),
+    (match) => '_${match.group(0)!.toLowerCase()}',
+  );
+}
+
 // =============================================================================
 // Common / Shared Models
 // =============================================================================
@@ -48,23 +56,19 @@ Map<String, Object?> asMap(Object? json) {
 /// Pagination offsets/links returned by list-based MyAnimeList endpoints.
 @freezed
 abstract class MalPaging with _$MalPaging {
-  const factory MalPaging({
-    String? previous,
-    String? next,
-  }) = _MalPaging;
+  const factory MalPaging({String? previous, String? next}) = _MalPaging;
 
-  factory MalPaging.fromJson(Map<String, dynamic> json) => _$MalPagingFromJson(json);
+  factory MalPaging.fromJson(Map<String, dynamic> json) =>
+      _$MalPagingFromJson(json);
 }
 
 /// Medium and large URL paths to a specific cover image or avatar graphic.
 @freezed
 abstract class MalPicture with _$MalPicture {
-  const factory MalPicture({
-    String? medium,
-    String? large,
-  }) = _MalPicture;
+  const factory MalPicture({String? medium, String? large}) = _MalPicture;
 
-  factory MalPicture.fromJson(Map<String, dynamic> json) => _$MalPictureFromJson(json);
+  factory MalPicture.fromJson(Map<String, dynamic> json) =>
+      _$MalPictureFromJson(json);
 }
 
 /// Alternative titles associated with an anime or manga resource (e.g. English, Japanese, Synonyms).
@@ -76,7 +80,8 @@ abstract class MalAlternativeTitles with _$MalAlternativeTitles {
     String? ja,
   }) = _MalAlternativeTitles;
 
-  factory MalAlternativeTitles.fromJson(Map<String, dynamic> json) => _$MalAlternativeTitlesFromJson(json);
+  factory MalAlternativeTitles.fromJson(Map<String, dynamic> json) =>
+      _$MalAlternativeTitlesFromJson(json);
 }
 
 /// Standardized entity representing a node with a unique ID and name string.
@@ -87,29 +92,28 @@ abstract class MalNamedNode with _$MalNamedNode {
     @Default('') String name,
   }) = _MalNamedNode;
 
-  factory MalNamedNode.fromJson(Map<String, dynamic> json) => _$MalNamedNodeFromJson(json);
+  factory MalNamedNode.fromJson(Map<String, dynamic> json) =>
+      _$MalNamedNodeFromJson(json);
 }
 
 /// Information about a manga author node and their contribution role.
 @freezed
 abstract class MalAuthor with _$MalAuthor {
-  const factory MalAuthor({
-    required MalNamedNode node,
-    String? role,
-  }) = _MalAuthor;
+  const factory MalAuthor({required MalNamedNode node, String? role}) =
+      _MalAuthor;
 
-  factory MalAuthor.fromJson(Map<String, dynamic> json) => _$MalAuthorFromJson(json);
+  factory MalAuthor.fromJson(Map<String, dynamic> json) =>
+      _$MalAuthorFromJson(json);
 }
 
 /// Broadcast schedule metadata detailing the day of the week and local start time.
 @freezed
 abstract class MalBroadcast with _$MalBroadcast {
-  const factory MalBroadcast({
-    String? dayOfTheWeek,
-    String? startTime,
-  }) = _MalBroadcast;
+  const factory MalBroadcast({String? dayOfTheWeek, String? startTime}) =
+      _MalBroadcast;
 
-  factory MalBroadcast.fromJson(Map<String, dynamic> json) => _$MalBroadcastFromJson(json);
+  factory MalBroadcast.fromJson(Map<String, dynamic> json) =>
+      _$MalBroadcastFromJson(json);
 }
 
 /// Release season indicators including calendar year and segment name (e.g. spring, fall).
@@ -120,7 +124,8 @@ abstract class MalSeason with _$MalSeason {
     String? season,
   }) = _MalSeason;
 
-  factory MalSeason.fromJson(Map<String, dynamic> json) => _$MalSeasonFromJson(json);
+  factory MalSeason.fromJson(Map<String, dynamic> json) =>
+      _$MalSeasonFromJson(json);
 }
 
 /// Ranking position data indicating the item position and previous ranking offsets.
@@ -131,7 +136,8 @@ abstract class MalRanking with _$MalRanking {
     @JsonKey(fromJson: _parseInt) int? previousRank,
   }) = _MalRanking;
 
-  factory MalRanking.fromJson(Map<String, dynamic> json) => _$MalRankingFromJson(json);
+  factory MalRanking.fromJson(Map<String, dynamic> json) =>
+      _$MalRankingFromJson(json);
 }
 
 // =============================================================================
@@ -153,18 +159,27 @@ abstract class MalUser with _$MalUser {
     @JsonKey(fromJson: _parseBool) bool? isSupporter,
   }) = _MalUser;
 
-  factory MalUser.fromJson(Map<String, dynamic> json) => _$MalUserFromJson(json);
+  factory MalUser.fromJson(Map<String, dynamic> json) =>
+      _$MalUserFromJson(json);
 }
 
 // =============================================================================
 // Library Status Models
 // =============================================================================
 
+/// Possible statuses for an anime entry in a user's library.
+@JsonEnum(fieldRename: FieldRename.snake)
+enum MalAnimeStatus { watching, completed, onHold, dropped, planToWatch }
+
+/// Possible statuses for a manga entry in a user's library.
+@JsonEnum(fieldRename: FieldRename.snake)
+enum MalMangaStatus { reading, completed, onHold, dropped, planToRead }
+
 /// Library metadata representing an anime entry inside the user's personal animelist.
 @freezed
 abstract class MalAnimeListStatus with _$MalAnimeListStatus {
   const factory MalAnimeListStatus({
-    String? status,
+    MalAnimeStatus? status,
     @JsonKey(fromJson: _parseIntRequired) required int score,
     @JsonKey(fromJson: _parseIntRequired) required int numEpisodesWatched,
     @JsonKey(fromJson: _parseBoolRequired) required bool isRewatching,
@@ -176,14 +191,15 @@ abstract class MalAnimeListStatus with _$MalAnimeListStatus {
     String? comments,
   }) = _MalAnimeListStatus;
 
-  factory MalAnimeListStatus.fromJson(Map<String, dynamic> json) => _$MalAnimeListStatusFromJson(json);
+  factory MalAnimeListStatus.fromJson(Map<String, dynamic> json) =>
+      _$MalAnimeListStatusFromJson(json);
 }
 
 /// Library metadata representing a manga entry inside the user's personal mangalist.
 @freezed
 abstract class MalMangaListStatus with _$MalMangaListStatus {
   const factory MalMangaListStatus({
-    String? status,
+    MalMangaStatus? status,
     @JsonKey(fromJson: _parseIntRequired) required int score,
     @JsonKey(fromJson: _parseIntRequired) required int numVolumesRead,
     @JsonKey(fromJson: _parseIntRequired) required int numChaptersRead,
@@ -196,7 +212,8 @@ abstract class MalMangaListStatus with _$MalMangaListStatus {
     String? comments,
   }) = _MalMangaListStatus;
 
-  factory MalMangaListStatus.fromJson(Map<String, dynamic> json) => _$MalMangaListStatusFromJson(json);
+  factory MalMangaListStatus.fromJson(Map<String, dynamic> json) =>
+      _$MalMangaListStatusFromJson(json);
 }
 
 // =============================================================================
@@ -240,7 +257,8 @@ abstract class MalAnimeNode with _$MalAnimeNode {
     @Default([]) List<MalNamedNode> studios,
   }) = _MalAnimeNode;
 
-  factory MalAnimeNode.fromJson(Map<String, dynamic> json) => _$MalAnimeNodeFromJson(json);
+  factory MalAnimeNode.fromJson(Map<String, dynamic> json) =>
+      _$MalAnimeNodeFromJson(json);
 }
 
 /// Anime list row item representation enclosing the base node and user's listing details.
@@ -254,7 +272,8 @@ abstract class MalAnimeListItem with _$MalAnimeListItem {
     MalRanking? ranking,
   }) = _MalAnimeListItem;
 
-  factory MalAnimeListItem.fromJson(Map<String, dynamic> json) => _$MalAnimeListItemFromJson(json);
+  factory MalAnimeListItem.fromJson(Map<String, dynamic> json) =>
+      _$MalAnimeListItemFromJson(json);
 
   factory MalAnimeListItem.fromMap(Map<String, Object?> map) =>
       MalAnimeListItem.fromJson(asMap(map).cast<String, dynamic>());
@@ -269,7 +288,8 @@ abstract class MalRelatedAnime with _$MalRelatedAnime {
     @Default('') String relationTypeFormatted,
   }) = _MalRelatedAnime;
 
-  factory MalRelatedAnime.fromJson(Map<String, dynamic> json) => _$MalRelatedAnimeFromJson(json);
+  factory MalRelatedAnime.fromJson(Map<String, dynamic> json) =>
+      _$MalRelatedAnimeFromJson(json);
 }
 
 /// Recommendation indicator linking a recommended anime to the target anime node.
@@ -280,7 +300,8 @@ abstract class MalAnimeRecommendation with _$MalAnimeRecommendation {
     @JsonKey(fromJson: _parseIntRequired) required int numRecommendations,
   }) = _MalAnimeRecommendation;
 
-  factory MalAnimeRecommendation.fromJson(Map<String, dynamic> json) => _$MalAnimeRecommendationFromJson(json);
+  factory MalAnimeRecommendation.fromJson(Map<String, dynamic> json) =>
+      _$MalAnimeRecommendationFromJson(json);
 }
 
 // =============================================================================
@@ -321,7 +342,8 @@ abstract class MalMangaNode with _$MalMangaNode {
     @Default([]) List<MalNamedNode> serialization,
   }) = _MalMangaNode;
 
-  factory MalMangaNode.fromJson(Map<String, dynamic> json) => _$MalMangaNodeFromJson(json);
+  factory MalMangaNode.fromJson(Map<String, dynamic> json) =>
+      _$MalMangaNodeFromJson(json);
 }
 
 /// Manga list row item representation enclosing the base node and user's listing details.
@@ -335,7 +357,8 @@ abstract class MalMangaListItem with _$MalMangaListItem {
     MalRanking? ranking,
   }) = _MalMangaListItem;
 
-  factory MalMangaListItem.fromJson(Map<String, dynamic> json) => _$MalMangaListItemFromJson(json);
+  factory MalMangaListItem.fromJson(Map<String, dynamic> json) =>
+      _$MalMangaListItemFromJson(json);
 
   factory MalMangaListItem.fromMap(Map<String, Object?> map) =>
       MalMangaListItem.fromJson(asMap(map).cast<String, dynamic>());
@@ -350,7 +373,8 @@ abstract class MalRelatedManga with _$MalRelatedManga {
     @Default('') String relationTypeFormatted,
   }) = _MalRelatedManga;
 
-  factory MalRelatedManga.fromJson(Map<String, dynamic> json) => _$MalRelatedMangaFromJson(json);
+  factory MalRelatedManga.fromJson(Map<String, dynamic> json) =>
+      _$MalRelatedMangaFromJson(json);
 }
 
 /// Recommendation indicator linking a recommended manga to the target manga node.
@@ -361,7 +385,8 @@ abstract class MalMangaRecommendation with _$MalMangaRecommendation {
     @JsonKey(fromJson: _parseIntRequired) required int numRecommendations,
   }) = _MalMangaRecommendation;
 
-  factory MalMangaRecommendation.fromJson(Map<String, dynamic> json) => _$MalMangaRecommendationFromJson(json);
+  factory MalMangaRecommendation.fromJson(Map<String, dynamic> json) =>
+      _$MalMangaRecommendationFromJson(json);
 }
 
 // =============================================================================
@@ -373,13 +398,13 @@ abstract class MalMangaRecommendation with _$MalMangaRecommendation {
 abstract class MalPaginated<T> with _$MalPaginated<T> {
   const MalPaginated._();
 
-  const factory MalPaginated({
-    required List<T> data,
-    MalPaging? paging,
-  }) = _MalPaginated<T>;
+  const factory MalPaginated({required List<T> data, MalPaging? paging}) =
+      _MalPaginated<T>;
 
-  factory MalPaginated.fromJson(Map<String, dynamic> json, T Function(Object?) fromJsonT) =>
-      _$MalPaginatedFromJson(json, fromJsonT);
+  factory MalPaginated.fromJson(
+    Map<String, dynamic> json,
+    T Function(Object?) fromJsonT,
+  ) => _$MalPaginatedFromJson(json, fromJsonT);
 
   factory MalPaginated.fromMap(
     Map<String, Object?> map,
@@ -395,7 +420,9 @@ abstract class MalPaginated<T> with _$MalPaginated<T> {
     final rawPaging = map['paging'];
     return MalPaginated<T>(
       data: dataList,
-      paging: rawPaging != null ? MalPaging.fromJson(asMap(rawPaging).cast<String, dynamic>()) : null,
+      paging: rawPaging != null
+          ? MalPaging.fromJson(asMap(rawPaging).cast<String, dynamic>())
+          : null,
     );
   }
 }
@@ -412,7 +439,8 @@ abstract class MalForumSubboard with _$MalForumSubboard {
     @Default('') String title,
   }) = _MalForumSubboard;
 
-  factory MalForumSubboard.fromJson(Map<String, dynamic> json) => _$MalForumSubboardFromJson(json);
+  factory MalForumSubboard.fromJson(Map<String, dynamic> json) =>
+      _$MalForumSubboardFromJson(json);
 }
 
 /// Forum board details including subboards and text descriptions.
@@ -425,7 +453,8 @@ abstract class MalForumBoard with _$MalForumBoard {
     @Default([]) List<MalForumSubboard> subboards,
   }) = _MalForumBoard;
 
-  factory MalForumBoard.fromJson(Map<String, dynamic> json) => _$MalForumBoardFromJson(json);
+  factory MalForumBoard.fromJson(Map<String, dynamic> json) =>
+      _$MalForumBoardFromJson(json);
 }
 
 /// Forum category collection mapping lists of available boards.
@@ -436,7 +465,8 @@ abstract class MalForumCategory with _$MalForumCategory {
     @Default([]) List<MalForumBoard> boards,
   }) = _MalForumCategory;
 
-  factory MalForumCategory.fromJson(Map<String, dynamic> json) => _$MalForumCategoryFromJson(json);
+  factory MalForumCategory.fromJson(Map<String, dynamic> json) =>
+      _$MalForumCategoryFromJson(json);
 }
 
 /// Public profile details summary representing the creator of a forum post.
@@ -448,7 +478,8 @@ abstract class MalForumPostCreator with _$MalForumPostCreator {
     String? avatarUrl,
   }) = _MalForumPostCreator;
 
-  factory MalForumPostCreator.fromJson(Map<String, dynamic> json) => _$MalForumPostCreatorFromJson(json);
+  factory MalForumPostCreator.fromJson(Map<String, dynamic> json) =>
+      _$MalForumPostCreatorFromJson(json);
 }
 
 /// Individual reply post element containing content text, numbering, and timestamps.
@@ -463,7 +494,8 @@ abstract class MalForumPost with _$MalForumPost {
     String? signature,
   }) = _MalForumPost;
 
-  factory MalForumPost.fromJson(Map<String, dynamic> json) => _$MalForumPostFromJson(json);
+  factory MalForumPost.fromJson(Map<String, dynamic> json) =>
+      _$MalForumPostFromJson(json);
 }
 
 /// Complete discussion topic details structure enclosing title headers and paginated posts.
@@ -479,12 +511,19 @@ abstract class MalForumTopicDetail with _$MalForumTopicDetail {
 
   factory MalForumTopicDetail.fromJson(Map<String, dynamic> json) {
     final dataMap = asMap(json['data']);
-    final title = dataMap['title']?.toString() ?? json['title']?.toString() ?? '';
+    final title =
+        dataMap['title']?.toString() ?? json['title']?.toString() ?? '';
     final rawPosts = dataMap['posts'] ?? json['posts'];
     final postsList = rawPosts is List
-        ? rawPosts.map((i) => MalForumPost.fromJson(asMap(i).cast<String, dynamic>())).toList()
+        ? rawPosts
+              .map(
+                (i) => MalForumPost.fromJson(asMap(i).cast<String, dynamic>()),
+              )
+              .toList()
         : <MalForumPost>[];
-    final pagingVal = json['paging'] != null ? MalPaging.fromJson(asMap(json['paging']).cast<String, dynamic>()) : null;
+    final pagingVal = json['paging'] != null
+        ? MalPaging.fromJson(asMap(json['paging']).cast<String, dynamic>())
+        : null;
     return MalForumTopicDetail(
       title: title,
       posts: postsList,
@@ -507,7 +546,8 @@ abstract class MalForumTopic with _$MalForumTopic {
     @JsonKey(fromJson: _parseBoolRequired) required bool isLocked,
   }) = _MalForumTopic;
 
-  factory MalForumTopic.fromJson(Map<String, dynamic> json) => _$MalForumTopicFromJson(json);
+  factory MalForumTopic.fromJson(Map<String, dynamic> json) =>
+      _$MalForumTopicFromJson(json);
 }
 
 /// Paginated collection response representing a set of query matching discussion topics.
@@ -518,5 +558,6 @@ abstract class MalForumTopicsResponse with _$MalForumTopicsResponse {
     MalPaging? paging,
   }) = _MalForumTopicsResponse;
 
-  factory MalForumTopicsResponse.fromJson(Map<String, dynamic> json) => _$MalForumTopicsResponseFromJson(json);
+  factory MalForumTopicsResponse.fromJson(Map<String, dynamic> json) =>
+      _$MalForumTopicsResponseFromJson(json);
 }

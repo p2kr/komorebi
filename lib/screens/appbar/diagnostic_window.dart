@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/talker.dart';
+import 'package:komorebi/widgets/chips.dart';
 import 'package:talker/talker.dart';
 
 class DiagnosticWindow extends HookWidget {
@@ -162,33 +163,16 @@ Widget _diagnosticLogMsgTile(
           ),
 
           // Log level
-          Container(
-            padding: .symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(2),
-            ),
-            child: Text(
-              data.logLevel!.name.toUpperCase(),
-              style: context.textTheme.labelSmall?.copyWith(
-                color: data.getFlutterColor(),
-                fontWeight: .bold,
-              ),
+          SimpleChip(
+            label: data.logLevel!.name.toUpperCase(),
+            labelStyle: context.textTheme.labelSmall?.copyWith(
+              color: data.getFlutterColor(),
+              fontWeight: .bold,
             ),
           ),
 
           // category chip
-          Container(
-            padding: .symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              border: Border.all(color: Theme.of(context).dividerColor),
-              borderRadius: BorderRadius.circular(2),
-            ),
-            child: Text(
-              getCategoryName(data),
-              style: context.textTheme.labelSmall,
-            ),
-          ),
+          SimpleChip(label: getCategoryName(data)),
         ],
       ),
       subtitle: Text(

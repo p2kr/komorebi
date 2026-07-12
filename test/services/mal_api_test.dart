@@ -1,9 +1,10 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/utils/mal_api.dart';
+import 'package:komorebi/models/mal_models.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}
@@ -109,7 +110,7 @@ void main() {
 
         final list = await api.getUserAnimeList(
           username: 'prince',
-          status: 'watching',
+          status: MalAnimeStatus.watching,
           limit: 50,
         );
 
@@ -156,13 +157,13 @@ void main() {
         final status = await api.updateMyAnimeListStatus(
           animeId: 5,
           accessToken: 'auth_token',
-          status: 'completed',
+          status: MalAnimeStatus.completed,
           score: 9,
           numWatchedEpisodes: 12,
           isRewatching: false,
         );
 
-        expect(status.status, 'completed');
+        expect(status.status, MalAnimeStatus.completed);
         expect(status.score, 9);
         expect(status.numEpisodesWatched, 12);
       },
