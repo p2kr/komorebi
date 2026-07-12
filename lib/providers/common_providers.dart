@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/services/database.dart';
+import 'package:komorebi/themes/theme.dart';
+import 'package:komorebi/themes/theme_builder.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'common_providers.g.dart';
@@ -48,5 +50,21 @@ class LocaleNotifier extends _$LocaleNotifier {
 
   void update(Locale locale) {
     state = locale;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class ThemeNotifier extends _$ThemeNotifier {
+  @override
+  ThemeBuilder build() {
+    return defaultMonochromeTheme;
+  }
+
+  void updateTheme(ThemeBuilder newTheme) {
+    state = newTheme;
+  }
+
+  void resetTheme() {
+    state = defaultMonochromeTheme;
   }
 }

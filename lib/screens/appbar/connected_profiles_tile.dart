@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/models/profiles_table.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/handle_delete.dart';
@@ -62,7 +63,7 @@ void onDeleteProfile(BuildContext context, WidgetRef ref, Profile profile) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: Text("DELETE @${profile.username} ?"),
+      title: Text(S.of(context).deleteProfileConfirm(profile.username)),
       actions: [
         ElevatedButton(
           onPressed: () async {
@@ -70,11 +71,11 @@ void onDeleteProfile(BuildContext context, WidgetRef ref, Profile profile) {
             if (!context.mounted) return;
             Navigator.pop(context);
           },
-          child: Text("YES"),
+          child: Text(S.of(context).yes.toUpperCase()),
         ),
         OutlinedButton(
           onPressed: () => Navigator.pop(context),
-          child: Text("NO"),
+          child: Text(S.of(context).no.toUpperCase()),
         ),
       ],
     ),

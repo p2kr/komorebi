@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/widgets/chips.dart';
 import 'package:overflow_view/overflow_view.dart';
@@ -47,22 +49,44 @@ class OverflowingGenreList extends StatelessWidget {
   }
 }
 
-class OverflowingStatisticsList extends StatelessWidget {
+class OverflowingStatisticsList extends ConsumerWidget {
   const OverflowingStatisticsList({super.key, required this.statistics});
 
   final List<SimpleChip> statistics;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentTheme = ref.watch(themeProvider);
+
     return OverflowView.flexible(
       spacing: 2,
       children: statistics,
       builder: (context, remainingCount) {
+        final theme = (context.theme.brightness == Brightness.dark
+            ? currentTheme.lightTheme
+            : currentTheme.darkTheme);
+
         return Tooltip(
-          message: statistics
-              .skip(statistics.length - remainingCount)
-              .map((chip) => chip.label)
-              .join('\n'),
+          richMessage: WidgetSpan(
+            // invert theme, since tooltip is white in dark mode and black in light mode.
+            child: Theme(
+              data: theme.copyWith(
+                textTheme: theme.textTheme.apply(
+                  bodyColor: theme.colorScheme.primary,
+                ),
+              ),
+              child: Column(
+                children: [
+                  for (
+                    int i = statistics.length - remainingCount;
+                    i < statistics.length;
+                    i++
+                  )
+                    statistics[i],
+                ],
+              ),
+            ),
+          ),
           child: SimpleChip(label: "+$remainingCount"),
         );
       },

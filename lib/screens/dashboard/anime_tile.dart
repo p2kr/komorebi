@@ -1,7 +1,9 @@
 import 'dart:math';
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/models/mal_models.dart';
 import 'package:komorebi/screens/dashboard/overflowing_list.dart';
 import 'package:komorebi/screens/dashboard/synopsis_widget.dart';
@@ -26,6 +28,7 @@ class AnimeTile extends StatelessWidget {
     final contentRating = animeItem.node.rating?.toUpperCase();
     final alternateTitle = animeItem.node.alternativeTitles;
     final genres = animeItem.node.genres;
+    final nextEpisode = getNextEpisodeNumber(episodesWatched, totalEpisodes);
 
     return Card(
       // elevation: 2,
@@ -118,7 +121,7 @@ class AnimeTile extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("PROGRESS"),
+                              Text(S.of(context).progress),
                               Text(
                                 "${episodesWatched ?? "?"} / ${totalEpisodes ?? "?"}",
                               ),
@@ -148,19 +151,33 @@ class AnimeTile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(4.0),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              spacing: 4,
               children: [
-                FilledButton.icon(
-                  icon: Icon(Icons.download_sharp),
-                  onPressed: () {},
-                  label: Text(
-                    "Get Episode ${getNextEpisodeNumber(episodesWatched, totalEpisodes)}",
+                Expanded(
+                  child: FilledButton.icon(
+                    icon: Icon(Icons.download_sharp),
+                    onPressed: () {
+                      // TODO: Download the episode.
+                    },
+                    label: AutoSizeText(
+                      S.of(context).getEpisode(nextEpisode),
+                      maxLines: 1,
+                      overflowReplacement: AutoSizeText(S.of(context).epShort(nextEpisode)),
+                    ),
                   ),
                 ),
-                OutlinedButton.icon(
-                  icon: Icon(Icons.manage_search_outlined),
-                  onPressed: () {},
-                  label: Text("Crawler Options"),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    icon: Icon(Icons.manage_search_outlined),
+                    onPressed: () {
+                      // TODO: Navigate to Smart Matcher
+                    },
+                    label: AutoSizeText(
+                      S.of(context).crawlerOptions,
+                      maxLines: 1,
+                      overflowReplacement: AutoSizeText(S.of(context).options),
+                    ),
+                  ),
                 ),
               ],
             ),

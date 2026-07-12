@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/screens/dashboard/synopsis_widget.dart';
 
 void main() {
   Widget buildTestableWidget(Widget child, {double height = 100.0}) {
     return MaterialApp(
+      localizationsDelegates: const [
+        S.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: S.delegate.supportedLocales,
       theme: ThemeData(
         textTheme: const TextTheme(
           bodySmall: TextStyle(fontSize: 12.0, color: Colors.grey),

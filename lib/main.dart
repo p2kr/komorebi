@@ -38,6 +38,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(themeModeProvider);
     final locale = ref.watch(localeProvider);
+    final theme = ref.watch(themeProvider);
 
     return MaterialApp(
       locale: locale,
@@ -52,8 +53,8 @@ class MyApp extends ConsumerWidget {
       ],
       supportedLocales: S.delegate.supportedLocales,
       title: APP_NAME,
-      theme: defaultMonochromeTheme.lightTheme,
-      darkTheme: defaultMonochromeTheme.darkTheme,
+      theme: theme.lightTheme,
+      darkTheme: theme.darkTheme,
       home: const HomePage(),
     );
   }

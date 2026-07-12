@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:app_links/app_links.dart';
 import 'package:drift/drift.dart';
@@ -161,10 +162,14 @@ Future<void> setupAppWindow() async {
     } catch (e, t) {
       talker.warning("Failed to register custom protocol schemes: ", e, t);
     }
-    WindowOptions windowOptions = WindowOptions(center: true);
+    WindowOptions windowOptions = const WindowOptions(
+      center: true,
+      minimumSize: Size(800, 600),
+    );
 
     await windowManager.waitUntilReadyToShow(windowOptions);
     await windowManager.show();
+    await windowManager.center(animate: true);
     await windowManager.focus();
     await windowManager.maximize(); //TODO: Make it configurable
   }

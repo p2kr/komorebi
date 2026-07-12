@@ -5,11 +5,5 @@ import 'package:talker_dio_logger/talker_dio_logger_settings.dart';
 
 Dio getDioWithLogger([BaseOptions? options]) => Dio(options)
   ..interceptors.add(
-    TalkerDioLogger(
-      talker: talker,
-      settings: const TalkerDioLoggerSettings(
-        printRequestHeaders: true,
-        printResponseHeaders: true,
-      ),
-    ),
+    TalkerDioLogger(talker: talker, settings: const TalkerDioLoggerSettings()),
   );

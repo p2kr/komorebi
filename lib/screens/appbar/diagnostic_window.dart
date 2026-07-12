@@ -230,6 +230,15 @@ void _onClose(BuildContext context) {
 
 enum _DropdownType { LEVEL, CATEGORY }
 
+String _getDropdownLabel(BuildContext context, _DropdownType type) {
+  switch (type) {
+    case _DropdownType.LEVEL:
+      return S.of(context).level;
+    case _DropdownType.CATEGORY:
+      return S.of(context).category;
+  }
+}
+
 DropdownMenu<String> _getDropdown(
   BuildContext context,
   _DropdownType type,
@@ -250,7 +259,7 @@ DropdownMenu<String> _getDropdown(
   return DropdownMenu(
     initialSelection: menus.firstOrNull,
     textStyle: context.textTheme.bodySmall,
-    label: Text(type.name, style: context.textTheme.bodySmall),
+    label: Text(_getDropdownLabel(context, type), style: context.textTheme.bodySmall),
     dropdownMenuEntries: menuEntries,
     menuStyle: MenuStyle(padding: WidgetStateProperty.all(EdgeInsets.zero)),
     inputDecorationTheme: const InputDecorationTheme(

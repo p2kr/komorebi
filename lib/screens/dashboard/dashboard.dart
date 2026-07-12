@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/models/mal_models.dart';
 import 'package:komorebi/providers/dashboard_providers.dart';
 import 'package:komorebi/screens/dashboard/anime_tile.dart';
@@ -12,6 +13,10 @@ class Dashboard extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = S.of(context);
+
+    final statusMap = useMemoized(() => _getStatusMap(s), [s]);
+
     final animeOrManga = useState(MediaType.anime);
 
     // Make the state nullable so `null` can represent "All"
@@ -34,13 +39,14 @@ class Dashboard extends HookConsumerWidget {
             spacing: 8,
             children: [
               DropdownMenu(
+                selectOnly: true,
                 initialSelection: animeOrManga.value,
-                label: const Text("Media type"),
-                dropdownMenuEntries: const [
-                  DropdownMenuEntry(value: MediaType.anime, label: "Anime"),
+                label: Text(s.mediaType),
+                dropdownMenuEntries: [
+                  DropdownMenuEntry(value: MediaType.anime, label: s.anime),
                   DropdownMenuEntry(
                     value: MediaType.manga,
-                    label: "Manga",
+                    label: s.manga,
                     enabled: false,
                     trailingIcon: Icon(Icons.construction_outlined),
                   ),
@@ -56,8 +62,9 @@ class Dashboard extends HookConsumerWidget {
               animeOrManga.value == MediaType.anime
                   // Type the DropdownMenu as nullable
                   ? DropdownMenu<MalAnimeStatus?>(
+                      selectOnly: true,
                       initialSelection: animeStatus.value,
-                      label: const Text("Anime Status"),
+                      label: Text(s.animeStatus),
                       dropdownMenuEntries: [
                         // Inject the "All" entry at the top with a null value
                         DropdownMenuEntry(
@@ -78,7 +85,7 @@ class Dashboard extends HookConsumerWidget {
                     // Manga Status
                     DropdownMenu<MalMangaStatus?>(
                       initialSelection: mangaStatus.value,
-                      label: const Text("Manga Status"),
+                      label: Text(s.mangaStatus),
                       dropdownMenuEntries: [
                         DropdownMenuEntry(
                           value: null,
@@ -123,7 +130,7 @@ class Dashboard extends HookConsumerWidget {
                       dashboardAnimeProvider(status: animeStatus.value),
                     );
                   },
-                  label: Text("Error: $e. [Click to Refresh]"),
+                  label: Text(S.of(context).errorClickToRefresh(e.toString())),
                 ),
               ),
               loading: () => Center(child: CircularProgressIndicator()),
@@ -135,13 +142,13 @@ class Dashboard extends HookConsumerWidget {
   }
 }
 
-const statusMap = {
-  "all": "All",
-  "watching": "Watching",
-  "completed": "Completed",
-  "onHold": "On Hold",
-  "dropped": "Dropped",
-  "planToWatch": "Plan to Watch",
-  "reading": "Reading",
-  "planToRead": "Plan to Read",
+Map<String, String> _getStatusMap(S s) => {
+  "all": s.all,
+  "watching": s.watching,
+  "completed": s.completed,
+  "onHold": s.onHold,
+  "dropped": s.dropped,
+  "planToWatch": s.planToWatch,
+  "reading": s.reading,
+  "planToRead": s.planToRead,
 };

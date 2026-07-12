@@ -1,24 +1,26 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/themes/theme.dart';
 
 class SynopsisWidget extends HookWidget {
   final String? text;
   final TextStyle? textStyle;
   final TextStyle? linkStyle;
-  final String showMoreText;
+  final String? showMoreText;
 
   const SynopsisWidget({
     super.key,
     required this.text,
     this.textStyle,
     this.linkStyle,
-    this.showMoreText = "Show More",
+    this.showMoreText,
   });
 
   @override
   Widget build(BuildContext context) {
+    final resolvedShowMoreText = showMoreText ?? S.of(context).showMore;
     final synopsisText = text ?? "";
     final tapRecognizer = useMemoized(() => TapGestureRecognizer());
 
@@ -30,7 +32,7 @@ class SynopsisWidget extends HookWidget {
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Synopsis"),
+              Text(S.of(context).synopsis),
               IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: const Icon(Icons.close),
@@ -62,7 +64,7 @@ class SynopsisWidget extends HookWidget {
           padding: const EdgeInsets.symmetric(horizontal: 8.0),
           child: Center(
             child: Text(
-              "[NO SYNOPSIS AVAILABLE]",
+              S.of(context).noSynopsisAvailable,
               textAlign: TextAlign.center,
               style: resolvedTextStyle,
             ),
@@ -82,7 +84,7 @@ class SynopsisWidget extends HookWidget {
               maxHeight: constraints.maxHeight,
               textStyle: resolvedTextStyle,
               linkStyle: resolvedLinkStyle,
-              showMoreText: showMoreText,
+              showMoreText: resolvedShowMoreText,
               tapRecognizer: tapRecognizer,
             );
           },
