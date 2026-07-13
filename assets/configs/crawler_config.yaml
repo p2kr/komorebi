@@ -1,0 +1,30 @@
+# Komorebi Crawler Site Configurations
+# This file contains the default scraper profiles used by the parallel web crawler.
+
+# Configs:
+# {title} - title of anime/manga
+# {number} - episode/chapter of anime/manga
+
+animerss:
+  name: "AnimeRSS Feed Tracker"
+  baseUrl: "https://feed.animerss.org/updates?q={title}+ep+{number}"
+  itemSelector: "item, entry"
+  titleSelector: "title"
+  linkSelector: "link"
+  isActive: true
+
+nyaa:
+  name: "Nyaa.si Anime Torrents"
+  baseUrl: "https://nyaa.si/?f=0&c=1_2&q={title}+ep+{number}"
+  itemSelector: "tr.success, tr.default"
+  titleSelector: "td[colspan!='2'] a:not([class])"
+  linkSelector: "td.text-center a[href^='magnet:']"
+  isActive: true
+
+gogoanime:
+  name: "GogoAnime Tracker Portal"
+  baseUrl: "https://gogoanime.org/search?q={title}+ep+{number}"
+  itemSelector: "ul.items li"
+  titleSelector: "p.name a"
+  linkSelector: "p.name a"
+  isActive: false

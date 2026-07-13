@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/screens/home.dart';
-import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/constants.dart';
 import 'package:komorebi/utils/init.dart';
 import 'package:komorebi/utils/talker.dart';

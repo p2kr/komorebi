@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart' as drift;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/models/profiles_table.dart';
+import 'package:komorebi/models/db/profiles_table.dart';
 import 'package:komorebi/services/database.dart';
 
 void main() {

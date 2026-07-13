@@ -259,7 +259,10 @@ DropdownMenu<String> _getDropdown(
   return DropdownMenu(
     initialSelection: menus.firstOrNull,
     textStyle: context.textTheme.bodySmall,
-    label: Text(_getDropdownLabel(context, type), style: context.textTheme.bodySmall),
+    label: Text(
+      _getDropdownLabel(context, type),
+      style: context.textTheme.bodySmall,
+    ),
     dropdownMenuEntries: menuEntries,
     menuStyle: MenuStyle(padding: WidgetStateProperty.all(EdgeInsets.zero)),
     inputDecorationTheme: const InputDecorationTheme(

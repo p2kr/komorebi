@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:komorebi/utils/utils.dart';
 
-class SmartMatcherScreen extends StatelessWidget {
-  const SmartMatcherScreen({super.key});
+class Discover extends StatelessWidget {
+  const Discover({super.key});
 
   @override
   Widget build(BuildContext context) {

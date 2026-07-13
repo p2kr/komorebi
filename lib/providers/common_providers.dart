@@ -4,6 +4,7 @@ import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/themes/theme_builder.dart';
+import 'package:komorebi/utils/constants.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'common_providers.g.dart';
@@ -66,5 +67,27 @@ class ThemeNotifier extends _$ThemeNotifier {
 
   void resetTheme() {
     state = defaultMonochromeTheme;
+  }
+}
+
+@Riverpod(keepAlive: true)
+class SwapAlternateTitleNotifier extends _$SwapAlternateTitleNotifier {
+  @override
+  bool build() {
+    return false;
+  }
+
+  Future<void> load() async {
+    final database = ref.read(dbProvider);
+    final config = await database.configsDao.getConfig(Settings.SWAP_ALTERNATE_TITLE.name);
+    if (config != null) {
+      state = config.configValue == 'true';
+    }
+  }
+
+  void toggle() {
+    state = !state;
+    final database = ref.read(dbProvider);
+    database.configsDao.setConfig(Settings.SWAP_ALTERNATE_TITLE.name, state.toString());
   }
 }

@@ -1,4 +1,3 @@
-import 'package:animated_tree_view/animated_tree_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -6,15 +5,15 @@ import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/screens/browser_mode/browser.dart';
 import 'package:komorebi/screens/crawlers/parser_sources.dart';
 import 'package:komorebi/screens/crawlers/selected_sandbox.dart';
-import 'package:komorebi/screens/crawlers/smart_matcher.dart';
-import 'package:komorebi/screens/local_collection/collections.dart';
+import 'package:komorebi/screens/crawlers/smart_matcher/smart_matcher.dart';
 import 'package:komorebi/screens/dashboard/dashboard.dart';
+import 'package:komorebi/screens/discover/discover.dart';
+import 'package:komorebi/screens/local_collection/collections.dart';
 import 'package:komorebi/screens/nav_bar/lang_switcher.dart';
+import 'package:komorebi/screens/nav_bar/settings_button.dart';
 import 'package:komorebi/screens/nav_bar/theme_switcher.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/talker.dart';
-
-typedef _Node = TreeNode<MenuItem>;
 
 // ── Main Navigation Bar Widget ───────────────────────────────────────────────
 
@@ -23,53 +22,28 @@ class NavBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeScreen = useState(NavScreen.dashboard);
-    final oldTreeRef = useRef<_Node?>(null);
+    final activeScreen = useState(NavItem.dashboard);
 
-    // Rebuild tree only when locale changes.
-    final tree = useMemoized(() {
-      final newTree = _buildTree(context, oldTreeRef.value);
-      oldTreeRef.value = newTree;
-      return newTree;
-    }, [Localizations.localeOf(context)]);
+    final menuTree = useMemoized(
+      () => NavItem.roots
+          .map((item) => _buildMenuItem(context, item, activeScreen))
+          .toList(),
+      [
+        Localizations.localeOf(context),
+        activeScreen.value,
+        // will change on dark/light switch
+        context.colorScheme.secondaryContainer,
+      ],
+      // [context],
+    );
 
     return Row(
       children: [
         Drawer(
-          width: 200,
+          width: 200, // TODO: Needs tweaking.
           child: Column(
             children: [
-              Expanded(
-                child: TreeView.simpleTyped<MenuItem, _Node>(
-                  showRootNode: false,
-                  tree: tree,
-                  builder: (context, node) {
-                    final item = node.data!;
-
-                    final isSelected =
-                        item.screen != null &&
-                        item.screen == activeScreen.value;
-
-                    return ListTile(
-                      leading: Icon(item.icon),
-                      title: Text(item.title),
-                      selected: isSelected,
-                      titleTextStyle: isSelected
-                          ? context.textTheme.titleMedium?.copyWith(
-                              fontWeight: .bold,
-                            )
-                          : null,
-                      // selectedTileColor: Colors.blue,// todo: not working
-                    );
-                  },
-                  onItemTap: (node) {
-                    final screen = node.data!.screen;
-                    if (screen == null) return; // expand-only parent
-                    activeScreen.value = screen;
-                    talker.debug('Nav → $screen');
-                  },
-                ),
-              ),
+              Expanded(child: ListView(children: menuTree)),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12.0,
@@ -78,7 +52,11 @@ class NavBar extends HookConsumerWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   crossAxisAlignment: CrossAxisAlignment.center,
-                  children: const [ThemeSwitcher(), LangSwitcher()],
+                  children: const [
+                    ThemeSwitcher(),
+                    SettingsButton(),
+                    LangSwitcher(),
+                  ],
                 ),
               ),
             ],
@@ -88,8 +66,8 @@ class NavBar extends HookConsumerWidget {
         // IndexedStack keeps every screen alive — state is never lost on switch.
         Expanded(
           child: IndexedStack(
-            index: activeScreen.value.index,
-            children: [for (final screen in NavScreen.values) screen.widget],
+            index: NavItem.screens.indexOf(activeScreen.value),
+            children: [for (final screen in NavItem.screens) screen.widget!],
           ),
         ),
       ],
@@ -97,116 +75,77 @@ class NavBar extends HookConsumerWidget {
   }
 }
 
-// ── Screen registry ──────────────────────────────────────────────────────────
-// Declaration order == IndexedStack index (via .index). Add new screens here.
-
-enum NavScreen {
-  dashboard(Dashboard()),
-  smartMatcher(SmartMatcherScreen()),
-  parserSources(ParserSourcesScreen()),
-  selectedSandbox(SelectedSandboxScreen()),
-  collections(Collections()),
-  browser(Browser());
-
-  const NavScreen(this.widget);
-  final Widget widget;
-}
-
 // ── Menu Data Model ──────────────────────────────────────────────────────────
 
-class MenuItem {
-  const MenuItem({
-    required this.title,
-    required this.icon,
-    this.screen, // null = expand-only parent node
-    this.children = const [],
-  });
+enum NavItem {
+  dashboard(Icons.space_dashboard_outlined, Dashboard()),
+  discover(Icons.whatshot_rounded, Discover()),
+  crawlers(Icons.smart_toy_outlined, null),
+  smartMatcher(Icons.auto_awesome_outlined, SmartMatcherScreen()),
+  parserSources(Icons.code_outlined, ParserSourcesScreen()),
+  selectedSandbox(Icons.science_outlined, SelectedSandboxScreen()),
+  collections(Icons.collections_bookmark_outlined, Collections()),
+  browser(Icons.explore_outlined, Browser());
 
-  final String title;
+  const NavItem(this.icon, this.widget);
+
   final IconData icon;
-  final NavScreen? screen;
-  final List<MenuItem> children;
-}
+  final Widget? widget;
 
-// ── Helper functions ─────────────────────────────────────────────────────────
-
-_Node _buildTree(BuildContext context, _Node? oldRoot) {
-  final root = _Node.root();
-  final menuItems = _buildMenuItems(context);
-  final stack = <(MenuItem, _Node)>[
-    for (final item in menuItems.reversed) (item, root),
-  ];
-
-  while (stack.isNotEmpty) {
-    final (item, parent) = stack.removeLast();
-
-    // Use the icon's codePoint as the key to ensure uniqueness
-    // when language changes or widget rebuilds
-    final node = _Node(key: item.icon.codePoint.toString(), data: item);
-
-    parent.add(node);
-    for (final child in item.children.reversed) {
-      stack.add((child, node));
-    }
+  String title(BuildContext context) {
+    final s = S.of(context);
+    return switch (this) {
+      NavItem.dashboard => s.dashboard,
+      NavItem.discover => s.discover,
+      NavItem.crawlers => s.crawlers,
+      NavItem.smartMatcher => s.smartMatcher,
+      NavItem.parserSources => s.parserSources,
+      NavItem.selectedSandbox => s.selectedSandbox,
+      NavItem.collections => s.collections,
+      NavItem.browser => s.browser,
+    };
   }
 
-  if (oldRoot != null) {
-    _restoreExpansionState(oldRoot, root);
+  List<NavItem> get children {
+    return switch (this) {
+      NavItem.crawlers => [smartMatcher, parserSources, selectedSandbox],
+      _ => const [],
+    };
   }
 
-  return root;
+  static const roots = [dashboard, discover, crawlers, collections, browser];
+
+  static final screens = NavItem.values.where((e) => e.widget != null).toList();
 }
 
-void _restoreExpansionState(_Node oldNode, _Node newNode) {
-  newNode.expansionNotifier.value = oldNode.expansionNotifier.value;
-  for (final newChild in newNode.childrenAsList) {
-    for (final oldChild in oldNode.childrenAsList) {
-      if (oldChild.key == newChild.key) {
-        _restoreExpansionState(oldChild as _Node, newChild as _Node);
-        break;
-      }
-    }
+Widget _buildMenuItem(
+  BuildContext context,
+  NavItem item,
+  ValueNotifier<NavItem> activeScreen,
+) {
+  if (item.children.isNotEmpty) {
+    return ExpansionTile(
+      leading: Icon(item.icon),
+      title: Text(item.title(context)),
+      childrenPadding: const EdgeInsets.only(left: 16.0),
+      children: item.children
+          .map((child) => _buildMenuItem(context, child, activeScreen))
+          .toList(),
+    );
   }
-}
 
-List<MenuItem> _buildMenuItems(BuildContext context) {
-  final s = S.of(context);
-  return [
-    MenuItem(
-      title: s.dashboard,
-      icon: Icons.space_dashboard_outlined,
-      screen: NavScreen.dashboard,
-    ),
-    MenuItem(
-      title: s.crawlers,
-      icon: Icons.smart_toy_outlined,
-      children: [
-        MenuItem(
-          title: s.smartMatcher,
-          icon: Icons.auto_awesome_outlined,
-          screen: NavScreen.smartMatcher,
-        ),
-        MenuItem(
-          title: s.parserSources,
-          icon: Icons.code_outlined,
-          screen: NavScreen.parserSources,
-        ),
-        MenuItem(
-          title: s.selectedSandbox,
-          icon: Icons.science_outlined,
-          screen: NavScreen.selectedSandbox,
-        ),
-      ],
-    ),
-    MenuItem(
-      title: s.collections,
-      icon: Icons.collections_bookmark_outlined,
-      screen: NavScreen.collections,
-    ),
-    MenuItem(
-      title: s.browser,
-      icon: Icons.explore_outlined,
-      screen: NavScreen.browser,
-    ),
-  ];
+  final isSelected = item == activeScreen.value;
+  return ListTile(
+    leading: Icon(item.icon),
+    title: Text(item.title(context)),
+    selected: isSelected,
+    selectedTileColor: context.colorScheme.secondaryContainer,
+    titleTextStyle: isSelected
+        ? context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
+        : null,
+    onTap: () {
+      activeScreen.value = item;
+      talker.debug('Nav → $item');
+    },
+  );
 }

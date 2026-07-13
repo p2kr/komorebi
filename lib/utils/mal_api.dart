@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:komorebi/models/env.dart';
-import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/models/api/mal_models.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
 

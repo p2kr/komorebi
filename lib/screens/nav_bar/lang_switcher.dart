@@ -3,6 +3,7 @@ import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/providers/common_providers.dart';
+import 'package:komorebi/themes/theme.dart';
 import 'package:popover/popover.dart';
 
 class LangSwitcher extends ConsumerWidget {
@@ -72,7 +73,7 @@ class LangSwitcher extends ConsumerWidget {
                     currentLocale.languageCode.toUpperCase(),
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: context.textTheme.labelLarge?.fontSize,
                       color: colorScheme.onSurface,
                     ),
                   ),

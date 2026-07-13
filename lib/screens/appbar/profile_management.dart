@@ -51,9 +51,8 @@ class ProfileManagementPopup extends HookConsumerWidget {
                             // profile name
                             Text(
                               activeProfile.username,
-                              style: context.textTheme.headlineSmall?.copyWith(
-                                fontSize:
-                                    context.textTheme.titleMedium?.fontSize,
+                              style: context.textTheme.titleMedium?.copyWith(
+                                fontFamily: context.fontSerif,
                                 fontWeight: .bold,
                               ),
                             ),

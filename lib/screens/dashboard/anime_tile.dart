@@ -3,21 +3,38 @@ import 'dart:math';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/models/api/mal_models.dart';
+import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/screens/dashboard/overflowing_list.dart';
 import 'package:komorebi/screens/dashboard/synopsis_widget.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/widgets/chips.dart';
 
-class AnimeTile extends StatelessWidget {
+class AnimeTile extends ConsumerWidget {
   const AnimeTile({super.key, required this.animeItem});
 
   final MalAnimeListItem animeItem;
 
   @override
-  Widget build(BuildContext context) {
-    final title = animeItem.node.title;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final swapTitles = ref.watch(swapAlternateTitleProvider);
+    final alternateTitle = animeItem.node.alternativeTitles;
+
+    final displayTitle =
+        swapTitles &&
+            alternateTitle?.en != null &&
+            alternateTitle!.en!.isNotEmpty
+        ? alternateTitle.en!
+        : animeItem.node.title;
+
+    final displayAltTitle = swapTitles
+        ? animeItem.node.title
+        : (alternateTitle?.en?.isEmpty == true
+              ? animeItem.node.title
+              : alternateTitle?.en);
+
     final leadingImg = animeItem.node.mainPicture?.medium;
     final synopsis = animeItem.node.synopsis;
     final mediaType = animeItem.node.mediaType;
@@ -26,12 +43,10 @@ class AnimeTile extends StatelessWidget {
     final popularity = animeItem.node.popularity;
     final meanRating = animeItem.node.mean;
     final contentRating = animeItem.node.rating?.toUpperCase();
-    final alternateTitle = animeItem.node.alternativeTitles;
     final genres = animeItem.node.genres;
     final nextEpisode = getNextEpisodeNumber(episodesWatched, totalEpisodes);
 
     return Card(
-      // elevation: 2,
       child: Column(
         children: [
           SizedBox(
@@ -45,6 +60,7 @@ class AnimeTile extends StatelessWidget {
                     width: 100,
                     fit: BoxFit.cover,
                     imageUrl: leadingImg,
+                    placeholder: (context, url) => Placeholder(),
                   ),
                 Expanded(
                   child: Padding(
@@ -78,17 +94,17 @@ class AnimeTile extends StatelessWidget {
 
                         // TITLE
                         Text(
-                          title,
+                          displayTitle,
                           maxLines: 2,
                           style: context.textTheme.bodyLarge?.copyWith(
-                            fontFamily:
-                                context.textTheme.headlineSmall?.fontFamily,
+                            fontFamily: context.fontSerif,
                             fontWeight: FontWeight.bold,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                         // Alternate title
-                        if (alternateTitle?.en != null)
+                        if (displayAltTitle != null &&
+                            displayAltTitle != displayTitle)
                           Row(
                             spacing: 4,
                             mainAxisSize: MainAxisSize.min,
@@ -99,9 +115,7 @@ class AnimeTile extends StatelessWidget {
                               ),
                               Expanded(
                                 child: Text(
-                                  alternateTitle!.en!.isEmpty
-                                      ? title
-                                      : alternateTitle.en!,
+                                  displayAltTitle,
                                   maxLines: 2,
                                   style: context.textTheme.bodyMedium,
                                   overflow: TextOverflow.ellipsis,
@@ -162,7 +176,9 @@ class AnimeTile extends StatelessWidget {
                     label: AutoSizeText(
                       S.of(context).getEpisode(nextEpisode),
                       maxLines: 1,
-                      overflowReplacement: AutoSizeText(S.of(context).epShort(nextEpisode)),
+                      overflowReplacement: AutoSizeText(
+                        S.of(context).epShort(nextEpisode),
+                      ),
                     ),
                   ),
                 ),

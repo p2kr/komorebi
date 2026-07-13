@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/models/profiles_table.dart';
+import 'package:komorebi/models/db/profiles_table.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/handle_delete.dart';
 import 'package:komorebi/themes/theme.dart';
@@ -28,8 +28,8 @@ class ConnectedProfilesTile extends ConsumerWidget {
         leading: getAvatar(profile),
         title: Text(
           profile.username,
-          style: context.textTheme.headlineSmall?.copyWith(
-            fontSize: context.textTheme.titleMedium?.fontSize,
+          style: context.textTheme.titleMedium?.copyWith(
+            fontFamily: context.fontSerif,
           ),
         ),
         subtitle: Row(

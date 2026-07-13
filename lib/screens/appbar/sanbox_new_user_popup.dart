@@ -15,7 +15,9 @@ class SanboxNewUserPopup extends HookConsumerWidget {
       insetPadding: .zero,
       contentPadding: .all(8),
       titlePadding: .all(8),
-      titleTextStyle: context.textTheme.headlineSmall?.copyWith(fontSize: 20),
+      titleTextStyle: context.textTheme.titleLarge?.copyWith(
+        fontFamily: context.fontSerif,
+      ),
       title: Text(S.of(context).createAReadonlySandboxAccount),
       content: SizedBox(
         width: 300,

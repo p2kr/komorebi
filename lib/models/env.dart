@@ -9,4 +9,10 @@ abstract class Env {
 
   @EnviedField()
   static final String malClientSecret = _Env.malClientSecret;
+
+  @EnviedField()
+  static final int anilistClientId = _Env.anilistClientId;
+
+  @EnviedField()
+  static final String anilistClientSecret = _Env.anilistClientSecret;
 }

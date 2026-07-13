@@ -3,7 +3,7 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/models/profiles_table.dart';
+import 'package:komorebi/models/db/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/screens/appbar/connected_profiles_tile.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:komorebi/models/profiles_table.dart';
+import 'package:komorebi/models/db/profiles_table.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';

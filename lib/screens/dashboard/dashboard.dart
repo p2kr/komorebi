@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/models/api/mal_models.dart';
 import 'package:komorebi/providers/dashboard_providers.dart';
+import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/screens/dashboard/anime_tile.dart';
 
 enum MediaType { anime, manga }
@@ -22,6 +23,32 @@ class Dashboard extends HookConsumerWidget {
     // Make the state nullable so `null` can represent "All"
     final animeStatus = useState<MalAnimeStatus?>(null);
     final mangaStatus = useState<MalMangaStatus?>(null);
+
+    final currentProfile = ref.watch(currentProfileProvider);
+
+    if (currentProfile.isLoading && !currentProfile.hasValue) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (currentProfile.value == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.person_off_outlined,
+              size: 64,
+              color: Theme.of(context).disabledColor,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              s.noActiveProfile,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+          ],
+        ),
+      );
+    }
 
     final animeList = ref.watch(
       dashboardAnimeProvider(status: animeStatus.value),

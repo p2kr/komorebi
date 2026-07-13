@@ -60,5 +60,6 @@
   "anime": "Anime",
   "manga": "Manga",
   "epShort": "EP {episodeNumber}",
-  "options": "Options"
+  "options": "Options",
+  "discover": "Discover"
 }

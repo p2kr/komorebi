@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/models/api/mal_models.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/widgets/chips.dart';

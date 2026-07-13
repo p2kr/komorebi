@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:komorebi/models/mal_models.dart';
+import 'package:komorebi/models/api/mal_models.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/utils/mal_api.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';

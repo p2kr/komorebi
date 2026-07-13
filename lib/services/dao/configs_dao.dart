@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:komorebi/models/config_table.dart';
+import 'package:komorebi/models/db/config_table.dart';
 import 'package:komorebi/services/database.dart';
 
 part 'configs_dao.g.dart';

@@ -1,9 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:komorebi/models/config_table.dart';
-import 'package:komorebi/models/logs_table.dart';
-import 'package:komorebi/models/profiles_table.dart';
-import 'package:komorebi/models/queue_items_table.dart';
+import 'package:komorebi/models/db/config_table.dart';
+import 'package:komorebi/models/db/logs_table.dart';
+import 'package:komorebi/models/db/profiles_table.dart';
+import 'package:komorebi/models/db/queue_items_table.dart';
 import 'package:komorebi/services/dao/configs_dao.dart';
 import 'package:komorebi/services/dao/profiles_dao.dart';
 import 'package:komorebi/utils/constants.dart';
