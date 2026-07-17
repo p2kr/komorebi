@@ -18,8 +18,10 @@ class SmartMatcherScreen extends HookConsumerWidget {
 
     final searchQuery = useState<({String title, String number})?>(null);
 
-    final crawlerResultsAsync = searchQuery.value == null
-        ? const AsyncValue.data(<CrawlerResult>[])
+    final AsyncValue<CrawlerResponse> crawlerResultsAsync = searchQuery.value ==
+        null
+        ? const AsyncValue<CrawlerResponse>.data(
+        (results: <CrawlerResult>[], isFetching: false))
         : ref.watch(
             getCrawlerResultsProvider(
               searchQuery.value!.title,
@@ -115,22 +117,35 @@ class SmartMatcherScreen extends HookConsumerWidget {
                 ),
                 Expanded(
                   child: switch (crawlerResultsAsync) {
-                    AsyncLoading<List<CrawlerResult>>() =>
-                      CircularProgressIndicator(),
-
-                    AsyncData<List<CrawlerResult>>() =>
-                      crawlerResultsAsync.value.isNotEmpty
+                    AsyncData<CrawlerResponse>(:final value) =>
+                    value.results.isNotEmpty || value.isFetching
                           ? ListView.builder(
-                              itemCount: crawlerResultsAsync.value.length,
+                      itemCount: value.results.length +
+                          (value.isFetching ? 1 : 0),
                               itemBuilder: (context, index) {
-                                final value = crawlerResultsAsync.value[index];
+                                if (index == value.results.length) {
+                                  return const Padding(
+                                    padding: EdgeInsets.all(16.0),
+                                    child: Center(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          CircularProgressIndicator(),
+                                          SizedBox(width: 16),
+                                          Text("Fetching more..."),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+                                final item = value.results[index];
                                 return ListTile(
-                                  title: Text(value.title),
-                                  subtitle: Text(value.source),
+                                  title: Text(item.title),
+                                  subtitle: Text(item.source),
                                   leading:
-                                      value.parsedTitle?.videoResolution != null
+                                  item.parsedTitle?.videoResolution != null
                                       ? Text(
-                                          value.parsedTitle!.videoResolution!,
+                                    item.parsedTitle!.videoResolution!,
                                         )
                                       : null,
                                   trailing: IconButton.filled(
@@ -144,9 +159,12 @@ class SmartMatcherScreen extends HookConsumerWidget {
                             )
                           : Text("No match found"),
 
-                    AsyncError<List<CrawlerResult>>() => Icon(
+                    AsyncError<CrawlerResponse>() =>
+                        Icon(
                       Icons.error_outline,
                     ),
+
+                    _ => CircularProgressIndicator(),
                   },
                 ),
               ],

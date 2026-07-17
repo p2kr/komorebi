@@ -56,3 +56,18 @@ Color getRandomColor() {
     0.9, // Value/Brightness (Keep it bright)
   ).toColor();
 }
+
+extension SafeCapitalize on String {
+  String toLocalizedCapitalized() {
+    if (isEmpty) return this;
+
+    // Extract the very first visible character/glyph safely
+    final String firstGraph = characters.take(1).toString();
+
+    // Extract the remaining visual characters safely
+    final String restGraphs = characters.skip(1).toString();
+
+    // Re-combine with only the true first character capitalized
+    return '${firstGraph.toUpperCase()}$restGraphs';
+  }
+}

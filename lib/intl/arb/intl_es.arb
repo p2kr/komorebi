@@ -61,5 +61,13 @@
   "manga": "Manga",
   "epShort": "EP {episodeNumber}",
   "options": "Opciones",
-  "discover": "Descubrir"
+  "discover": "Descubrir",
+  "generalSettings": "Configuración general",
+  "swapAlternateTitle": "Intercambiar título alternativo",
+  "showEnglishTitleAsMainTitleWhenAvailable": "Mostrar el título en inglés como título principal cuando esté disponible",
+  "appearance": "Apariencia",
+  "theme": "Tema",
+  "toggleBetweenLightAndDarkMode": "Alternar entre modo claro y oscuro",
+  "language": "Idioma",
+  "settings": "Configuración"
 }

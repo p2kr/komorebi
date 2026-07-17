@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:komorebi/crawlers/crawler_engine.dart';
@@ -10,44 +12,72 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part "crawler_providers.g.dart";
 
+typedef CrawlerResponse = ({List<CrawlerResult> results, bool isFetching});
+
+final _dio = getDioWithLogger();
+
 @riverpod
-Future<List<CrawlerResult>> getCrawlerResults(
+Stream<CrawlerResponse> getCrawlerResults(
   Ref ref, [
   String? title,
   String? number,
-]) async {
+    ]) {
   if (title == null || number == null || title.isEmpty || number.isEmpty) {
-    return [];
+    return Stream.value((results: <CrawlerResult>[], isFetching: false));
   }
 
-  Dio? dio;
-  final List<CrawlerResult> crawlerResults = [];
+  final cancelToken = CancelToken();
+  ref.onDispose(() => cancelToken.cancel('Provider disposed'));
 
-  try {
-    dio = getDioWithLogger();
+  final controller = StreamController<CrawlerResponse>();
+  final List<CrawlerResult> accumulatedResults = [];
 
-    final futures = CrawlerApi.crawlerConfigs.map((config) async {
+  controller.add((results: accumulatedResults, isFetching: true));
+
+  int pending = CrawlerApi.crawlerConfigs.length;
+  if (pending == 0) {
+    controller.add((results: accumulatedResults, isFetching: false));
+    controller.close();
+    return controller.stream;
+  }
+
+  for (final config in CrawlerApi.crawlerConfigs) {
+    Future(() async {
       try {
         final url = config.baseUrl
             .replaceAll("{title}", title)
             .replaceAll("{number}", number);
-        final resp = await dio!.get(url);
+
+        final resp = await _dio.get(url, cancelToken: cancelToken);
 
         if (resp.statusCode == HttpStatus.ok) {
-          final engine = CrawlerEngine(config);
-          // Directly adding to the shared list here:
-          crawlerResults.addAll(engine.parseHtml(rawHtml: resp.data));
+          final data = resp.data as String;
+          // Parse HTML in a background isolate
+          final parsed = await Isolate.run(() {
+            final engine = CrawlerEngine(config);
+            return engine.parseHtml(rawHtml: data);
+          });
+
+          accumulatedResults.addAll(parsed);
+          // Yield the new results to the stream
+          if (!controller.isClosed) {
+            controller.add(
+                (results: List.of(accumulatedResults), isFetching: true));
+          }
         }
       } catch (e, t) {
-        talker.warning("crawler failed for ${config.name}", e, t);
+        if (!cancelToken.isCancelled) {
+          talker.warning("crawler failed for ${config.name}", e, t);
+        }
+      } finally {
+        pending--;
+        if (pending == 0 && !controller.isClosed) {
+          controller.add((results: accumulatedResults, isFetching: false));
+          controller.close();
+        }
       }
     });
-
-    // We still have to wait for all the tasks to finish before returning
-    await Future.wait(futures);
-  } finally {
-    dio?.close();
   }
 
-  return crawlerResults;
+  return controller.stream;
 }

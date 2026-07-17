@@ -9,9 +9,7 @@ import 'package:komorebi/screens/crawlers/smart_matcher/smart_matcher.dart';
 import 'package:komorebi/screens/dashboard/dashboard.dart';
 import 'package:komorebi/screens/discover/discover.dart';
 import 'package:komorebi/screens/local_collection/collections.dart';
-import 'package:komorebi/screens/nav_bar/lang_switcher.dart';
-import 'package:komorebi/screens/nav_bar/settings_button.dart';
-import 'package:komorebi/screens/nav_bar/theme_switcher.dart';
+import 'package:komorebi/screens/settings/settings_screen.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/utils/talker.dart';
 
@@ -44,20 +42,10 @@ class NavBar extends HookConsumerWidget {
           child: Column(
             children: [
               Expanded(child: ListView(children: menuTree)),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12.0,
-                  vertical: 8.0,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: const [
-                    ThemeSwitcher(),
-                    SettingsButton(),
-                    LangSwitcher(),
-                  ],
-                ),
+              _buildMenuItem(
+                context,
+                NavItem.settings,
+                activeScreen,
               ),
             ],
           ),
@@ -85,7 +73,8 @@ enum NavItem {
   parserSources(Icons.code_outlined, ParserSourcesScreen()),
   selectedSandbox(Icons.science_outlined, SelectedSandboxScreen()),
   collections(Icons.collections_bookmark_outlined, Collections()),
-  browser(Icons.explore_outlined, Browser());
+  browser(Icons.explore_outlined, Browser()),
+  settings(Icons.settings_outlined, SettingsScreen());
 
   const NavItem(this.icon, this.widget);
 
@@ -103,6 +92,7 @@ enum NavItem {
       NavItem.selectedSandbox => s.selectedSandbox,
       NavItem.collections => s.collections,
       NavItem.browser => s.browser,
+      NavItem.settings => s.settings,
     };
   }
 
