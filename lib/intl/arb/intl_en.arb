@@ -69,5 +69,6 @@
   "theme": "Theme",
   "toggleBetweenLightAndDarkMode": "Toggle between light and dark mode",
   "language": "Language",
-  "settings": "Settings"
+  "settings": "Settings",
+  "appDescription": "An all in one app to consume manga and anime from MyAnimeList/Anilist"
 }

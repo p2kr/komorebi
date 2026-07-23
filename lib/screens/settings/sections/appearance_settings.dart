@@ -55,7 +55,6 @@ class AppearanceSettings extends ConsumerWidget {
             }),
           ),
         ),
-        const Divider(height: 32),
 
         // Language switcher
         ListTile(title: Text(s.language), trailing: LanguageSwitcher()),
