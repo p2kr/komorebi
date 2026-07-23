@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:talker/talker.dart';
@@ -28,7 +28,6 @@ class FileTalkerObserver extends TalkerObserver {
   File? get logFile => _logFile;
 
   Future<void> _initLogFile() async {
-    if (kIsWeb) return;
     try {
       final dir = await getApplicationSupportDirectory();
       _logFile = File('${dir.path}${Platform.pathSeparator}$fileName');
@@ -49,7 +48,6 @@ class FileTalkerObserver extends TalkerObserver {
   void onException(TalkerException err) => _writeLog(err);
 
   void _writeLog(TalkerData log) {
-    if (kIsWeb) return;
     try {
       final text = log.generateTextMessage();
       final lines = text.split('\n').map((e) => '│ $e').join('\n');

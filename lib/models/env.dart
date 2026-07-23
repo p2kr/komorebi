@@ -7,7 +7,7 @@ abstract class Env {
   @EnviedField()
   static final String malClientId = _Env.malClientId;
 
-  @EnviedField()
+  @EnviedField(defaultValue: "")
   static final String malClientSecret = _Env.malClientSecret;
 
   @EnviedField()

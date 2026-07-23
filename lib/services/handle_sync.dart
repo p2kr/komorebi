@@ -4,12 +4,10 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
-import 'package:komorebi/models/env.dart';
 import 'package:komorebi/models/api/mal_models.dart';
 import 'package:komorebi/models/db/profiles_table.dart';
+import 'package:komorebi/models/env.dart';
 import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
@@ -32,15 +30,6 @@ String _generateCodeVerifier() {
   return base64UrlEncode(values).replaceAll('=', '');
 }
 
-/// Main OAuth entrypoint that delegates to Web or Desktop implementation
-Future<void> signInWithOAuth(WidgetRef ref) async {
-  if (kIsWeb) {
-    await signInWithOAuthWeb(ref);
-  } else {
-    await signInWithOAuthDesktop(ref);
-  }
-}
-
 String? _extractOAuthCode(Uri uri) {
   if (uri.queryParameters.containsKey('code')) {
     return uri.queryParameters['code'];
@@ -56,47 +45,9 @@ String? _extractOAuthCode(Uri uri) {
   return null;
 }
 
-/// Web-specific OAuth flow using static HTML redirect
-Future<void> signInWithOAuthWeb(WidgetRef ref) async {
-  final codeVerifier = _generateCodeVerifier();
-  final redirectUrl = "${Uri.base.origin}/auth.html";
-
-  final loginUri = Uri.parse(authUrl).replace(
-    queryParameters: {
-      'client_id': clientId,
-      'redirect_uri': redirectUrl,
-      'response_type': 'code',
-      'code_challenge': codeVerifier,
-      'code_challenge_method': 'plain',
-    },
-  );
-
-  try {
-    talker.debug("Starting Web OAuth login flow with redirect: $redirectUrl");
-    final result = await FlutterWebAuth2.authenticate(
-      url: loginUri.toString(),
-      callbackUrlScheme: Uri.parse(redirectUrl).scheme,
-    );
-
-    final returnedUri = Uri.parse(result);
-    final authCode = _extractOAuthCode(returnedUri);
-
-    if (authCode != null) {
-      talker.debug(
-        "Authorization Code successfully retrieved on Web: $authCode",
-      );
-      await _exchangeCodeAndSaveProfile(
-        ref,
-        authCode,
-        codeVerifier,
-        redirectUrl,
-      );
-    } else {
-      talker.error("Authorization Code was null in Web callback URI: $result");
-    }
-  } catch (e, t) {
-    talker.error("Web authentication flow encountered an error: ", e, t);
-  }
+/// Main OAuth entrypoint for Desktop platforms
+Future<void> signInWithOAuth(WidgetRef ref) async {
+  await signInWithOAuthDesktop(ref);
 }
 
 /// Desktop-specific OAuth flow using default browser and custom protocol deep linking

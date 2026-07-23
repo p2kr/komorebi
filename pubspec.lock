@@ -317,10 +317,10 @@ packages:
     dependency: "direct main"
     description:
       name: drift
-      sha256: c21b9af62e78f86837638dda6c33506bd9444ca8a32cad2b99c07369cf9e2462
+      sha256: "84688491040b0ceb26575709a84d701c84ad4df4d8aff020adf6d85f155fb0dd"
       url: "https://pub.dev"
     source: hosted
-    version: "2.34.1"
+    version: "2.34.2"
   drift_dev:
     dependency: "direct dev"
     description:
@@ -333,10 +333,10 @@ packages:
     dependency: "direct main"
     description:
       name: drift_flutter
-      sha256: "887fdec622174dc7eaefd0048403e34ee07cc18626ac8a7544cc3b8a4a172166"
+      sha256: "91acf4bee7c3c84467cba46455aa70e5292a3b889f4582645d74f2e5a8c106f2"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.3.1"
   envied:
     dependency: "direct main"
     description:
@@ -402,10 +402,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_cache_manager
-      sha256: "400b6592f16a4409a7f2bb929a9a7e38c72cceb8ffb99ee57bbf2cb2cecf8386"
+      sha256: "1de7849213b4c73c85aca7e0ac687a9a5d82ccdb594366b9dcc26cb6a2189cd2"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.4.2"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -1150,10 +1150,10 @@ packages:
     dependency: transitive
     description:
       name: sqlite3
-      sha256: "752d9d746052359a2022f588bb979f2e7c4e0f9e4b6a1c3121f7626a1574974b"
+      sha256: c73fd75df1332d76a6257f4823ae4df9c791f522b97e4a60cbcad214de1becf4
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.4"
+    version: "3.5.0"
   sqlite3_flutter_libs:
     dependency: transitive
     description:
@@ -1222,42 +1222,42 @@ packages:
     dependency: transitive
     description:
       name: synchronized
-      sha256: "93b153dcb6a26dcddee6ca087dd634b53e38c10b5aa163e8e49501a776456153"
+      sha256: "61894a1956de6b4fc1aefd0892e109514a1a706cbece3ac59decd90ff5a7a423"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.1"
+    version: "3.4.1+1"
   talker:
     dependency: "direct main"
     description:
       name: talker
-      sha256: f1a14d623f1d1bec42bb3bb77674eb766ffe8d26e5f79af652d85cb097c3e757
+      sha256: "342a30d81df3fc2ffca8daafdfee0c1b882269b0825dcc62093075c08bac9500"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.17"
+    version: "5.1.19"
   talker_dio_logger:
     dependency: "direct main"
     description:
       name: talker_dio_logger
-      sha256: "6dba5c29afb566c6efe1a2c1b676488ea7c727b486bda0654d965a1cfad6ea9b"
+      sha256: "4536f7246acb0d034cef83deeb2e8db8c9b766ecfafa3f5d00d78b07f4b3b670"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.17"
+    version: "5.1.19"
   talker_logger:
     dependency: transitive
     description:
       name: talker_logger
-      sha256: "459205c3e571f97ecc6be6e1b1b7e6b97b853e78ea458894650be407596e3216"
+      sha256: "999b76cb583ee89da098e8ef3a7b863eb5261326f0d33e0877f20c9df1003790"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.17"
+    version: "5.1.19"
   talker_riverpod_logger:
     dependency: "direct main"
     description:
       name: talker_riverpod_logger
-      sha256: "0d2e3c436122a602e7f3cfa572c418b96b63dd9b9b6b51871e828501693550c6"
+      sha256: "4d4ae6bc62e5f2b837052b6f704f2caacd901166f7a62b88acf565c75db22967"
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.17"
+    version: "5.1.19"
   term_glyph:
     dependency: transitive
     description:
@@ -1366,10 +1366,10 @@ packages:
     dependency: transitive
     description:
       name: uuid
-      sha256: "1fef9e8e11e2991bb773070d4656b7bd5d850967a2456cfc83cf47925ba79489"
+      sha256: "9b129329f58692f6e6578329498a8fe9fbe98f090beb764ffbb8ee2eadd01dcd"
       url: "https://pub.dev"
     source: hosted
-    version: "4.5.3"
+    version: "4.6.0"
   value_layout_builder:
     dependency: transitive
     description:

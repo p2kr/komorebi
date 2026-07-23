@@ -48,30 +48,28 @@ void initializeSettings(WidgetRef ref) {
   ref.read(swapAlternateTitleProvider.notifier).load();
 }
 
-/// Apply window options only for desktop platforms
+/// Apply window options for desktop platforms
 Future<void> setupAppWindow() async {
-  if (!kIsWeb) {
-    await windowManager.ensureInitialized();
-    try {
-      await protocolHandler.register('komorebi');
-      await protocolHandler.register('mal_viewer');
-      talker.debug(
-        "Registered custom protocol schemes: komorebi:// and mal_viewer://",
-      );
-    } catch (e, t) {
-      talker.warning("Failed to register custom protocol schemes: ", e, t);
-    }
-    WindowOptions windowOptions = const WindowOptions(
-      center: true,
-      minimumSize: Size(800, 600),
+  await windowManager.ensureInitialized();
+  try {
+    await protocolHandler.register('komorebi');
+    await protocolHandler.register('mal_viewer');
+    talker.debug(
+      "Registered custom protocol schemes: komorebi:// and mal_viewer://",
     );
-
-    await windowManager.waitUntilReadyToShow(windowOptions);
-    await windowManager.show();
-    await windowManager.center(animate: true);
-    await windowManager.focus();
-    await windowManager.maximize(); //TODO: Make it configurable
+  } catch (e, t) {
+    talker.warning("Failed to register custom protocol schemes: ", e, t);
   }
+  WindowOptions windowOptions = const WindowOptions(
+    center: true,
+    minimumSize: Size(800, 600),
+  );
+
+  await windowManager.waitUntilReadyToShow(windowOptions);
+  await windowManager.show();
+  await windowManager.center(animate: true);
+  await windowManager.focus();
+  await windowManager.maximize(); //TODO: Make it configurable
 }
 
 Future<void> setupDb() async {
@@ -85,13 +83,9 @@ Future<void> setupDb() async {
 
   if (kDebugMode) {
     // create dummy entries
-    if (!kIsWeb) {
-      talker.debug(
-        "setting up dummy db entries in ${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}$DB_NAME.sqlite",
-      );
-    } else {
-      talker.debug("setting up dummy db entries in web storage");
-    }
+    talker.debug(
+      "setting up dummy db entries in ${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}$DB_NAME.sqlite",
+    );
 
     final count = await db.profiles
         .count()
@@ -111,7 +105,7 @@ Future<void> setupL10N() async {
 }
 
 Future<void> setupSingleInstanceAndArgs(List<String> args) async {
-  if (!kIsWeb && Platform.isWindows) {
+  if (Platform.isWindows) {
     await windowManager.ensureInitialized();
     try {
       await WindowsSingleInstance.ensureSingleInstance(
