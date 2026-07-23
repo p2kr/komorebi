@@ -12,72 +12,94 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part "crawler_providers.g.dart";
 
-typedef CrawlerResponse = ({List<CrawlerResult> results, bool isFetching});
+typedef CrawlerResponse = ({
+  List<CrawlerResult> results,
+  bool isFetching,
+  bool hasSearched,
+});
 
 final _dio = getDioWithLogger();
 
 @riverpod
-Stream<CrawlerResponse> getCrawlerResults(
-  Ref ref, [
-  String? title,
-  String? number,
-    ]) {
-  if (title == null || number == null || title.isEmpty || number.isEmpty) {
-    return Stream.value((results: <CrawlerResult>[], isFetching: false));
+class GetCrawlerResults extends _$GetCrawlerResults {
+  CancelToken? _cancelToken;
+
+  @override
+  CrawlerResponse build() {
+    ref.onDispose(() => _cancelToken?.cancel('Provider disposed'));
+    return (results: <CrawlerResult>[], isFetching: false, hasSearched: false);
   }
 
-  final cancelToken = CancelToken();
-  ref.onDispose(() => cancelToken.cancel('Provider disposed'));
+  Future<void> fetch({required String title, required String number}) async {
+    if (title.isEmpty || number.isEmpty) {
+      state = (
+        results: <CrawlerResult>[],
+        isFetching: false,
+        hasSearched: false,
+      );
+      return;
+    }
 
-  final controller = StreamController<CrawlerResponse>();
-  final List<CrawlerResult> accumulatedResults = [];
+    _cancelToken?.cancel('New fetch started');
+    final cancelToken = CancelToken();
+    _cancelToken = cancelToken;
 
-  controller.add((results: accumulatedResults, isFetching: true));
+    state = (results: <CrawlerResult>[], isFetching: true, hasSearched: true);
 
-  int pending = CrawlerApi.crawlerConfigs.length;
-  if (pending == 0) {
-    controller.add((results: accumulatedResults, isFetching: false));
-    controller.close();
-    return controller.stream;
+    await Future.wait(
+      CrawlerApi.crawlerConfigs.map(
+        (config) => _crawlSingle(config, title, number, cancelToken),
+      ),
+    );
+
+    if (!cancelToken.isCancelled) {
+      state = (results: state.results, isFetching: false, hasSearched: true);
+    }
   }
 
-  for (final config in CrawlerApi.crawlerConfigs) {
-    Future(() async {
-      try {
-        final url = config.baseUrl
-            .replaceAll("{title}", title)
-            .replaceAll("{number}", number);
+  Future<void> _crawlSingle(
+    CrawlerConfig config,
+    String title,
+    String number,
+    CancelToken cancelToken,
+  ) async {
+    try {
+      final url = config.baseUrl
+          .replaceAll("{title}", title)
+          .replaceAll("{number}", number);
 
-        final resp = await _dio.get(url, cancelToken: cancelToken);
+      final resp = await _dio.get(
+        url,
+        cancelToken: cancelToken,
+        options: Options(
+          sendTimeout: const Duration(seconds: 5),
+          receiveTimeout: const Duration(seconds: 5),
+        ),
+      );
 
-        if (resp.statusCode == HttpStatus.ok) {
-          final data = resp.data as String;
-          // Parse HTML in a background isolate
-          final parsed = await Isolate.run(() {
-            final engine = CrawlerEngine(config);
-            return engine.parseHtml(rawHtml: data);
-          });
+      if (resp.statusCode == HttpStatus.ok && resp.data is String) {
+        final rawHtml = resp.data as String;
+        final parsed = await Isolate.run(
+          () => CrawlerEngine(config).parseHtml(rawHtml: rawHtml),
+        );
 
-          accumulatedResults.addAll(parsed);
-          // Yield the new results to the stream
-          if (!controller.isClosed) {
-            controller.add(
-                (results: List.of(accumulatedResults), isFetching: true));
-          }
-        }
-      } catch (e, t) {
-        if (!cancelToken.isCancelled) {
-          talker.warning("crawler failed for ${config.name}", e, t);
-        }
-      } finally {
-        pending--;
-        if (pending == 0 && !controller.isClosed) {
-          controller.add((results: accumulatedResults, isFetching: false));
-          controller.close();
+        if (!cancelToken.isCancelled && parsed.isNotEmpty) {
+          state = (
+            results: [...state.results, ...parsed],
+            isFetching: true,
+            hasSearched: true,
+          );
         }
       }
-    });
+    } catch (e, t) {
+      if (!cancelToken.isCancelled) {
+        talker.warning("crawler failed for ${config.name}", e, t);
+      }
+    }
   }
 
-  return controller.stream;
+  void clearResult() {
+    _cancelToken?.cancel('Cleared results');
+    state = (results: <CrawlerResult>[], isFetching: false, hasSearched: false);
+  }
 }

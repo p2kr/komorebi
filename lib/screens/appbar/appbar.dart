@@ -12,6 +12,7 @@ AppBar appBar(BuildContext context, WidgetRef ref) {
   final activeProfile = ref.watch(currentProfileProvider);
 
   return AppBar(
+    scrolledUnderElevation: 0,
     title: Row(
       children: [
         Expanded(

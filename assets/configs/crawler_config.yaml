@@ -5,26 +5,42 @@
 # {title} - title of anime/manga
 # {number} - episode/chapter of anime/manga
 
-animerss:
-  name: "AnimeRSS Feed Tracker"
-  baseUrl: "https://feed.animerss.org/updates?q={title}+ep+{number}"
-  itemSelector: "item, entry"
-  titleSelector: "title"
-  linkSelector: "link"
-  isActive: true
-
 nyaa:
   name: "Nyaa.si Anime Torrents"
-  baseUrl: "https://nyaa.si/?f=0&c=1_2&q={title}+ep+{number}"
-  itemSelector: "tr.success, tr.default"
-  titleSelector: "td[colspan!='2'] a:not([class])"
-  linkSelector: "td.text-center a[href^='magnet:']"
-  isActive: true
+  base_url: "https://nyaa.si/?page=rss&q={title}+{number}&c=1_2&f=0"
+  item_selector: "item"
+  title_selector: "title"
+  link_selector: "link"
+  is_active: true
 
-gogoanime:
-  name: "GogoAnime Tracker Portal"
-  baseUrl: "https://gogoanime.org/search?q={title}+ep+{number}"
-  itemSelector: "ul.items li"
-  titleSelector: "p.name a"
-  linkSelector: "p.name a"
-  isActive: false
+animetosho:
+  name: "AnimeTosho Torrents"
+  base_url: "https://animetosho.org/search?q={title}+{number}"
+  item_selector: "div.home_list_entry"
+  title_selector: "div.link a"
+  link_selector: "a[href^='magnet:']"
+  is_active: true
+
+tokyotosho:
+  name: "Tokyo Toshokan"
+  base_url: "https://tokyotosho.info/search.php?terms={title}+{number}"
+  item_selector: "table.listing tr.main"
+  title_selector: "td.desc-top a:not([website])"
+  link_selector: "a[href^='magnet:']"
+  is_active: true
+
+subsplease:
+  name: "SubsPlease RSS"
+  base_url: "https://subsplease.org/rss/?r=1080"
+  item_selector: "item"
+  title_selector: "title"
+  link_selector: "link"
+  is_active: true
+
+erairaws:
+  name: "Erai-raws RSS"
+  base_url: "https://www.erai-raws.info/rss-1080p/"
+  item_selector: "item"
+  title_selector: "title"
+  link_selector: "link"
+  is_active: true

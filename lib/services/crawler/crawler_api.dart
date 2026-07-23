@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:komorebi/models/api/crawler_config.dart';
 import 'package:komorebi/utils/talker.dart';
@@ -15,7 +16,9 @@ abstract class CrawlerApi {
 
   /// Ensures the asset is copied to the destination file if it doesn't exist
   static Future<void> _ensureAssetCopied(File destinationFile) async {
-    if (await destinationFile.exists() && await destinationFile.length() > 0) {
+    if (await destinationFile.exists() &&
+        await destinationFile.length() > 0 &&
+        !kDebugMode) {
       talker.debug("crawler config file already exists");
       return;
     }
@@ -33,6 +36,24 @@ abstract class CrawlerApi {
     await tempFile.rename(destinationFile.path);
   }
 
+  /// Loads crawler configurations from the bundled YAML asset into memory.
+  ///
+  /// This method ensures the bundled asset at [configPath] is copied into the
+  /// application's support directory (so the file can be read and re-written
+  /// later). It then reads the YAML file, converts it to native Dart maps/lists
+  /// and constructs `CrawlerConfig` objects which are stored in the
+  /// static [crawlerConfigs] list.
+  ///
+  /// Behavior notes:
+  /// - A `retry` wrapper is used with up to 2 attempts. If the first attempt
+  ///   fails, the `onRetry` callback will log an error and delete the local
+  ///   file so the asset can be recopied from the bundle on the next attempt.
+  /// - Any fatal errors that escape the retry loop are logged via `talker.error`
+  ///   but not rethrown here.
+  ///
+  /// Important: this must be called only after Flutter bindings are
+  /// initialized (so `rootBundle` and `getApplicationSupportDirectory` are
+  /// available), e.g. from an async initialization routine in the app.
   static Future<void> loadConfigs() async {
     try {
       final dir = await getApplicationSupportDirectory();

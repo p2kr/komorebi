@@ -8,26 +8,49 @@ class CrawlerEngine {
   CrawlerEngine(this.config);
 
   List<CrawlerResult> parseHtml({required String rawHtml}) {
+    if (!config.isActive || rawHtml.trim().isEmpty) return [];
+
     final document = parser.parse(rawHtml);
+    final elements = document.querySelectorAll(config.itemSelector);
+    if (elements.isEmpty) return [];
+
+    // Pre-evaluate title and link selector matches once to avoid O(N^2) document re-queries
+    final matchedTitleElements = document
+        .querySelectorAll(config.titleSelector)
+        .toSet();
+    final matchedLinkElements = document
+        .querySelectorAll(config.linkSelector)
+        .toSet();
+
     final List<CrawlerResult> results = [];
 
-    final elements = document.querySelectorAll(config.itemSelector);
     for (var element in elements) {
-      // package:html's Element doesn't provide `matches`, so fall back to
-      // checking whether the document's selector result contains this element.
-      var titleElement =
+      final titleElement =
           element.querySelector(config.titleSelector) ??
-          (document.querySelectorAll(config.titleSelector).contains(element)
-              ? element
-              : null);
+          (matchedTitleElements.contains(element) ? element : null);
       final title = titleElement?.text.trim() ?? element.text.trim();
 
-      var linkElement =
+      final linkElement =
           element.querySelector(config.linkSelector) ??
-          (document.querySelectorAll(config.linkSelector).contains(element)
-              ? element
-              : null);
-      final downloadUrl = linkElement?.attributes['href'] ?? '';
+          (matchedLinkElements.contains(element) ? element : null);
+
+      String downloadUrl =
+          linkElement?.attributes['href'] ??
+          linkElement?.attributes['url'] ??
+          '';
+
+      if (downloadUrl.isEmpty && linkElement != null) {
+        final linkText = linkElement.text.trim();
+        if (linkText.isNotEmpty) {
+          downloadUrl = linkText;
+        } else if (linkElement.parent != null) {
+          final nodes = linkElement.parent!.nodes;
+          final index = nodes.indexOf(linkElement);
+          if (index != -1 && index + 1 < nodes.length) {
+            downloadUrl = nodes[index + 1].text?.trim() ?? '';
+          }
+        }
+      }
 
       if (title.isNotEmpty || downloadUrl.isNotEmpty) {
         results.add(
