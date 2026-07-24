@@ -1,4 +1,4 @@
-name: Flutter CI/CD (Windows & Web)
+name: Flutter CI/CD (Windows)
 
 on:
   push:
@@ -14,16 +14,14 @@ concurrency:
 permissions:
   contents: read
   pull-requests: write
-  pages: write
-  id-token: write
 
 env:
   MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
   MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
 
 jobs:
-  test_and_build_web:
-    name: 🔍 Test & 🌐 Build Web
+  test:
+    name: 🔍 Test & Analyze
     runs-on: ubuntu-latest
     steps:
       - name: 📥 Checkout repository
@@ -45,13 +43,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-
             ${{ runner.os }}-pub-
-
-      - name: ⚙️ Enable Web Support
-        run: flutter config --enable-web
-
-      - name: ⚙️ Setup GitHub Pages
-        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
 
       - name: 📦 Install dependencies
         run: flutter pub get
@@ -104,24 +95,6 @@ jobs:
           name: codecov-umbrella
           fail_ci_if_error: false
 
-      - name: 🏗️ Build Web Release Bundle
-        # Note: By default, GitHub Pages serves project repositories at https://<user>.github.io/<repo-name>/
-        # Passing --base-href "/${{ github.event.repository.name }}/" ensures routing and assets work correctly.
-        # If you are using a custom domain or a user/organization root site (<user>.github.io), remove --base-href or set it to "/".
-        run: flutter build web --release --base-href "/${{ github.event.repository.name }}/"
-
-      - name: 📤 Upload Web Artifacts (CI)
-        uses: actions/upload-artifact@v4
-        with:
-          name: komorebi-web-build
-          path: build/web
-          if-no-files-found: error
-
-      - name: 📤 Upload Pages Artifact (CD)
-        if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: build/web
 
   build_windows:
     name: 🖥️ Build Windows Desktop
@@ -168,16 +141,3 @@ jobs:
           name: komorebi-windows-build
           path: build/windows/x64/runner/Release/
           if-no-files-found: error
-
-  deploy_web:
-    name: 🚀 Deploy Web to GitHub Pages
-    needs: test_and_build_web
-    if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: 🚀 Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4

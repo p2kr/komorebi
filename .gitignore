@@ -52,5 +52,4 @@ app.*.map.json
 lib/intl/generated/
 devtools_options.yaml
 
-docs/
 scratch/
