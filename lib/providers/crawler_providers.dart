@@ -30,8 +30,8 @@ class GetCrawlerResults extends _$GetCrawlerResults {
     return (results: <CrawlerResult>[], isFetching: false, hasSearched: false);
   }
 
-  Future<void> fetch({required String title, required String number}) async {
-    if (title.isEmpty || number.isEmpty) {
+  Future<void> fetch({required String title}) async {
+    if (title.isEmpty) {
       state = (
         results: <CrawlerResult>[],
         isFetching: false,
@@ -48,7 +48,7 @@ class GetCrawlerResults extends _$GetCrawlerResults {
 
     await Future.wait(
       CrawlerApi.crawlerConfigs.map(
-        (config) => _crawlSingle(config, title, number, cancelToken),
+        (config) => _crawlSingle(config, title, cancelToken),
       ),
     );
 
@@ -60,13 +60,13 @@ class GetCrawlerResults extends _$GetCrawlerResults {
   Future<void> _crawlSingle(
     CrawlerConfig config,
     String title,
-    String number,
     CancelToken cancelToken,
   ) async {
     try {
       final url = config.baseUrl
           .replaceAll("{title}", title)
-          .replaceAll("{number}", number);
+          .replaceAll("+{number}", "")
+          .replaceAll("{number}", "");
 
       final resp = await _dio.get(
         url,
@@ -80,7 +80,7 @@ class GetCrawlerResults extends _$GetCrawlerResults {
       if (resp.statusCode == HttpStatus.ok && resp.data is String) {
         final rawHtml = resp.data as String;
         final parsed = await Isolate.run(
-          () => CrawlerEngine(config).parseHtml(rawHtml: rawHtml),
+          () => CrawlerEngine(config).parse(rawHtml: rawHtml),
         );
 
         if (!cancelToken.isCancelled && parsed.isNotEmpty) {

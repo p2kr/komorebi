@@ -14,7 +14,6 @@ class SmartMatcherScreen extends HookConsumerWidget {
     final formKey = useMemoized(() => GlobalKey<FormState>());
 
     final mediaTitle = useTextEditingController();
-    final mediaNumber = useTextEditingController(text: "1");
 
     final crawlerResults = ref.watch(getCrawlerResultsProvider);
 
@@ -37,7 +36,10 @@ class SmartMatcherScreen extends HookConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text("ANIME NAME", style: context.textTheme.labelLarge),
+                  Text(
+                    "ANIME / MANGA TITLE",
+                    style: context.textTheme.labelLarge,
+                  ),
                   TextFormField(
                     autofocus: true,
                     controller: mediaTitle,
@@ -51,25 +53,7 @@ class SmartMatcherScreen extends HookConsumerWidget {
                     ],
                     decoration: const InputDecoration(
                       isDense: true,
-                      hintText: "e.g. Attack on Titan",
-                      border: OutlineInputBorder(),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text("EPISODE TARGET", style: context.textTheme.labelLarge),
-                  TextFormField(
-                    controller: mediaNumber,
-                    keyboardType: TextInputType.number,
-                    validator: (value) =>
-                        (value == null || value.isEmpty) ? "Required" : null,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                        RegExp(r'^\d+\.?\d*'), // allows decimals
-                      ),
-                    ],
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      hintText: "e.g. 1",
+                      hintText: "e.g. Attack on Titan S3 E1",
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -83,10 +67,7 @@ class SmartMatcherScreen extends HookConsumerWidget {
                         if (formKey.currentState!.validate()) {
                           ref
                               .read(getCrawlerResultsProvider.notifier)
-                              .fetch(
-                                title: mediaTitle.text,
-                                number: mediaNumber.text,
-                              );
+                              .fetch(title: mediaTitle.text);
                         }
                       },
                     ),

@@ -1,16 +1,18 @@
 # Komorebi Crawler Site Configurations
 # This file contains the default scraper profiles used by the parallel web crawler.
 
-# Configs:
+# Template Variables:
 # {title} - title of anime/manga
 # {number} - episode/chapter of anime/manga
 
 nyaa:
   name: "Nyaa.si Anime Torrents"
-  base_url: "https://nyaa.si/?page=rss&q={title}+{number}&c=1_2&f=0"
+  base_url: "https://nyaa.si/?page=rss&c=1_2&f=0&q={title}+{number}"
   item_selector: "item"
   title_selector: "title"
   link_selector: "link"
+  popularity_selector: "seeders, nyaa\\:seeders"
+  size_selector: "size, nyaa\\:size"
   is_active: true
 
 animetosho:
@@ -19,6 +21,8 @@ animetosho:
   item_selector: "div.home_list_entry"
   title_selector: "div.link a"
   link_selector: "a[href^='magnet:']"
+  popularity_selector: "span.seeders, div.links"
+  size_selector: "div.size, span.size"
   is_active: true
 
 tokyotosho:
@@ -27,14 +31,18 @@ tokyotosho:
   item_selector: "table.listing tr.main"
   title_selector: "td.desc-top a:not([website])"
   link_selector: "a[href^='magnet:']"
-  is_active: true
+  popularity_selector: "td.stats-0"
+  size_selector: "td.desc-top"
+  is_active: false # Disabled: Server connection times out (522 Cloudflare Error)
 
 subsplease:
-  name: "SubsPlease RSS"
-  base_url: "https://subsplease.org/rss/?r=1080"
-  item_selector: "item"
-  title_selector: "title"
-  link_selector: "link"
+  name: "SubsPlease API"
+  base_url: "https://subsplease.org/api/?f=search&tz=UTC&s={title}"
+  item_selector: "json"
+  title_selector: "show"
+  link_selector: "downloads"
+  popularity_selector: null
+  size_selector: "filesize"
   is_active: true
 
 erairaws:
@@ -43,4 +51,6 @@ erairaws:
   item_selector: "item"
   title_selector: "title"
   link_selector: "link"
-  is_active: true
+  popularity_selector: "seeders, erai\\:seeders"
+  size_selector: "size, erai\\:size"
+  is_active: false # Disabled: Returns 403 Forbidden (Cloudflare anti-bot protection)
