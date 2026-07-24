@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Successful</title>
+  <style>
+      body {
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+          background: #f4f6f8;
+          margin: 0;
+          text-align: center;
+      }
+
+      .card {
+          background: white;
+          padding: 40px;
+          border-radius: 12px;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+          max-width: 400px;
+      }
+
+      .btn {
+          display: inline-block;
+          margin-top: 20px;
+          padding: 12px 24px;
+          background: #2e51a2; /* MyAnimeList Blue */
+          color: white;
+          text-decoration: none;
+          border-radius: 6px;
+          font-weight: bold;
+      }
+
+      .hidden {
+          display: none;
+      }
+  </style>
+</head>
+<body>
+<div class="card">
+  <h1>✅ Successfully Authenticated</h1>
+  <p>You can safely close this tab and return to the app.</p>
+
+  <!-- Fallback UI if the browser blocks the automatic redirect -->
+  <div id="fallback" class="hidden">
+    <p style="font-size: 0.9em; color: #666; margin-top: 30px;">
+      If the app didn't open automatically, click below:
+    </p>
+    <a id="manual-link" href="#" class="btn">Open App Manually</a>
+  </div>
+</div>
+
+<script>
+  // 1. Define your desktop app's custom protocol
+  const APP_SCHEME = "komorebi://auth-callback";
+
+  // 2. Extract the OAuth parameters MAL appended to this page's URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const code = urlParams.get('code');
+  const state = urlParams.get('state');
+
+  if (code) {
+      // 3. Construct the deep link to wake up your desktop app
+      const deepLink = `${APP_SCHEME}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || '')}`;
+
+      // 4. Attempt to trigger the deep link automatically
+      window.location.href = deepLink;
+
+      // 5. Modern browsers often block automatic custom protocol redirects
+      // without user interaction. We show a fallback button after 1 second.
+      setTimeout(() => {
+          document.getElementById('fallback').classList.remove('hidden');
+          document.getElementById('manual-link').href = deepLink;
+      }, 1000);
+  } else {
+      // Handle cases where the user denied access or MAL returned an error
+      const error = urlParams.get('error');
+      document.querySelector('.card').innerHTML = `
+          <h1>❌ Authentication Failed</h1>
+          <p>${error || "No authentication code found."}</p>
+      `;
+  }
+</script>
+</body>
+</html>
