@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:komorebi/crawlers/crawler_parser.dart';
 import 'package:komorebi/models/api/crawler_config.dart';
+import 'package:quiver/strings.dart';
 
 class JsonCrawlerParser implements CrawlerParser {
   @override
   bool canParse(String content, CrawlerConfig config) {
+    if (isBlank(content)) return false;
     if (config.itemSelector.toLowerCase() == CrawlerParserUtils.jsonSelector) {
       return true;
     }

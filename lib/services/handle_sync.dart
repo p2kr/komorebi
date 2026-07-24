@@ -9,6 +9,7 @@ import 'package:komorebi/models/api/mal_models.dart';
 import 'package:komorebi/models/db/profiles_table.dart';
 import 'package:komorebi/models/env.dart';
 import 'package:komorebi/providers/common_providers.dart';
+import 'package:komorebi/providers/oauth_timer_provider.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';
@@ -65,6 +66,8 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
     },
   );
 
+  ref.read(oauthCountdownProvider.notifier).startCountdown(desktopOauthTimeout);
+
   try {
     talker.debug(
       "Starting Desktop OAuth login flow via default browser with deep link: $redirectUrl",
@@ -119,6 +122,9 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
     }
   } catch (e, t) {
     talker.error("Desktop authentication flow encountered an error: ", e, t);
+    rethrow;
+  } finally {
+    ref.read(oauthCountdownProvider.notifier).stopCountdown();
   }
 }
 

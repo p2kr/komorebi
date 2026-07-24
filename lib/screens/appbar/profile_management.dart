@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/providers/oauth_timer_provider.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/screens/appbar/connected_profiles_tile.dart';
 import 'package:komorebi/screens/appbar/sanbox_new_user_popup.dart';
@@ -16,11 +19,21 @@ class ProfileManagementPopup extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final size = MediaQuery.of(context).size;
+    final countdownNotifier = ref.read(oauthCountdownProvider.notifier);
+
+    useEffect(() {
+      return () {
+        Future.microtask(() {
+          countdownNotifier.stopCountdown();
+        });
+      };
+    }, const []);
 
     // final activeProfile -> fetch from state & db config
     final activeProfileAsync = ref.watch(currentProfileProvider);
     // final allProfiles -> fetch from db
     final allProfilesAsync = ref.watch(allProfilesProvider);
+    final oauthCountdown = ref.watch(oauthCountdownProvider);
 
     return Dialog(
       child: Container(
@@ -148,23 +161,45 @@ class ProfileManagementPopup extends HookConsumerWidget {
               crossAxisAlignment: .stretch,
               children: [
                 // add another profile
-                FilledButton.icon(
-                  onPressed: () {
-                    onLinkWithOAuthPressed(context, ref);
-                  },
-                  label: Text(S.of(context).linkAnotherMalOauth),
-                  icon: Transform.rotate(
-                    angle: -math.pi / 4,
-                    child: Icon(Icons.key_outlined, applyTextScaling: true),
+                if (oauthCountdown != null)
+                  FilledButton.icon(
+                    onPressed: null,
+                    icon: SizedBox(
+                      height: 18,
+                      width: 18,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    label: AutoSizeText(
+                      "Authenticating in browser\n(${getCountdownString(oauthCountdown)})",
+                      maxLines: 2,
+                      minFontSize: 9,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  )
+                else
+                  FilledButton.icon(
+                    onPressed: () {
+                      onLinkWithOAuthPressed(context, ref);
+                    },
+                    label: AutoSizeText(
+                      S.of(context).linkAnotherMalOauth,
+                      maxLines: 1,
+                    ),
+                    icon: Transform.rotate(
+                      angle: -math.pi / 4,
+                      child: Icon(Icons.key_outlined, applyTextScaling: true),
+                    ),
                   ),
-                ),
 
                 // Sandbox link button
                 OutlinedButton.icon(
                   onPressed: () {
                     onQuickSandboxLinkPressed(context, ref);
                   },
-                  label: Text(S.of(context).quickSandboxLink),
+                  label: AutoSizeText(
+                    S.of(context).quickSandboxLink,
+                    maxLines: 1,
+                  ),
                   icon: Icon(Icons.person_add_alt, applyTextScaling: true),
                 ),
 
@@ -177,7 +212,10 @@ class ProfileManagementPopup extends HookConsumerWidget {
                       onDeleteProfile(context, ref, activeProfileAsync.value!);
                     }
                   },
-                  label: Text(S.of(context).disconnectActiveProfile),
+                  label: AutoSizeText(
+                    S.of(context).disconnectActiveProfile,
+                    maxLines: 1,
+                  ),
                   icon: Icon(Icons.logout_outlined, applyTextScaling: true),
                 ),
               ],
@@ -222,4 +260,8 @@ void onLinkWithOAuthPressed(BuildContext context, WidgetRef ref) {
         );
         ScaffoldMessenger.of(context).showSnackBar(snackbar);
       });
+}
+
+String getCountdownString(Duration oauthCountdown) {
+  return "${oauthCountdown.inMinutes.remainder(60).toString().padLeft(2, '0')}:${oauthCountdown.inSeconds.remainder(60).toString().padLeft(2, '0')}";
 }

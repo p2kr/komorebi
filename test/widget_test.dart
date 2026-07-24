@@ -20,11 +20,11 @@ void main() {
 
     // Build our app and trigger a frame.
     await tester.pumpWidget(const ProviderScope(child: MyApp()));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byIcon(Icons.monitor_heart_outlined), findsOneWidget);
     await tester.tap(find.byIcon(Icons.monitor_heart_outlined));
-    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(DiagnosticWindow), findsOneWidget);
   });

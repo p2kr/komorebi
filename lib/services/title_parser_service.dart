@@ -5,6 +5,7 @@ import 'package:komorebi/models/api/crawler_config.dart';
 import 'package:komorebi/utils/talker.dart';
 import 'package:path/path.dart' as path;
 import 'package:quiver/collection.dart';
+import 'package:quiver/strings.dart';
 
 /// Supported title parser types.
 enum TitleParserType { anitomy, regex, disabled }
@@ -46,8 +47,8 @@ class TitleParserService {
 
   /// Parses a raw title string using the active parser strategy with LRU caching.
   Future<CrawlerParsedTitle?> parseTitle(String title) async {
+    if (isBlank(title) || type == TitleParserType.disabled) return null;
     final trimmed = title.trim();
-    if (trimmed.isEmpty || type == TitleParserType.disabled) return null;
 
     if (_cache.containsKey(trimmed)) return _cache[trimmed];
 

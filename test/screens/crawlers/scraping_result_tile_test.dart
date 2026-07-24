@@ -108,7 +108,7 @@ void main() {
           resolution: '1080p',
           size: '1.35 GB',
         ),
-        equals('1080p | 1.35 GB'),
+        equals('1080p · 1.35 GB'),
       );
       expect(
         ScrapingResultTile.formatDownloadButtonLabel(

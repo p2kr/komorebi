@@ -104,17 +104,16 @@ class ScrapingResultTile extends StatelessWidget {
         // isThreeLine: true,
         titleAlignment: ListTileTitleAlignment.center,
         leading: Container(
+          alignment: .center,
+          width: 50,
+          height: 50,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
           decoration: BoxDecoration(
             color: context.colorScheme.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: context.colorScheme.outlineVariant),
           ),
-          child: AutoSizeText(
-            badgeLabel ?? 'N/A',
-            // textAlign: TextAlign.center,
-            maxLines: 2,
-          ),
+          child: AutoSizeText(badgeLabel ?? 'N/A', maxLines: 2),
         ),
         title: Text(crawlerResult.title),
         subtitle: Wrap(

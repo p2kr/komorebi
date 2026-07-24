@@ -1,5 +1,6 @@
 import 'package:komorebi/models/api/crawler_config.dart';
 import 'package:komorebi/services/title_parser_service.dart';
+import 'package:quiver/strings.dart';
 
 /// Configurable scoring weights and constants for [SearchRanker].
 class RankScoringConfig {
@@ -46,7 +47,7 @@ class SearchRanker {
     required List<CrawlerConfig> configs,
     RankScoringConfig scoringConfig = defaultConfig,
   }) async {
-    if (results.isEmpty) return [];
+    if (results.isEmpty || isBlank(query)) return [];
 
     final configOrder = <String, int>{};
     for (int i = 0; i < configs.length; i++) {

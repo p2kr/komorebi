@@ -1,8 +1,9 @@
 import 'package:dio/dio.dart';
-import 'package:komorebi/models/env.dart';
 import 'package:komorebi/models/api/mal_models.dart';
+import 'package:komorebi/models/env.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
+import 'package:quiver/strings.dart';
 
 // =============================================================================
 // Exceptions & Helpers
@@ -67,9 +68,9 @@ class MalApi {
     final client = clientId ?? defaultClientId;
 
     final headers = <String, Object?>{};
-    if (token != null && token.isNotEmpty) {
+    if (isNotBlank(token)) {
       headers['Authorization'] = 'Bearer $token';
-    } else if (client != null && client.isNotEmpty) {
+    } else if (isNotBlank(client)) {
       headers['X-MAL-CLIENT-ID'] = client;
     } else {
       talker.warning(

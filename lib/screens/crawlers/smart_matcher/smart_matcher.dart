@@ -57,6 +57,8 @@ class SmartMatcherScreen extends HookConsumerWidget {
                       hintText: "e.g. Attack on Titan S3 E1",
                       border: OutlineInputBorder(),
                     ),
+                    onFieldSubmitted: (_) =>
+                        onRunParallelCrawlerPressed(formKey, ref, mediaTitle),
                   ),
                   const SizedBox(height: 2),
                   SizedBox(
@@ -64,13 +66,8 @@ class SmartMatcherScreen extends HookConsumerWidget {
                     child: FilledButton.icon(
                       label: const Text("RUN PARALLEL CRAWLER"),
                       icon: const Icon(Icons.search_outlined),
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          ref
-                              .read(getCrawlerResultsProvider.notifier)
-                              .fetch(title: mediaTitle.text);
-                        }
-                      },
+                      onPressed: () =>
+                          onRunParallelCrawlerPressed(formKey, ref, mediaTitle),
                     ),
                   ),
                 ],
@@ -142,5 +139,15 @@ class SmartMatcherScreen extends HookConsumerWidget {
         ),
       ],
     );
+  }
+}
+
+void onRunParallelCrawlerPressed(
+  GlobalKey<FormState> formKey,
+  WidgetRef ref,
+  TextEditingController mediaTitle,
+) {
+  if (formKey.currentState!.validate()) {
+    ref.read(getCrawlerResultsProvider.notifier).fetch(title: mediaTitle.text);
   }
 }
