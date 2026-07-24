@@ -7,9 +7,8 @@ class CrawlerEngine {
   final CrawlerConfig config;
   final List<CrawlerParser> _parsers;
 
-  CrawlerEngine(this.config, {
-    List<CrawlerParser>? parsers,
-  }) : _parsers = parsers ?? [JsonCrawlerParser(), HtmlCrawlerParser()];
+  CrawlerEngine(this.config, {List<CrawlerParser>? parsers})
+    : _parsers = parsers ?? [JsonCrawlerParser(), HtmlCrawlerParser()];
 
   List<CrawlerResult> parse({required String rawHtml}) {
     if (!config.isActive || rawHtml.trim().isEmpty) return [];

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:app_links/app_links.dart';
+import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -13,6 +14,7 @@ import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/crawler/crawler_api.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';
+import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:protocol_handler/protocol_handler.dart';
@@ -37,10 +39,13 @@ Future<void> doInitialConfigurations(List<String> args) async {
   await setupAppWindow();
   // setup crawler configs
   await setupCrawler();
+  // add additional licences to about section
+  await addAdditionalLicences();
 
   talker.debug("exited init.doInitialConfigurations successfully");
 }
 
+/// Called in [HomePage]'s initState only.
 void initializeSettings(WidgetRef ref) {
   // Load current profile
   ref.read(currentProfileProvider);
@@ -184,4 +189,27 @@ class _DeepLinkProtocolListener extends ProtocolListener {
 
 Future<void> setupCrawler() async {
   await CrawlerApi.loadConfigs();
+}
+
+Future<void> addAdditionalLicences() async {
+  Dio? dio;
+  try {
+    dio = getDioWithLogger();
+
+    final anitomyLicenceResp = await dio.get(
+      "https://raw.githubusercontent.com/erengy/anitomy/refs/heads/develop/LICENSE",
+    );
+
+    LicenseRegistry.addLicense(() async* {
+      if (anitomyLicenceResp.statusCode == HttpStatus.ok) {
+        final data =
+            anitomyLicenceResp.data ?? "Mozilla Public License Version 2.0";
+        yield LicenseEntryWithLineBreaks(["erengy/anitomy"], data);
+      }
+    });
+  } catch (e, t) {
+    talker.warning("error fetching licence for anitomy", e, t);
+  } finally {
+    dio?.close();
+  }
 }

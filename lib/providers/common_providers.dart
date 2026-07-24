@@ -79,7 +79,9 @@ class SwapAlternateTitleNotifier extends _$SwapAlternateTitleNotifier {
 
   Future<void> load() async {
     final database = ref.read(dbProvider);
-    final config = await database.configsDao.getConfig(Settings.SWAP_ALTERNATE_TITLE.name);
+    final config = await database.configsDao.getConfig(
+      Settings.SWAP_ALTERNATE_TITLE.name,
+    );
     if (config != null) {
       state = config.configValue == 'true';
     }
@@ -88,6 +90,9 @@ class SwapAlternateTitleNotifier extends _$SwapAlternateTitleNotifier {
   void toggle() {
     state = !state;
     final database = ref.read(dbProvider);
-    database.configsDao.setConfig(Settings.SWAP_ALTERNATE_TITLE.name, state.toString());
+    database.configsDao.setConfig(
+      Settings.SWAP_ALTERNATE_TITLE.name,
+      state.toString(),
+    );
   }
 }

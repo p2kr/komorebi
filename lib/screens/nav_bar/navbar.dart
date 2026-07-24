@@ -42,11 +42,7 @@ class NavBar extends HookConsumerWidget {
           child: Column(
             children: [
               Expanded(child: ListView(children: menuTree)),
-              _buildMenuItem(
-                context,
-                NavItem.settings,
-                activeScreen,
-              ),
+              _buildMenuItem(context, NavItem.settings, activeScreen),
             ],
           ),
         ),

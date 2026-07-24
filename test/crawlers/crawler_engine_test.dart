@@ -171,8 +171,10 @@ void main() {
       final results = engine.parse(rawHtml: sampleJson);
 
       expect(results.length, equals(1));
-      expect(results.first.title,
-          equals('Tensei Shitara Slime Datta Ken S4 - 15 (1080p)'));
+      expect(
+        results.first.title,
+        equals('Tensei Shitara Slime Datta Ken S4 - 15 (1080p)'),
+      );
       expect(
         results.first.downloadUrl,
         equals('magnet:?xt=urn:btih:1234567890abcdef'),
@@ -181,18 +183,19 @@ void main() {
     });
 
     test(
-        'parses SubsPlease API JSON response with multiple resolutions correctly', () {
-      const config = CrawlerConfig(
-        id: 'subsplease',
-        name: 'SubsPlease API',
-        baseUrl: 'https://subsplease.org/api/?f=search&tz=UTC&s={title}',
-        itemSelector: 'json',
-        titleSelector: 'show',
-        linkSelector: 'downloads',
-        isActive: true,
-      );
+      'parses SubsPlease API JSON response with multiple resolutions correctly',
+      () {
+        const config = CrawlerConfig(
+          id: 'subsplease',
+          name: 'SubsPlease API',
+          baseUrl: 'https://subsplease.org/api/?f=search&tz=UTC&s={title}',
+          itemSelector: 'json',
+          titleSelector: 'show',
+          linkSelector: 'downloads',
+          isActive: true,
+        );
 
-      const sampleMultiResJson = '''
+        const sampleMultiResJson = '''
         {
           "Bleach - 12": {
             "show": "Bleach",
@@ -218,23 +221,24 @@ void main() {
         }
       ''';
 
-      final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleMultiResJson);
+        final engine = CrawlerEngine(config);
+        final results = engine.parse(rawHtml: sampleMultiResJson);
 
-      expect(results.length, equals(3));
+        expect(results.length, equals(3));
 
-      expect(results[0].title, equals('Bleach - 12 (480p)'));
-      expect(results[0].downloadUrl, equals('magnet:?xt=urn:btih:hash480'));
-      expect(results[0].size, equals('350 MB'));
+        expect(results[0].title, equals('Bleach - 12 (480p)'));
+        expect(results[0].downloadUrl, equals('magnet:?xt=urn:btih:hash480'));
+        expect(results[0].size, equals('350 MB'));
 
-      expect(results[1].title, equals('Bleach - 12 (720p)'));
-      expect(results[1].downloadUrl, equals('magnet:?xt=urn:btih:hash720'));
-      expect(results[1].size, equals('650 MB'));
+        expect(results[1].title, equals('Bleach - 12 (720p)'));
+        expect(results[1].downloadUrl, equals('magnet:?xt=urn:btih:hash720'));
+        expect(results[1].size, equals('650 MB'));
 
-      expect(results[2].title, equals('Bleach - 12 (1080p)'));
-      expect(results[2].downloadUrl, equals('magnet:?xt=urn:btih:hash1080'));
-      expect(results[2].size, equals('1.35 GB'));
-    });
+        expect(results[2].title, equals('Bleach - 12 (1080p)'));
+        expect(results[2].downloadUrl, equals('magnet:?xt=urn:btih:hash1080'));
+        expect(results[2].size, equals('1.35 GB'));
+      },
+    );
 
     test('parses size field when sizeSelector is provided in RSS', () {
       const config = CrawlerConfig(
@@ -296,8 +300,10 @@ void main() {
 
       expect(results.length, equals(1));
       expect(results.first.title, equals('Solo Leveling - 05'));
-      expect(results.first.downloadUrl,
-          equals('magnet:?xt=urn:btih:abcdef123456'));
+      expect(
+        results.first.downloadUrl,
+        equals('magnet:?xt=urn:btih:abcdef123456'),
+      );
       expect(results.first.popularity, equals(1500.0));
       expect(results.first.size, equals('450 MB'));
     });
@@ -331,24 +337,26 @@ void main() {
     });
 
     test(
-        'handles invalid CSS selectors gracefully without throwing exception', () {
-      const config = CrawlerConfig(
-        id: 'invalid_selector',
-        name: 'Invalid Selector Test',
-        baseUrl: 'https://example.com',
-        itemSelector: ':::invalid..css[selector',
-        titleSelector: 'title',
-        linkSelector: 'a',
-        isActive: true,
-      );
+      'handles invalid CSS selectors gracefully without throwing exception',
+      () {
+        const config = CrawlerConfig(
+          id: 'invalid_selector',
+          name: 'Invalid Selector Test',
+          baseUrl: 'https://example.com',
+          itemSelector: ':::invalid..css[selector',
+          titleSelector: 'title',
+          linkSelector: 'a',
+          isActive: true,
+        );
 
-      const sampleHtml = '<html><body><div>Test</div></body></html>';
+        const sampleHtml = '<html><body><div>Test</div></body></html>';
 
-      final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleHtml);
+        final engine = CrawlerEngine(config);
+        final results = engine.parse(rawHtml: sampleHtml);
 
-      expect(results, isEmpty);
-    });
+        expect(results, isEmpty);
+      },
+    );
 
     test('handles invalid JSON gracefully when itemSelector is json', () {
       const config = CrawlerConfig(

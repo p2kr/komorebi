@@ -15,7 +15,10 @@ class SimpleChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final resolvedStyle = labelStyle ?? context.textTheme.labelSmall;
+    final resolvedStyle = labelStyle == null
+        ? context.textTheme.labelSmall
+        : context.textTheme.labelSmall?.merge(labelStyle);
+
     final iconSize = resolvedStyle?.fontSize != null
         ? resolvedStyle!.fontSize! * 1.2
         : null;
@@ -46,6 +49,7 @@ class SimpleChip extends StatelessWidget {
           ],
         ),
         style: resolvedStyle,
+        maxLines: 1,
       ),
     );
   }

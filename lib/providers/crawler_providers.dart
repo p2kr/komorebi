@@ -6,7 +6,9 @@ import 'package:dio/dio.dart';
 import 'package:komorebi/crawlers/crawler_engine.dart';
 import 'package:komorebi/models/api/crawler_config.dart';
 import 'package:komorebi/services/crawler/crawler_api.dart';
+import 'package:komorebi/services/title_parser_service.dart';
 import 'package:komorebi/utils/dio.dart';
+import 'package:komorebi/utils/search_ranker.dart';
 import 'package:komorebi/utils/talker.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -16,6 +18,7 @@ typedef CrawlerResponse = ({
   List<CrawlerResult> results,
   bool isFetching,
   bool hasSearched,
+  String rawQuery,
 });
 
 final _dio = getDioWithLogger();
@@ -27,7 +30,12 @@ class GetCrawlerResults extends _$GetCrawlerResults {
   @override
   CrawlerResponse build() {
     ref.onDispose(() => _cancelToken?.cancel('Provider disposed'));
-    return (results: <CrawlerResult>[], isFetching: false, hasSearched: false);
+    return (
+      results: <CrawlerResult>[],
+      isFetching: false,
+      hasSearched: false,
+      rawQuery: "",
+    );
   }
 
   Future<void> fetch({required String title}) async {
@@ -36,6 +44,7 @@ class GetCrawlerResults extends _$GetCrawlerResults {
         results: <CrawlerResult>[],
         isFetching: false,
         hasSearched: false,
+        rawQuery: title,
       );
       return;
     }
@@ -44,7 +53,12 @@ class GetCrawlerResults extends _$GetCrawlerResults {
     final cancelToken = CancelToken();
     _cancelToken = cancelToken;
 
-    state = (results: <CrawlerResult>[], isFetching: true, hasSearched: true);
+    state = (
+      results: <CrawlerResult>[],
+      isFetching: true,
+      hasSearched: true,
+      rawQuery: title,
+    );
 
     await Future.wait(
       CrawlerApi.crawlerConfigs.map(
@@ -53,7 +67,19 @@ class GetCrawlerResults extends _$GetCrawlerResults {
     );
 
     if (!cancelToken.isCancelled) {
-      state = (results: state.results, isFetching: false, hasSearched: true);
+      final ranked = await SearchRanker.rankResults(
+        query: title,
+        results: state.results,
+        configs: CrawlerApi.crawlerConfigs,
+      );
+      if (!cancelToken.isCancelled) {
+        state = (
+          results: ranked,
+          isFetching: false,
+          hasSearched: true,
+          rawQuery: title,
+        );
+      }
     }
   }
 
@@ -84,11 +110,24 @@ class GetCrawlerResults extends _$GetCrawlerResults {
         );
 
         if (!cancelToken.isCancelled && parsed.isNotEmpty) {
-          state = (
-            results: [...state.results, ...parsed],
-            isFetching: true,
-            hasSearched: true,
+          final withAnitomy = await TitleParserService.instance.parseAndAttach(
+            parsed,
           );
+          final combined = [...state.results, ...withAnitomy];
+          final ranked = await SearchRanker.rankResults(
+            query: title,
+            results: combined,
+            configs: CrawlerApi.crawlerConfigs,
+          );
+
+          if (!cancelToken.isCancelled) {
+            state = (
+              results: ranked,
+              isFetching: true,
+              hasSearched: true,
+              rawQuery: title,
+            );
+          }
         }
       }
     } catch (e, t) {
@@ -100,6 +139,11 @@ class GetCrawlerResults extends _$GetCrawlerResults {
 
   void clearResult() {
     _cancelToken?.cancel('Cleared results');
-    state = (results: <CrawlerResult>[], isFetching: false, hasSearched: false);
+    state = (
+      results: <CrawlerResult>[],
+      isFetching: false,
+      hasSearched: false,
+      rawQuery: "",
+    );
   }
 }

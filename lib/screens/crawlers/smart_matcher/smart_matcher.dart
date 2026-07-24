@@ -5,6 +5,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/providers/crawler_providers.dart';
 import 'package:komorebi/screens/crawlers/smart_matcher/scraping_result_tile.dart';
 import 'package:komorebi/themes/theme.dart';
+import 'package:komorebi/widgets/chips.dart';
 
 class SmartMatcherScreen extends HookConsumerWidget {
   const SmartMatcherScreen({super.key});
@@ -84,23 +85,24 @@ class SmartMatcherScreen extends HookConsumerWidget {
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: .stretch,
+                spacing: 2,
                 children: [
-                  Row(
-                    mainAxisAlignment: .spaceBetween,
-                    crossAxisAlignment: .end,
-                    children: [
-                      Text(
-                        "Ranked Scraping Results",
-                        style: context.textTheme.titleLarge?.copyWith(
-                          fontFamily: context.fontSerif,
-                        ),
-                      ),
-                      Text(
-                        "Count: ${crawlerResults.results.length}",
-                        style: context.textTheme.labelLarge,
-                      ),
-                    ],
+                  Text(
+                    "Ranked Scraping Results",
+                    style: context.textTheme.titleLarge?.copyWith(
+                      fontFamily: context.fontSerif,
+                    ),
                   ),
+                  if (crawlerResults.rawQuery.isNotEmpty)
+                    SimpleChip(
+                      label:
+                          "Showing ${crawlerResults.results.length} results for: ${crawlerResults.rawQuery}",
+                      labelStyle: context.textTheme.bodyMedium?.copyWith(
+                        fontStyle: .italic,
+                        overflow: .ellipsis,
+                      ),
+                    ),
+                  const SizedBox(height: 2),
                   Expanded(
                     child:
                         crawlerResults.results.isNotEmpty ||
@@ -111,7 +113,7 @@ class SmartMatcherScreen extends HookConsumerWidget {
                                 (crawlerResults.isFetching ? 1 : 0),
                             itemBuilder: (context, index) {
                               if (index == crawlerResults.results.length) {
-                                return const Padding(
+                                return Padding(
                                   padding: EdgeInsets.all(16.0),
                                   child: Center(
                                     child: ListTile(
