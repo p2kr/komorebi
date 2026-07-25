@@ -9,6 +9,9 @@ const DB_FILE_NAME = "$DB_NAME.sqlite";
 /// https://p2kr.github.io/komorebi/
 const MAL_OAUTH_REDIRECT_URL = "https://p2kr.github.io/komorebi/";
 
+/// Vault location
+const VAULT_LOC = "vault";
+
 /// Set of configs stored in db
 enum Settings {
   LAST_USED_PROFILE,

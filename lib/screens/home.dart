@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/screens/appbar/appbar.dart';
 import 'package:komorebi/screens/nav_bar/navbar.dart';
 import 'package:komorebi/utils/init.dart';
+import 'package:libtorrent_flutter/libtorrent_flutter.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -23,5 +24,13 @@ class _HomePageState extends ConsumerState<HomePage> {
     initializeSettings(ref);
 
     super.initState();
+  }
+
+  @override
+  void dispose() async {
+    super.dispose();
+
+    // TODO:  Find better place under window.close
+    await LibtorrentFlutter.instance.dispose();
   }
 }

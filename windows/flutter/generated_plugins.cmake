@@ -5,6 +5,8 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   desktop_webview_window
+  media_kit_libs_windows_video
+  media_kit_video
   protocol_handler_windows
   screen_retriever_windows
   url_launcher_windows
@@ -15,6 +17,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
   jni
+  libtorrent_flutter
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

@@ -17,6 +17,9 @@ import 'package:komorebi/services/database.dart';
 import 'package:komorebi/utils/constants.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/talker.dart';
+import 'package:libtorrent_flutter/libtorrent_flutter.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:window_manager/window_manager.dart';
@@ -41,9 +44,17 @@ Future<void> doInitialConfigurations(List<String> args) async {
   // setup crawler configs
   await setupCrawler();
   // add additional licences to about section
-  await addAdditionalLicences();
+  await setupAdditionalLicences();
+  // setup libtorrent
+  await setupLibtorrent();
+  // setup media kit
+  setupMediaKit();
 
   talker.debug("exited init.doInitialConfigurations successfully");
+}
+
+void setupMediaKit() {
+  MediaKit.ensureInitialized();
 }
 
 /// Called in [HomePage]'s initState only.
@@ -197,7 +208,7 @@ Future<void> setupCrawler() async {
   await CrawlerApi.loadConfigs();
 }
 
-Future<void> addAdditionalLicences() async {
+Future<void> setupAdditionalLicences() async {
   Dio? dio;
   try {
     dio = getDioWithLogger();
@@ -218,4 +229,13 @@ Future<void> addAdditionalLicences() async {
   } finally {
     dio?.close();
   }
+}
+
+Future<void> setupLibtorrent() async {
+  String downloadDirectory = join(
+    (await getApplicationSupportDirectory()).path,
+    VAULT_LOC,
+  );
+  talker.debug("setting up vault at $downloadDirectory");
+  await LibtorrentFlutter.init(defaultSavePath: downloadDirectory);
 }
