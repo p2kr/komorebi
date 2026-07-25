@@ -3,87 +3,148 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Authentication Successful</title>
+  <title>Komorebi - Authentication</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet">
   <style>
+      * {
+          box-sizing: border-box;
+      }
+
       body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
           display: flex;
           justify-content: center;
           align-items: center;
-          height: 100vh;
-          background: #f4f6f8;
+          min-height: 100vh;
+          background: #121212;
+          color: #f2f2f2;
           margin: 0;
+          padding: 20px;
           text-align: center;
       }
 
       .card {
-          background: white;
-          padding: 40px;
-          border-radius: 12px;
-          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-          max-width: 400px;
+          background: #1e1e1e;
+          padding: 40px 32px;
+          border-radius: 8px;
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+          max-width: 420px;
+          width: 100%;
+          border: 1px solid #2e2e2e;
+      }
+
+      .icon {
+          font-size: 48px;
+          margin-bottom: 16px;
+      }
+
+      h1 {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: 1.6rem;
+          font-weight: 700;
+          margin: 0 0 12px 0;
+          color: #ffffff;
+      }
+
+      p {
+          font-family: 'Inter', sans-serif;
+          color: #a0a0a0;
+          font-size: 0.95rem;
+          line-height: 1.5;
+          margin: 0 0 24px 0;
       }
 
       .btn {
+          font-family: 'JetBrains Mono', monospace;
           display: inline-block;
-          margin-top: 20px;
-          padding: 12px 24px;
-          background: #2e51a2; /* MyAnimeList Blue */
-          color: white;
+          width: 100%;
+          padding: 14px 24px;
+          background: #ffffff;
+          color: #000000;
           text-decoration: none;
-          border-radius: 6px;
-          font-weight: bold;
+          border-radius: 4px;
+          font-weight: 600;
+          font-size: 0.95rem;
+          transition: background-color 0.2s, transform 0.1s;
+          border: none;
+          cursor: pointer;
       }
 
-      .hidden {
-          display: none;
+      .btn:hover {
+          background: #e0e0e0;
+      }
+
+      .btn:active {
+          transform: scale(0.98);
+      }
+
+      .subtext {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.8rem;
+          color: #757575;
+          margin-top: 16px;
+          margin-bottom: 0;
       }
   </style>
 </head>
 <body>
 <div class="card">
-  <h1>✅ Successfully Authenticated</h1>
-  <p>You can safely close this tab and return to the app.</p>
+  <div class="icon" id="status-icon">✅</div>
+  <h1 id="status-title">Successfully Authenticated</h1>
+  <p id="status-desc">Redirecting to Komorebi desktop app...</p>
 
-  <!-- Fallback UI if the browser blocks the automatic redirect -->
-  <div id="fallback" class="hidden">
-    <p style="font-size: 0.9em; color: #666; margin-top: 30px;">
-      If the app didn't open automatically, click below:
-    </p>
-    <a id="manual-link" href="#" class="btn">Open App Manually</a>
-  </div>
+  <a id="manual-link" href="#" class="btn">Open Komorebi App</a>
+  <p class="subtext" id="subtext">If your browser asks for permission to open Komorebi, click <strong>Open</strong> or
+    <strong>Allow</strong>.</p>
 </div>
 
 <script>
-  // 1. Define your desktop app's custom protocol
-  const APP_SCHEME = "komorebi://auth-callback";
+    const APP_SCHEME = "komorebi://auth-callback";
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
 
-  // 2. Extract the OAuth parameters MAL appended to this page's URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const code = urlParams.get('code');
-  const state = urlParams.get('state');
+    const manualBtn = document.getElementById('manual-link');
+    const statusTitle = document.getElementById('status-title');
+    const statusDesc = document.getElementById('status-desc');
+    const statusIcon = document.getElementById('status-icon');
 
-  if (code) {
-      // 3. Construct the deep link to wake up your desktop app
-      const deepLink = `${APP_SCHEME}?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state || '')}`;
+    if (code) {
+        const deepLink = `${APP_SCHEME}?code=${encodeURIComponent(code)}${state ? `&state=${encodeURIComponent(state)}` : ''}`;
+        manualBtn.href = deepLink;
 
-      // 4. Attempt to trigger the deep link automatically
-      window.location.href = deepLink;
+        // When user clicks the button explicitly (user gesture activation)
+        manualBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.location.href = deepLink;
+            statusDesc.textContent = "Opening app... You may safely close this browser tab.";
+        });
 
-      // 5. Modern browsers often block automatic custom protocol redirects
-      // without user interaction. We show a fallback button after 1 second.
-      setTimeout(() => {
-          document.getElementById('fallback').classList.remove('hidden');
-          document.getElementById('manual-link').href = deepLink;
-      }, 1000);
-  } else {
-      // Handle cases where the user denied access or MAL returned an error
-      const error = urlParams.get('error');
-      document.querySelector('.card').innerHTML = `
-          <h1>❌ Authentication Failed</h1>
-          <p>${error || "No authentication code found."}</p>
-      `;
-  }
+        // Attempt automatic redirect via iframe and location.assign
+        try {
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = deepLink;
+            document.body.appendChild(iframe);
+        } catch (err) {
+        }
+
+        try {
+            window.location.assign(deepLink);
+        } catch (err) {
+        }
+    } else {
+        statusIcon.textContent = "❌";
+        statusTitle.textContent = "Authentication Failed";
+        statusDesc.textContent = error || "No authorization code received";
+        manualBtn.style.display = "none";
+        document.getElementById('subtext').style.display = "none";
+    }
 </script>
 </body>
 </html>
