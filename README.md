@@ -10,7 +10,7 @@ MyAnimeList.**
 ![SQLite Drift](https://img.shields.io/badge/Drift%20SQLite-2.34%2B-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/Riverpod-3.3%2B-6F42C1?style=for-the-badge&logo=dart&logoColor=white)
 [![Codecov](https://img.shields.io/codecov/c/github/p2kr/komorebi?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/p2kr/komorebi)
-![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
+![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg?style=for-the-badge)
 
 ---
 
@@ -181,6 +181,6 @@ explore our internal documentation:
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** - see
 the [LICENSE](file:///c:/Users/Prince/Documents/CODE/mal_viewer/LICENSE) file for details.
 
