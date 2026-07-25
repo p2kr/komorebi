@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/providers/common_providers.dart';
 import 'package:komorebi/screens/browser_mode/browser.dart';
 import 'package:komorebi/screens/crawlers/parser_sources.dart';
 import 'package:komorebi/screens/crawlers/selected_sandbox.dart';
 import 'package:komorebi/screens/crawlers/smart_matcher/smart_matcher.dart';
 import 'package:komorebi/screens/dashboard/dashboard.dart';
 import 'package:komorebi/screens/discover/discover.dart';
-import 'package:komorebi/screens/local_collection/collections.dart';
+import 'package:komorebi/screens/local_collection/local_collection.dart';
 import 'package:komorebi/screens/settings/settings_screen.dart';
 import 'package:komorebi/themes/theme.dart';
-import 'package:komorebi/utils/talker.dart';
 
 // ── Main Navigation Bar Widget ───────────────────────────────────────────────
 
@@ -20,15 +20,15 @@ class NavBar extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final activeScreen = useState(NavItem.dashboard);
+    final activeScreen = ref.watch(activeScreenProvider);
 
     final menuTree = useMemoized(
       () => NavItem.roots
-          .map((item) => _buildMenuItem(context, item, activeScreen))
+          .map((item) => _buildMenuItem(context, item, activeScreen, ref))
           .toList(),
       [
         Localizations.localeOf(context),
-        activeScreen.value,
+        activeScreen,
         // will change on dark/light switch
         context.colorScheme.secondaryContainer,
       ],
@@ -42,7 +42,7 @@ class NavBar extends HookConsumerWidget {
           child: Column(
             children: [
               Expanded(child: ListView(children: menuTree)),
-              _buildMenuItem(context, NavItem.settings, activeScreen),
+              _buildMenuItem(context, NavItem.settings, activeScreen, ref),
             ],
           ),
         ),
@@ -50,7 +50,7 @@ class NavBar extends HookConsumerWidget {
         // IndexedStack keeps every screen alive — state is never lost on switch.
         Expanded(
           child: IndexedStack(
-            index: NavItem.screens.indexOf(activeScreen.value),
+            index: NavItem.screens.indexOf(activeScreen),
             children: [for (final screen in NavItem.screens) screen.widget!],
           ),
         ),
@@ -68,7 +68,7 @@ enum NavItem {
   smartMatcher(Icons.auto_awesome_outlined, SmartMatcherScreen()),
   parserSources(Icons.code_outlined, ParserSourcesScreen()),
   selectedSandbox(Icons.science_outlined, SelectedSandboxScreen()),
-  collections(Icons.collections_bookmark_outlined, Collections()),
+  collections(Icons.collections_bookmark_outlined, LocalCollection()),
   browser(Icons.explore_outlined, Browser()),
   settings(Icons.settings_outlined, SettingsScreen());
 
@@ -107,7 +107,8 @@ enum NavItem {
 Widget _buildMenuItem(
   BuildContext context,
   NavItem item,
-  ValueNotifier<NavItem> activeScreen,
+  NavItem activeScreen,
+  WidgetRef ref,
 ) {
   if (item.children.isNotEmpty) {
     return ExpansionTile(
@@ -115,12 +116,12 @@ Widget _buildMenuItem(
       title: Text(item.title(context)),
       childrenPadding: const EdgeInsets.only(left: 16.0),
       children: item.children
-          .map((child) => _buildMenuItem(context, child, activeScreen))
+          .map((child) => _buildMenuItem(context, child, activeScreen, ref))
           .toList(),
     );
   }
 
-  final isSelected = item == activeScreen.value;
+  final isSelected = item == activeScreen;
   return ListTile(
     leading: Icon(item.icon),
     title: Text(item.title(context)),
@@ -130,8 +131,7 @@ Widget _buildMenuItem(
         ? context.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)
         : null,
     onTap: () {
-      activeScreen.value = item;
-      talker.debug('Nav → $item');
+      ref.read(activeScreenProvider.notifier).switchScreen(item);
     },
   );
 }

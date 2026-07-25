@@ -55,6 +55,7 @@ class TitleParserService {
     CrawlerParsedTitle? parsed;
     if (type == TitleParserType.anitomy) {
       parsed = await parseWithAnitomy(trimmed, executablePath);
+      parsed ??= parseWithRegex(trimmed);
     } else if (type == TitleParserType.regex) {
       parsed = parseWithRegex(trimmed);
     }
@@ -123,22 +124,6 @@ class TitleParserService {
       episode: ep != null ? [ep] : null,
       videoResolution: res != null ? [res] : null,
     );
-  }
-
-  /// Parses titles for a list of [CrawlerResult] items and returns updated results.
-  Future<List<CrawlerResult>> parseAndAttach(
-    List<CrawlerResult> results,
-  ) async {
-    final updated = <CrawlerResult>[];
-    for (final res in results) {
-      if (res.parsedTitle != null) {
-        updated.add(res);
-      } else {
-        final parsed = await parseTitle(res.title);
-        updated.add(res.copyWith(parsedTitle: parsed));
-      }
-    }
-    return updated;
   }
 
   void clearCache() => _cache.clear();

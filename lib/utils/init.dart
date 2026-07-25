@@ -10,6 +10,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/find_locale.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/providers/common_providers.dart';
+import 'package:komorebi/providers/local_collection_providers.dart';
 import 'package:komorebi/providers/profile_management_provider.dart';
 import 'package:komorebi/services/crawler/crawler_api.dart';
 import 'package:komorebi/services/database.dart';
@@ -50,7 +51,12 @@ void initializeSettings(WidgetRef ref) {
   // Load current profile
   ref.read(currentProfileProvider);
   ref.read(allProfilesProvider);
+
+  // Load alternate tile settings
   ref.read(swapAlternateTitleProvider.notifier).load();
+
+  // Initialize download queue
+  ref.read(downloadQueueProvider);
 }
 
 /// Apply window options for desktop platforms

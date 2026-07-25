@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/models/api/crawler_config.dart';
 import 'package:komorebi/services/title_parser_service.dart';
 
 void main() {
@@ -48,20 +47,12 @@ void main() {
       expect(parsed, isNull);
     });
 
-    test('attaches parsed titles to CrawlerResult list', () async {
-      service.type = TitleParserType.anitomy;
-      const results = [
-        CrawlerResult(
-          title: '[SubsPlease] Bleach - 12 (1080p)',
-          downloadUrl: 'https://example.com/bleach.torrent',
-          source: 'nyaa',
-        ),
-      ];
-
-      final updated = await service.parseAndAttach(results);
-      expect(updated.length, equals(1));
-      expect(updated.first.parsedTitle, isNotNull);
-      expect(updated.first.parsedTitle?.title, contains('Bleach'));
+    test('parses title successfully for item', () async {
+      service.type = TitleParserType.regex;
+      final parsed = await service.parseTitle(
+          '[SubsPlease] Bleach - 12 (1080p)');
+      expect(parsed, isNotNull);
+      expect(parsed?.releaseGroup, contains('SubsPlease'));
     });
   });
 }

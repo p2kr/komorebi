@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:komorebi/crawlers/crawler_engine.dart';
 import 'package:komorebi/models/api/crawler_config.dart';
 import 'package:komorebi/services/crawler/crawler_api.dart';
-import 'package:komorebi/services/title_parser_service.dart';
 import 'package:komorebi/utils/dio.dart';
 import 'package:komorebi/utils/search_ranker.dart';
 import 'package:komorebi/utils/talker.dart';
@@ -110,10 +109,7 @@ class GetCrawlerResults extends _$GetCrawlerResults {
         );
 
         if (!cancelToken.isCancelled && parsed.isNotEmpty) {
-          final withAnitomy = await TitleParserService.instance.parseAndAttach(
-            parsed,
-          );
-          final combined = [...state.results, ...withAnitomy];
+          final combined = [...state.results, ...parsed];
           final ranked = await SearchRanker.rankResults(
             query: title,
             results: combined,

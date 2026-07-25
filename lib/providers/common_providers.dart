@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/screens/nav_bar/navbar.dart';
 import 'package:komorebi/services/database.dart';
 import 'package:komorebi/themes/theme.dart';
 import 'package:komorebi/themes/theme_builder.dart';
@@ -94,5 +95,17 @@ class SwapAlternateTitleNotifier extends _$SwapAlternateTitleNotifier {
       Settings.SWAP_ALTERNATE_TITLE.name,
       state.toString(),
     );
+  }
+}
+
+@riverpod
+class ActiveScreenNotifier extends _$ActiveScreenNotifier {
+  @override
+  NavItem build() {
+    return NavItem.dashboard;
+  }
+
+  void switchScreen(NavItem newScreen) {
+    state = newScreen;
   }
 }

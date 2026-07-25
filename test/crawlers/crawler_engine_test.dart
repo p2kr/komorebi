@@ -6,7 +6,7 @@ import 'package:komorebi/models/api/crawler_config.dart';
 
 void main() {
   group('CrawlerEngine Tests', () {
-    test('parses Nyaa RSS correctly', () {
+    test('parses Nyaa RSS correctly', () async {
       const config = CrawlerConfig(
         id: 'nyaa',
         name: 'Nyaa.si Anime Torrents',
@@ -29,7 +29,7 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleRss);
+      final results = await engine.parse(rawHtml: sampleRss);
 
       expect(results.length, equals(1));
       expect(
@@ -43,7 +43,7 @@ void main() {
       expect(results.first.source, equals('nyaa'));
     });
 
-    test('parses RSS item correctly', () {
+    test('parses RSS item correctly', () async {
       const config = CrawlerConfig(
         id: 'subsplease',
         name: 'SubsPlease RSS',
@@ -66,7 +66,7 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleRss);
+      final results = await engine.parse(rawHtml: sampleRss);
 
       expect(results.length, equals(1));
       expect(results.first.title, equals('[SubsPlease] Bleach - 12 (1080p)'));
@@ -79,7 +79,7 @@ void main() {
 
     test(
       'returns empty list immediately if config is disabled (isActive == false)',
-      () {
+          () async {
         const config = CrawlerConfig(
           id: 'disabled_provider',
           name: 'Disabled Provider',
@@ -102,13 +102,14 @@ void main() {
       ''';
 
         final engine = CrawlerEngine(config);
-        final results = engine.parse(rawHtml: sampleRss);
+        final results = await engine.parse(rawHtml: sampleRss);
 
         expect(results, isEmpty);
       },
     );
 
-    test('parses popularity field when popularitySelector is provided', () {
+    test(
+        'parses popularity field when popularitySelector is provided', () async {
       const config = CrawlerConfig(
         id: 'nyaa_rss',
         name: 'Nyaa RSS',
@@ -133,13 +134,13 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleRss);
+      final results = await engine.parse(rawHtml: sampleRss);
 
       expect(results.length, equals(1));
       expect(results.first.popularity, equals(250.0));
     });
 
-    test('parses SubsPlease API JSON response correctly', () {
+    test('parses SubsPlease API JSON response correctly', () async {
       const config = CrawlerConfig(
         id: 'subsplease',
         name: 'SubsPlease API',
@@ -168,7 +169,7 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleJson);
+      final results = await engine.parse(rawHtml: sampleJson);
 
       expect(results.length, equals(1));
       expect(
@@ -184,7 +185,7 @@ void main() {
 
     test(
       'parses SubsPlease API JSON response with multiple resolutions correctly',
-      () {
+          () async {
         const config = CrawlerConfig(
           id: 'subsplease',
           name: 'SubsPlease API',
@@ -222,7 +223,7 @@ void main() {
       ''';
 
         final engine = CrawlerEngine(config);
-        final results = engine.parse(rawHtml: sampleMultiResJson);
+        final results = await engine.parse(rawHtml: sampleMultiResJson);
 
         expect(results.length, equals(3));
 
@@ -240,7 +241,7 @@ void main() {
       },
     );
 
-    test('parses size field when sizeSelector is provided in RSS', () {
+    test('parses size field when sizeSelector is provided in RSS', () async {
       const config = CrawlerConfig(
         id: 'nyaa_rss',
         name: 'Nyaa RSS',
@@ -265,13 +266,14 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleRss);
+      final results = await engine.parse(rawHtml: sampleRss);
 
       expect(results.length, equals(1));
       expect(results.first.size, equals('1.2 GiB'));
     });
 
-    test('parses JSON array format with custom selectors dynamically', () {
+    test(
+        'parses JSON array format with custom selectors dynamically', () async {
       const config = CrawlerConfig(
         id: 'custom_api',
         name: 'Custom Tracker',
@@ -296,7 +298,7 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleJson);
+      final results = await engine.parse(rawHtml: sampleJson);
 
       expect(results.length, equals(1));
       expect(results.first.title, equals('Solo Leveling - 05'));
@@ -308,7 +310,7 @@ void main() {
       expect(results.first.size, equals('450 MB'));
     });
 
-    test('resolves relative download URLs against baseUrl', () {
+    test('resolves relative download URLs against baseUrl', () async {
       const config = CrawlerConfig(
         id: 'relative_site',
         name: 'Relative Site',
@@ -327,7 +329,7 @@ void main() {
       ''';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleHtml);
+      final results = await engine.parse(rawHtml: sampleHtml);
 
       expect(results.length, equals(1));
       expect(
@@ -338,7 +340,7 @@ void main() {
 
     test(
       'handles invalid CSS selectors gracefully without throwing exception',
-      () {
+          () async {
         const config = CrawlerConfig(
           id: 'invalid_selector',
           name: 'Invalid Selector Test',
@@ -352,13 +354,13 @@ void main() {
         const sampleHtml = '<html><body><div>Test</div></body></html>';
 
         final engine = CrawlerEngine(config);
-        final results = engine.parse(rawHtml: sampleHtml);
+        final results = await engine.parse(rawHtml: sampleHtml);
 
         expect(results, isEmpty);
       },
     );
 
-    test('handles invalid JSON gracefully when itemSelector is json', () {
+    test('handles invalid JSON gracefully when itemSelector is json', () async {
       const config = CrawlerConfig(
         id: 'json_test',
         name: 'JSON Test',
@@ -372,9 +374,41 @@ void main() {
       const sampleInvalidJson = '{ invalid json content }';
 
       final engine = CrawlerEngine(config);
-      final results = engine.parse(rawHtml: sampleInvalidJson);
+      final results = await engine.parse(rawHtml: sampleInvalidJson);
 
       expect(results, isEmpty);
+    });
+
+    test(
+        'automatically parses and attaches parsedTitle to extracted items', () async {
+      const config = CrawlerConfig(
+        id: 'nyaa',
+        name: 'Nyaa',
+        baseUrl: 'https://nyaa.si',
+        itemSelector: 'item',
+        titleSelector: 'title',
+        linkSelector: 'link',
+        isActive: true,
+      );
+
+      const sampleRss = '''
+        <rss version="2.0">
+          <channel>
+            <item>
+              <title>[SubsPlease] One Piece - 1080 (1080p) [12345678].mkv</title>
+              <link>https://nyaa.si/download/123456.torrent</link>
+            </item>
+          </channel>
+        </rss>
+      ''';
+
+      final engine = CrawlerEngine(config);
+      final results = await engine.parse(rawHtml: sampleRss);
+
+      expect(results.length, equals(1));
+      expect(results.first.parsedTitle, isNotNull);
+      expect(results.first.parsedTitle?.releaseGroup, contains('SubsPlease'));
+      expect(results.first.parsedTitle?.videoResolution, contains('1080p'));
     });
 
     test('JsonCrawlerParser and HtmlCrawlerParser work independently', () {
