@@ -1,13 +1,12 @@
 # 🌸 Komorebi (木漏れ日)
 
-**An All-in-One Native Flutter Desktop Application for Consuming, Archiving, and Synchronizing Manga & Anime from
-MyAnimeList/AniList.**
+**An All-in-One Native Desktop Client & Local Sidecar Engine for Consuming, Archiving, and Synchronizing Manga & Anime from MyAnimeList / AniList.**
 
 ![Version](https://img.shields.io/badge/Version-1.0.0-8A2BE2?style=for-the-badge)
 ![Dart](https://img.shields.io/badge/Dart-3.12%2B-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 ![Flutter](https://img.shields.io/badge/Flutter-3.24%2B-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Go](https://img.shields.io/badge/Go-1.22%2B-00ADD8?style=for-the-badge&logo=go&logoColor=white)
 ![Platform](https://img.shields.io/badge/Platforms-Windows%20%7C%20Linux-0078D4?style=for-the-badge&logo=windows&logoColor=white)
-![SQLite Drift](https://img.shields.io/badge/Drift%20SQLite-2.34%2B-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Riverpod](https://img.shields.io/badge/Riverpod-3.3%2B-6F42C1?style=for-the-badge&logo=dart&logoColor=white)
 [![Codecov](https://img.shields.io/codecov/c/github/p2kr/komorebi?style=for-the-badge&logo=codecov&logoColor=white)](https://codecov.io/gh/p2kr/komorebi)
 ![License: AGPL v3](https://img.shields.io/badge/License-AGPLv3-blue.svg?style=for-the-badge)
@@ -16,38 +15,22 @@ MyAnimeList/AniList.**
 
 ## 📌 Overview
 
-**Komorebi** is a powerful, standalone application built with Flutter, tailored specifically for **Windows** and
-**Linux** desktop platforms. Designed as an evolution of web-frontend and Node-backend media synchronizers, Komorebi
-eliminates
-the need to run external local backend servers or browser extensions. Everything runs within a high-performance unified
-native binary.
+**Komorebi** is a powerful desktop application tailored specifically for **Windows** and **Linux** platforms. Built using a decoupled architecture, Komorebi pairs a high-performance **Flutter Desktop Client (`komorebi_client`)** with a dedicated **Go Local Backend Sidecar (`komorebi_server`)**.
 
-Whether you are synchronizing your watching progress with **MyAnimeList (MAL)** or **AniList**, browsing streaming
-archives ad-free via
-our embedded loopback proxy, or downloading high-bitrate media directly to your hard drive, Komorebi delivers a
-seamless, premium experience.
+The Flutter client delivers a reactive user experience adhering to Feature-First Clean Architecture, while the Go backend sidecar manages local database persistence, HTML scraping, torrent downloading, title parsing, and local adblock proxying over local loopback (`http://127.0.0.1:8080`).
 
 ---
 
 ## ✨ Key Features
 
-- 🖥️ **Native Desktop Architecture**: Powered by Flutter and `window_manager`, offering custom window dimensions,
-  borderless layouts, drag-handling, and native system OS integration.
-- ⚡ **Zero Local Host Requirement**: Eliminates external Node.js servers. Leveraging Dart's native `dart:io`, Komorebi
-  directly reads and writes files to your system without browser sandbox restrictions.
-- 🔑 **OAuth 2.0 PKCE & Deep Linking**: Native deep-linking integration (`komorebi://auth-callback`) and PKCE flow for
-  secure, 1-click MyAnimeList/AniList authentication with a hosted redirect landing page.
-- 🛡️ **Embedded Adblock Loopback Proxy**: Features an internal HTTP loopback server (`LocalAdblockProxy`) running on
-  port `3001` that intercepts requests, strips tracking scripts, removes ad banners, and purges unwanted popups/iframes
-  before serving HTML to inline web views.
-- 💾 **Relational SQLite Persistence (Drift)**: A robust, type-safe SQLite database layer managing user profiles
-  (`Profiles`), download queues (`QueueItems`), audit logs (`Logs`), and app configuration (`Configs`).
-- 🕷️ **HTML Scraper & Crawler Engine**: Built-in CSS selector extraction engine (`CrawlerEngine`) powered by
-  `package:html` and `dio` to traverse media directories and extract streaming or download links.
-- 🌗 **Curated Obsidian Aesthetic**: Designed with a sleek, dark/light monochrome visual identity using premium
-  typography (**Inter**, **JetBrains Mono**, and **Playfair Display**).
-- 📊 **Real-Time Diagnostics Terminal**: Integrated audit logging and debugging console powered by `talker` with level
-  and category filters for instant developer feedback.
+- 🖥️ **Native Desktop Architecture**: Powered by Flutter (`komorebi_client`) and Go (`komorebi_server`), offering borderless layouts, drag-handling, and OS integration.
+- ⚡ **Local Backend Sidecar**: High-performance Go sidecar process automatically managed by the Flutter client over local loopback IPC.
+- 🔑 **OAuth 2.0 PKCE & Deep Linking**: Native deep-linking integration (`komorebi://auth-callback`) and PKCE flow for 1-click MyAnimeList/AniList authentication.
+- 🛡️ **Embedded Adblock Loopback Proxy**: Local HTTP loopback server that intercepts requests, strips tracking scripts, and sanitizes HTML before serving web views.
+- 💾 **Local Relational SQLite Persistence**: SQLite database layer managing user profiles (`Profiles`), download queues (`QueueItems`), audit logs (`Logs`), and app configuration (`Configs`).
+- 🕷️ **HTML Scraper & Crawler Engine**: Built-in CSS selector extraction engine to traverse media trackers and parse streaming/download links.
+- 🌗 **Curated Obsidian Aesthetic**: Designed with a sleek monochrome visual identity using premium typography (**Inter**, **JetBrains Mono**, **Playfair Display**).
+- 📊 **Real-Time Diagnostics Terminal**: Integrated audit logging console powered by `talker` with level and category filters.
 
 ---
 
@@ -55,58 +38,44 @@ seamless, premium experience.
 
 ```mermaid
 graph TD
-    subgraph GUI["Desktop UI Layer (Flutter / Riverpod)"]
-        A["Main Window / Custom Titlebar"] --> B["Adblock WebView / Browser Mode"]
-        A --> C["MyAnimeList / AniList Profile Switcher"]
-        A --> D["Diagnostics Terminal"]
+    subgraph Client["Flutter Desktop Frontend (komorebi_client)"]
+        UI["Desktop UI Layer (Flutter / Riverpod)"]
+        State["Application Controllers & State"]
+        DioClient["IPC REST / WebSocket Client"]
+        UI --> State --> DioClient
     end
 
-    subgraph Engine["Core Engine & Network Layer"]
-        B -->|HTTP Requests| E["LocalAdblockProxy (Loopback Server :3001)"]
-        E -->|Sanitizes DOM & Strips Ads| F["External Streaming Sites"]
-        C -->|OAuth PKCE Deep Link| G["MAL / AniList REST APIs / Auth Redirect"]
-        H["CrawlerEngine (CSS Selector Parser)"] -->|Extracts Media| F
+    subgraph IPC["Local Loopback IPC (127.0.0.1:8080)"]
+        DioClient <-->|REST APIs & WebSockets| Sidecar
     end
 
-    subgraph Storage["Persistence & File System (dart:io / Drift)"]
-        I["Drift SQLite Database (Profiles, Queue, Logs, Configs)"]
-        J["Local Hard Drive (Media & Downloads)"]
+    subgraph Server["Go Backend Sidecar (komorebi_server)"]
+        Sidecar["Loopback HTTP / WebSocket Server"]
+        DB["SQLite Persistence Engine"]
+        Crawler["HTML Scraper & CSS Parser"]
+        Proxy["Adblock Loopback Proxy"]
+        Parser["Anitomy Title Parser"]
+        
+        Sidecar --> DB
+        Sidecar --> Crawler
+        Sidecar --> Proxy
+        Sidecar --> Parser
     end
-
-    GUI <--> Storage
-    Engine <--> Storage
 ```
 
 ---
 
 ## 🛠️ Technology Stack
 
-| Feature                    | Dart / Flutter Package              | Purpose                                                                             |
-|:---------------------------|:------------------------------------|:------------------------------------------------------------------------------------|
-| **State Management**       | `flutter_riverpod` (^3.3.2)         | Reactive separation of business logic, download states, and UI.                     |
-| **Database & Persistence** | `drift` (^2.34.0) + `drift_flutter` | Type-safe relational SQLite database (`Profiles`, `QueueItems`, `Logs`, `Configs`). |
-| **REST & Networking**      | `dio` (^5.10.0)                     | High-performance HTTP client with download progress streams and interceptors.       |
-| **OAuth 2.0 & Deep Links** | `protocol_handler` + `app_links`    | Custom URI scheme handling (`komorebi://auth-callback`) and PKCE token flow.        |
-| **HTML Parser & Scraper**  | `html` (^0.15.6)                    | DOM traversal and CSS selector querying engine (`CrawlerEngine`).                   |
-| **Adblock Proxy Server**   | `dart:io` (`HttpServer`)            | Embedded loopback server to fetch, sanitize, and proxy streaming sites.             |
-| **Window Management**      | `window_manager` (^0.5.1)           | Custom title bars, window framing, centering, and size constraints.                 |
-| **Logging & Diagnostics**  | `talker` (^5.1.17)                  | Structured logging engine and visual `DiagnosticWindow` console viewer.             |
-| **Localization**           | `flutter_intl` + `intl`             | ARB-based multi-language support and deferred loading.                              |
-
----
-
-## 📈 Development Progress Dashboard
-
-| Phase | Title                                 |       Status       | Progress | Key Implemented Components                                                                                                              |
-|:-----:|:--------------------------------------|:------------------:|:--------:|:----------------------------------------------------------------------------------------------------------------------------------------|
-| **1** | **Bootstrap & Window Controls**       |  🟢 **Completed**  |   100%   | Project setup, `window_manager` initialization, monochrome obsidian theme.                                                              |
-| **2** | **Local Database (Drift SQLite)**     |  🟢 **Completed**  |   100%   | `AppDatabase` setup, schemas (`Profiles`, `QueueItems`, `Logs`, `Configs`), DAOs, and generated queries.                                |
-| **3** | **MAL / AniList Sync & PKCE Auth**    |  🟢 **Completed**  |   100%   | MAL v2 & AniList API clients, PKCE OAuth 2.0 flow with deep linking (`komorebi://auth-callback`), token exchange, and account switcher. |
-| **4** | **Scraper & HTML Parsing Engine**     | 🟡 **In Progress** |   33%    | `CrawlerEngine` DOM and CSS selector extractor implemented.                                                                             |
-| **5** | **Adblock Proxy & Sandboxed WebView** | 🟡 **In Progress** |   80%    | Embedded `LocalAdblockProxy` loopback HTTP server & HTML sanitizer implemented.                                                         |
-| **6** | **Downloader & Queue Worker**         | ⚪ **Not Started** |    0%    | Pending background queue scheduler and real-time progress tracking.                                                                     |
-| **7** | **Offline Media Kit Player**          | ⚪ **Not Started** |    0%    | Pending `media_kit` MPV hardware-accelerated video player integration.                                                                  |
-| **8** | **Diagnostics Terminal & Polish**     | 🟡 **In Progress** |   66%    | Integrated `talker` logger and category/level filtered `DiagnosticWindow` log terminal viewer.                                          |
+| Component | Framework / Package | Purpose |
+|:---|:---|:---|
+| **Frontend UI** | Flutter (^3.24) + Riverpod (^3.3.2) | Feature-First reactive desktop user interface. |
+| **Backend Sidecar** | Go (1.22+) | Standalone lightweight local API server and heavy worker engine. |
+| **REST & Networking** | `dio` (^5.10.0) | High-performance HTTP client connecting Flutter to local sidecar. |
+| **OAuth 2.0 & Deep Links** | `protocol_handler` + `app_links` | URI scheme handling (`komorebi://auth-callback`) & PKCE token flow. |
+| **Database Persistence** | SQLite (GORM / sqlc in Go) | Relational local storage for profiles, queue items, logs, and configs. |
+| **Window Management** | `window_manager` (^0.5.1) | Custom title bars, framing, centering, and size constraints. |
+| **Logging & Diagnostics** | `talker` (^5.1.17) | Structured logging engine and visual diagnostic window. |
 
 ---
 
@@ -115,12 +84,10 @@ graph TD
 ### Prerequisites
 
 - **Dart SDK**: Version `^3.12.2` or higher
-- **Flutter SDK**: Version `^3.24.0` or higher (compatible with Dart 3.12+)
-- **Platform Development Tools**:
-    - **Windows**: Visual Studio 2022 with C++ Desktop Development workload
-  - **Linux**: `clang`, `cmake`, `ninja-build`, `pkg-config`, `libgtk-3-dev`
+- **Flutter SDK**: Version `^3.24.0` or higher
+- **Go SDK**: Version `1.22` or higher (for backend sidecar compilation)
 
-### Installation & Build
+### Installation & Execution
 
 1. **Clone the repository**:
    ```bash
@@ -128,64 +95,65 @@ graph TD
    cd komorebi
    ```
 
-2. **Install Flutter dependencies**:
+2. **Run the Flutter Client**:
    ```bash
+   cd komorebi_client
    flutter pub get
+   flutter run -d windows   # Or: flutter run -d linux
    ```
 
-3. **Run Code Generation** *(required for Drift database & localization)*:
+3. **Run the Go Backend Sidecar (Standalone / Dev Mode)**:
    ```bash
-   # Generate Drift database schemas
-   dart run build_runner build --delete-conflicting-outputs
-
-   # Generate localization (intl) files
-   dart run intl_utils:generate
-   ```
-
-4. **Run the application**:
-   ```bash
-   # For Windows Desktop
-   flutter run -d windows
-
-   # For Linux Desktop
-   flutter run -d linux
+   cd komorebi_server
+   go run main.go
    ```
 
 ---
 
-## 📁 Project Structure
+## 📁 Repository Structure
 
 ```text
-lib/
-├── crawlers/          # HTML parsing engines and DOM scraper logic (crawler_engine.dart)
-├── intl/              # ARB localization files and generated localization classes
-├── models/            # Drift SQLite table schemas and database data models
-├── network/           # Embedded HTTP loopback proxy server (proxy_server.dart)
-├── providers/         # Riverpod state providers, timers, and profile management
-├── screens/           # UI screens (AppBar, Browser Mode, Crawlers, Dashboard, Discover, Local Collection, Settings)
-├── services/          # Database, DAOs (ProfilesDao, ConfigsDao), MAL sync handler, and title parser
-├── themes/            # Monochrome obsidian theme definitions and typography
-├── utils/             # Constants, window initialization, Talker diagnostics, and MAL API client
-├── widgets/           # Reusable UI components and scraping result tiles
-└── main.dart          # Application entry point and ProviderScope bootstrap
+mal_viewer/ (Root)
+├── docs/                        # Engineering blueprints & architecture reviews
+│   ├── Komorebi Flutter Code Architecture Review and Refactoring.md
+│   ├── roadmap.md
+│   └── test_plan.md
+│
+├── komorebi_client/             # Feature-First Flutter Desktop App
+│   ├── assets/
+│   ├── lib/
+│   │   ├── main.dart
+│   │   └── src/
+│   │       ├── core/            # Themes, utilities, network, services, crawlers
+│   │       ├── features/        # appbar, browser_mode, crawlers, dashboard, discover, settings, etc.
+│   │       ├── models/          # Data Transfer Objects & schemas
+│   │       ├── providers/       # Riverpod state management
+│   │       └── shared/          # Reusable UI widgets
+│   ├── test/
+│   └── pubspec.yaml
+│
+└── komorebi_server/             # Go Local Backend Sidecar
+    ├── go.mod
+    ├── main.go                  # Sidecar loopback entry point
+    └── internal/
+        ├── crawler/             # HTML scraper engine & CSS selector parser
+        ├── db/                  # SQLite database engine
+        ├── parser/              # Title string parser
+        └── proxy/               # Adblock loopback proxy & sanitizer
 ```
 
 ---
 
-## 📖 Documentation & References
+## 📖 Documentation & Architecture References
 
-For comprehensive engineering details, architectural blueprints, and migration guidelines from the legacy web stack,
-explore our internal documentation:
+For detailed architectural blueprints and refactoring specifications:
 
-- 🗺️ **[roadmap.md](file:///c:/Users/Prince/Documents/CODE/mal_viewer/docs/roadmap.md)**: Full Phase-by-Phase technical
-  transition plan, code mapping, and schema blueprints.
-- 📝 **[react_instructions.md](file:///c:/Users/Prince/Documents/CODE/mal_viewer/docs/react_instructions.md)**: Developer
-  handover documentation detailing the original React/Express architecture and features.
+- 🏗️ **[Architecture Review & Refactoring Blueprint](file:///c:/Users/Prince/Documents/CODE/mal_viewer/docs/Komorebi%20Flutter%20Code%20Architecture%20Review%20and%20Refactoring.md)**: Feature-First Clean Architecture and frontend/backend split specification.
+- 🗺️ **[roadmap.md](file:///c:/Users/Prince/Documents/CODE/mal_viewer/docs/roadmap.md)**: Phase-by-Phase implementation roadmap.
+- 🧪 **[test_plan.md](file:///c:/Users/Prince/Documents/CODE/mal_viewer/docs/test_plan.md)**: Testing & quality assurance matrix.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** - see
-the [LICENSE](file:///c:/Users/Prince/Documents/CODE/mal_viewer/LICENSE) file for details.
-
+This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** - see the [LICENSE](file:///c:/Users/Prince/Documents/CODE/mal_viewer/LICENSE) file for details.

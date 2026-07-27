@@ -1,0 +1,16 @@
+# Go Binaries & Build Artifacts
+bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test Coverage & Vendor
+vendor/
+*.out
+*.test
+coverage.txt
+
+# Local Environment
+.env
