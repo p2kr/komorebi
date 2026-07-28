@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/core/services/handle_sync.dart';
+import 'package:komorebi/src/controllers/profile_controller.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
+import 'package:komorebi/src/providers/profile_management_provider.dart';
 
-class SanboxNewUserPopup extends HookConsumerWidget {
-  const SanboxNewUserPopup({super.key});
+class SandboxNewUserPopup extends HookConsumerWidget {
+  const SandboxNewUserPopup({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,6 +60,8 @@ class SanboxNewUserPopup extends HookConsumerWidget {
                       ),
                     ),
                   );
+                  ref.invalidate(allProfilesProvider);
+                  ref.invalidate(currentProfileProvider);
                   Navigator.pop(context);
                 },
           child: Text(S.of(context).yes),

@@ -56,8 +56,8 @@ class HtmlCrawlerParser implements CrawlerParser {
 
           final rawTitle =
               (titleElement?.attributes['title']?.isNotEmpty == true)
-                  ? titleElement!.attributes['title']!
-                  : (titleElement?.text ?? element.text);
+              ? titleElement!.attributes['title']!
+              : (titleElement?.text ?? element.text);
           final title = CrawlerParserUtils.cleanString(rawTitle);
 
           final linkElement = config.linkSelector.isNotEmpty

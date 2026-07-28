@@ -1,9 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:komorebi/src/models/db/profiles_table.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/core/services/database.dart';
+import 'package:komorebi/src/core/services/api/config_api_service.dart';
+import 'package:komorebi/src/core/services/api/profile_api_service.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/models/profile.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profile_management_provider.g.dart';
@@ -12,19 +11,17 @@ part 'profile_management_provider.g.dart';
 class CurrentProfileNotifier extends _$CurrentProfileNotifier {
   @override
   Future<Profile?> build() async {
-    ref.keepAlive();
+    final api = ref.watch(profileApiServiceProvider);
+    final configApi = ref.watch(configApiServiceProvider);
 
-    final db = ref.watch(dbProvider);
-
-    // check configs for [LAST_USED_PROFILE]. If present & valid, search in db, else fetch last created.
-    final lastUsedProfileConfig = await db.configsDao.getConfig(
+    final lastUsedProfileConfig = await configApi.getConfig(
       Settings.LAST_USED_PROFILE.name,
     );
     final configVal = lastUsedProfileConfig?.configValue;
     final configId = configVal != null ? int.tryParse(configVal) : null;
 
     if (configId != null) {
-      final configuredProfile = await db.profilesDao.getProfile(configId);
+      final configuredProfile = await api.getProfile(configId);
       if (configuredProfile != null) {
         talker.debug("fetched last used profile from config: $configId");
         return configuredProfile;
@@ -35,25 +32,25 @@ class CurrentProfileNotifier extends _$CurrentProfileNotifier {
       }
     }
 
-    final latestProfile = await db.profilesDao.getLatestProfile();
+    final latestProfile = await api.getLatestProfile();
     if (latestProfile != null) {
       talker.debug("using latest profile as last used profile");
-      await db.configsDao.setConfig(
+      await configApi.setConfig(
         Settings.LAST_USED_PROFILE.name,
         latestProfile.id.toString(),
       );
     } else if (configId != null) {
-      await db.configsDao.deleteConfig(Settings.LAST_USED_PROFILE.name);
+      await configApi.deleteConfig(Settings.LAST_USED_PROFILE.name);
     }
     return latestProfile;
   }
 
   /// Updates the current profile as [LAST_USED_PROFILE]
   Future<void> updateCurrentProfile(Profile newProfile) async {
-    final db = ref.read(dbProvider);
+    final configApi = ref.read(configApiServiceProvider);
 
     state = await AsyncValue.guard(() async {
-      await db.configsDao.setConfig(
+      await configApi.setConfig(
         Settings.LAST_USED_PROFILE.name,
         newProfile.id.toString(),
       );
@@ -62,21 +59,11 @@ class CurrentProfileNotifier extends _$CurrentProfileNotifier {
       );
       return newProfile;
     });
-    // ref.invalidateSelf(); // not required since we are directly watching db
   }
 }
 
 @riverpod
-Stream<List<Profile>> allProfiles(Ref ref) {
-  // ref.keepAlive();
-
-  final db = ref.watch(dbProvider);
-
-  if (kDebugMode) {
-    ref.onResume(() {
-      db.forceRefreshTable(db.profiles);
-    });
-  }
-
-  return db.profilesDao.getAllProfiles();
+Future<List<Profile>> allProfiles(Ref ref) async {
+  final api = ref.watch(profileApiServiceProvider);
+  return await api.getAllProfiles();
 }

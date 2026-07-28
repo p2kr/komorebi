@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/features/crawlers/smart_matcher/scraping_result_tile.dart';
+import 'package:komorebi/src/models/api/crawler_config.dart';
 
 void main() {
   group('ScrapingResultTile Tests', () {
@@ -90,10 +90,7 @@ void main() {
         formatDownloadButtonLabel(resolution: null, size: '500 MB'),
         equals('500 MB'),
       );
-      expect(
-        formatDownloadButtonLabel(resolution: null, size: null),
-        isNull,
-      );
+      expect(formatDownloadButtonLabel(resolution: null, size: null), isNull);
     });
   });
 }

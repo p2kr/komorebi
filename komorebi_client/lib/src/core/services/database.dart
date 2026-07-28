@@ -1,21 +1,14 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
-import 'package:komorebi/src/models/db/config_table.dart';
-import 'package:komorebi/src/models/db/profiles_table.dart';
-import 'package:komorebi/src/models/db/vault_items_table.dart';
-import 'package:komorebi/src/core/services/dao/configs_dao.dart';
-import 'package:komorebi/src/core/services/dao/profiles_dao.dart';
 import 'package:komorebi/src/core/services/dao/vault_items_dao.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
+import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/models/db/vault_items_table.dart';
 import 'package:path_provider/path_provider.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(
-  tables: [Profiles, Configs, VaultItems],
-  daos: [ProfilesDao, ConfigsDao, VaultItemsDao],
-)
+@DriftDatabase(tables: [VaultItems], daos: [VaultItemsDao])
 class AppDatabase extends _$AppDatabase {
   // After generating code, this class needs to define a `schemaVersion` getter
   // and a constructor telling drift where the database should be stored.

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/models/db/profiles_table.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
-import 'package:komorebi/src/core/services/handle_delete.dart';
+import 'package:komorebi/src/controllers/profile_controller.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
+import 'package:komorebi/src/models/profile.dart';
+import 'package:komorebi/src/providers/profile_management_provider.dart';
 
 class ConnectedProfilesTile extends ConsumerWidget {
   const ConnectedProfilesTile({super.key, required this.profile});
@@ -36,7 +36,10 @@ class ConnectedProfilesTile extends ConsumerWidget {
           spacing: 4,
           children: [
             getSyncTypeIcon(profile.syncType),
-            Text(profile.syncType.name, style: context.textTheme.labelSmall),
+            Text(
+              profile.syncType.name.toUpperCase(),
+              style: context.textTheme.labelSmall,
+            ),
           ],
         ),
         trailing: isCurrentProfileTile(profile, currProfile)
@@ -67,7 +70,7 @@ void onDeleteProfile(BuildContext context, WidgetRef ref, Profile profile) {
       actions: [
         ElevatedButton(
           onPressed: () async {
-            await handleProfileDeletion(ref, profile.id);
+            await handleProfileDeletion(ref, profile.id!);
             if (!context.mounted) return;
             Navigator.pop(context);
           },

@@ -1,5 +1,7 @@
 const APP_NAME = "Komorebi";
 
+const API_BASE_URL = "http://127.0.0.1:8080/api/v1";
+
 /// komorebi (all lower case)
 const KOMOREBI = "komorebi";
 

@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
+import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/models/db/vault_items_table.dart';
-import 'package:komorebi/src/core/services/database.dart';
 
 part 'vault_items_dao.g.dart';
 
@@ -116,10 +116,10 @@ class VaultItemsDao extends DatabaseAccessor<AppDatabase>
               : const Value.absent(),
           completedAt:
               (status == DownloadStatus.completed ||
-                      status == DownloadStatus.failed ||
-                      status == DownloadStatus.cancelled)
-                  ? Value(DateTime.timestamp())
-                  : const Value.absent(),
+                  status == DownloadStatus.failed ||
+                  status == DownloadStatus.cancelled)
+              ? Value(DateTime.timestamp())
+              : const Value.absent(),
         ),
       );
     });
@@ -135,17 +135,14 @@ class VaultItemsDao extends DatabaseAccessor<AppDatabase>
   /// Resets downloads left in pending/downloading status from a previous session to paused
   Future<int> recoverOrphanedDownloads() {
     return transaction(() async {
-      return (update(vaultItems)
-            ..where(
-              (t) =>
-                  t.status.equals(DownloadStatus.downloading.index) |
-                  t.status.equals(DownloadStatus.pending.index),
-            ))
+      return (update(vaultItems)..where(
+            (t) =>
+                t.status.equals(DownloadStatus.downloading.index) |
+                t.status.equals(DownloadStatus.pending.index),
+          ))
           .write(
-        const VaultItemsCompanion(
-          status: Value(DownloadStatus.paused),
-        ),
-      );
+            const VaultItemsCompanion(status: Value(DownloadStatus.paused)),
+          );
     });
   }
 
@@ -174,13 +171,15 @@ class VaultItemsDao extends DatabaseAccessor<AppDatabase>
           itemParsed.title!.isNotEmpty &&
           itemParsed.episode != null &&
           itemParsed.episode!.isNotEmpty) {
-        final titleMatch = parsedTitle.title!.join(" ").toLowerCase().trim() ==
+        final titleMatch =
+            parsedTitle.title!.join(" ").toLowerCase().trim() ==
             itemParsed.title!.join(" ").toLowerCase().trim();
-        final epMatch = parsedTitle.episode!.join(" ").toLowerCase().trim() ==
+        final epMatch =
+            parsedTitle.episode!.join(" ").toLowerCase().trim() ==
             itemParsed.episode!.join(" ").toLowerCase().trim();
         final seasonMatch =
             (parsedTitle.season?.join(" ") ?? "").toLowerCase().trim() ==
-                (itemParsed.season?.join(" ") ?? "").toLowerCase().trim();
+            (itemParsed.season?.join(" ") ?? "").toLowerCase().trim();
 
         if (titleMatch && epMatch && seasonMatch) {
           isDuplicate = true;

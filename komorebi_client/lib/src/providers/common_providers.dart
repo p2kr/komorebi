@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/features/nav_bar/navbar.dart';
+import 'package:komorebi/src/core/services/api/config_api_service.dart';
 import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/core/themes/theme_builder.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
+import 'package:komorebi/src/features/nav_bar/navbar.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'common_providers.g.dart';
@@ -79,8 +80,8 @@ class SwapAlternateTitleNotifier extends _$SwapAlternateTitleNotifier {
   }
 
   Future<void> load() async {
-    final database = ref.read(dbProvider);
-    final config = await database.configsDao.getConfig(
+    final configApi = ref.read(configApiServiceProvider);
+    final config = await configApi.getConfig(
       Settings.SWAP_ALTERNATE_TITLE.name,
     );
     if (config != null) {
@@ -90,11 +91,8 @@ class SwapAlternateTitleNotifier extends _$SwapAlternateTitleNotifier {
 
   void toggle() {
     state = !state;
-    final database = ref.read(dbProvider);
-    database.configsDao.setConfig(
-      Settings.SWAP_ALTERNATE_TITLE.name,
-      state.toString(),
-    );
+    final configApi = ref.read(configApiServiceProvider);
+    configApi.setConfig(Settings.SWAP_ALTERNATE_TITLE.name, state.toString());
   }
 }
 

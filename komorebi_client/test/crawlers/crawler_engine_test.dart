@@ -92,7 +92,7 @@ void main() {
 
     test(
       'returns empty list immediately if config is disabled (isActive == false)',
-          () async {
+      () async {
         const config = CrawlerConfig(
           id: 'disabled_provider',
           name: 'Disabled Provider',
@@ -122,19 +122,20 @@ void main() {
     );
 
     test(
-        'parses popularity field when popularitySelector is provided', () async {
-      const config = CrawlerConfig(
-        id: 'nyaa_rss',
-        name: 'Nyaa RSS',
-        baseUrl: 'https://nyaa.si/?page=rss&q={title}',
-        itemSelector: 'item',
-        titleSelector: 'title',
-        linkSelector: 'link',
-        popularitySelector: 'seeders',
-        isActive: true,
-      );
+      'parses popularity field when popularitySelector is provided',
+      () async {
+        const config = CrawlerConfig(
+          id: 'nyaa_rss',
+          name: 'Nyaa RSS',
+          baseUrl: 'https://nyaa.si/?page=rss&q={title}',
+          itemSelector: 'item',
+          titleSelector: 'title',
+          linkSelector: 'link',
+          popularitySelector: 'seeders',
+          isActive: true,
+        );
 
-      const sampleRss = '''
+        const sampleRss = '''
         <rss version="2.0">
           <channel>
             <item>
@@ -146,12 +147,13 @@ void main() {
         </rss>
       ''';
 
-      final engine = CrawlerEngine(config);
-      final results = await engine.parse(rawHtml: sampleRss);
+        final engine = CrawlerEngine(config);
+        final results = await engine.parse(rawHtml: sampleRss);
 
-      expect(results.length, equals(1));
-      expect(results.first.popularity, equals(250.0));
-    });
+        expect(results.length, equals(1));
+        expect(results.first.popularity, equals(250.0));
+      },
+    );
 
     test('parses SubsPlease API JSON response correctly', () async {
       const config = CrawlerConfig(
@@ -198,7 +200,7 @@ void main() {
 
     test(
       'parses SubsPlease API JSON response with multiple resolutions correctly',
-          () async {
+      () async {
         const config = CrawlerConfig(
           id: 'subsplease',
           name: 'SubsPlease API',
@@ -286,20 +288,21 @@ void main() {
     });
 
     test(
-        'parses JSON array format with custom selectors dynamically', () async {
-      const config = CrawlerConfig(
-        id: 'custom_api',
-        name: 'Custom Tracker',
-        baseUrl: 'https://api.example.com/search',
-        itemSelector: 'json',
-        titleSelector: 'name',
-        linkSelector: 'magnet_url',
-        popularitySelector: 'seeds',
-        sizeSelector: 'file_size',
-        isActive: true,
-      );
+      'parses JSON array format with custom selectors dynamically',
+      () async {
+        const config = CrawlerConfig(
+          id: 'custom_api',
+          name: 'Custom Tracker',
+          baseUrl: 'https://api.example.com/search',
+          itemSelector: 'json',
+          titleSelector: 'name',
+          linkSelector: 'magnet_url',
+          popularitySelector: 'seeds',
+          sizeSelector: 'file_size',
+          isActive: true,
+        );
 
-      const sampleJson = '''
+        const sampleJson = '''
         [
           {
             "name": "Solo Leveling - 05",
@@ -310,18 +313,19 @@ void main() {
         ]
       ''';
 
-      final engine = CrawlerEngine(config);
-      final results = await engine.parse(rawHtml: sampleJson);
+        final engine = CrawlerEngine(config);
+        final results = await engine.parse(rawHtml: sampleJson);
 
-      expect(results.length, equals(1));
-      expect(results.first.title, equals('Solo Leveling - 05'));
-      expect(
-        results.first.downloadUrl,
-        equals('magnet:?xt=urn:btih:abcdef123456'),
-      );
-      expect(results.first.popularity, equals(1500.0));
-      expect(results.first.size, equals('450 MB'));
-    });
+        expect(results.length, equals(1));
+        expect(results.first.title, equals('Solo Leveling - 05'));
+        expect(
+          results.first.downloadUrl,
+          equals('magnet:?xt=urn:btih:abcdef123456'),
+        );
+        expect(results.first.popularity, equals(1500.0));
+        expect(results.first.size, equals('450 MB'));
+      },
+    );
 
     test('resolves relative download URLs against baseUrl', () async {
       const config = CrawlerConfig(
@@ -353,7 +357,7 @@ void main() {
 
     test(
       'handles invalid CSS selectors gracefully without throwing exception',
-          () async {
+      () async {
         const config = CrawlerConfig(
           id: 'invalid_selector',
           name: 'Invalid Selector Test',
@@ -393,18 +397,19 @@ void main() {
     });
 
     test(
-        'automatically parses and attaches parsedTitle to extracted items', () async {
-      const config = CrawlerConfig(
-        id: 'nyaa',
-        name: 'Nyaa',
-        baseUrl: 'https://nyaa.si',
-        itemSelector: 'item',
-        titleSelector: 'title',
-        linkSelector: 'link',
-        isActive: true,
-      );
+      'automatically parses and attaches parsedTitle to extracted items',
+      () async {
+        const config = CrawlerConfig(
+          id: 'nyaa',
+          name: 'Nyaa',
+          baseUrl: 'https://nyaa.si',
+          itemSelector: 'item',
+          titleSelector: 'title',
+          linkSelector: 'link',
+          isActive: true,
+        );
 
-      const sampleRss = '''
+        const sampleRss = '''
         <rss version="2.0">
           <channel>
             <item>
@@ -415,14 +420,15 @@ void main() {
         </rss>
       ''';
 
-      final engine = CrawlerEngine(config);
-      final results = await engine.parse(rawHtml: sampleRss);
+        final engine = CrawlerEngine(config);
+        final results = await engine.parse(rawHtml: sampleRss);
 
-      expect(results.length, equals(1));
-      expect(results.first.parsedTitle, isNotNull);
-      expect(results.first.parsedTitle?.releaseGroup, contains('SubsPlease'));
-      expect(results.first.parsedTitle?.videoResolution, contains('1080p'));
-    });
+        expect(results.length, equals(1));
+        expect(results.first.parsedTitle, isNotNull);
+        expect(results.first.parsedTitle?.releaseGroup, contains('SubsPlease'));
+        expect(results.first.parsedTitle?.videoResolution, contains('1080p'));
+      },
+    );
 
     test('JsonCrawlerParser and HtmlCrawlerParser work independently', () {
       const jsonConfig = CrawlerConfig(

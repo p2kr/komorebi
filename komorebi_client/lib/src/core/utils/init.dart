@@ -4,19 +4,18 @@ import 'dart:ui';
 
 import 'package:app_links/app_links.dart';
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intl/find_locale.dart';
 import 'package:intl/intl.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/providers/vault_providers.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
 import 'package:komorebi/src/core/services/crawler/crawler_api.dart';
 import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/providers/profile_management_provider.dart';
+import 'package:komorebi/src/providers/vault_providers.dart';
 import 'package:libtorrent_flutter/libtorrent_flutter.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:path/path.dart';
@@ -97,28 +96,10 @@ Future<void> setupAppWindow() async {
 Future<void> setupDb() async {
   final db = AppDatabase();
   try {
-    await db.profilesDao.cleanDuplicateProfiles();
-    talker.debug("cleaned up any duplicate profiles in database");
     await db.vaultItemsDao.recoverOrphanedDownloads();
     talker.debug("recovered orphaned active downloads from previous sessions");
   } catch (e, stack) {
     talker.warning("failed during db startup recovery: ", e, stack);
-  }
-
-  if (kDebugMode) {
-    // create dummy entries
-    talker.debug(
-      "setting up dummy db entries in ${(await getApplicationSupportDirectory()).path}${Platform.pathSeparator}$DB_NAME.sqlite",
-    );
-
-    final count = await db.profiles
-        .count()
-        .getSingle(); // Get the count of profiles in the database
-    if (count == 0) {
-      await db
-          .into(db.profiles)
-          .insert(ProfilesCompanion(username: Value("Kineta")));
-    }
   }
   await db.close();
 }

@@ -50,7 +50,8 @@ void main() {
     test('parses title successfully for item', () async {
       service.type = TitleParserType.regex;
       final parsed = await service.parseTitle(
-          '[SubsPlease] Bleach - 12 (1080p)');
+        '[SubsPlease] Bleach - 12 (1080p)',
+      );
       expect(parsed, isNotNull);
       expect(parsed?.releaseGroup, contains('SubsPlease'));
     });

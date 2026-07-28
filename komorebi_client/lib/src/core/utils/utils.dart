@@ -3,8 +3,9 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
-import 'package:komorebi/src/models/db/profiles_table.dart';
+import 'package:komorebi/src/models/profile.dart';
 
 String getInitials(String? name) {
   if (name == null || name.isEmpty) return "??";
@@ -17,11 +18,20 @@ String getDateOnly(DateTime? dateTime) {
 }
 
 Widget getSyncTypeIcon(SyncType? syncType) => switch (syncType) {
-  .OAUTH => Transform.rotate(
+  SyncType.mal => Transform.rotate(
     angle: -math.pi / 4,
     child: Icon(Icons.key_outlined, size: 14, applyTextScaling: true),
   ),
-  .SANDBOX => Icon(Icons.person_add_alt, size: 14, applyTextScaling: true),
+  SyncType.sandbox => Icon(
+    Icons.person_add_alt,
+    size: 14,
+    applyTextScaling: true,
+  ),
+  SyncType.anilist => Icon(
+    Icons.bookmark_outline,
+    size: 14,
+    applyTextScaling: true,
+  ),
   _ => Icon(Icons.no_accounts_outlined, size: 14, applyTextScaling: true),
 };
 
@@ -69,5 +79,21 @@ extension SafeCapitalize on String {
 
     // Re-combine with only the true first character capitalized
     return '${firstGraph.toUpperCase()}$restGraphs';
+  }
+}
+
+class TimestampConverter implements JsonConverter<DateTime?, int?> {
+  const TimestampConverter();
+
+  @override
+  DateTime? fromJson(int? timestamp) {
+    if (timestamp == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(timestamp);
+  }
+
+  @override
+  int? toJson(DateTime? date) {
+    if (date == null) return null;
+    return (date.millisecondsSinceEpoch).floor();
   }
 }

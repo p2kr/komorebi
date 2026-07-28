@@ -3,12 +3,12 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
-import 'package:komorebi/src/models/db/vault_items_table.dart';
 import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/models/db/vault_items_table.dart';
 import 'package:libtorrent_flutter/libtorrent_flutter.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
@@ -272,8 +272,9 @@ class DownloadService {
     } catch (e) {
       if (_vaultItem != null) {
         final isCancelled = e is DioException && CancelToken.isCancel(e);
-        final status =
-            isCancelled ? DownloadStatus.cancelled : DownloadStatus.failed;
+        final status = isCancelled
+            ? DownloadStatus.cancelled
+            : DownloadStatus.failed;
         await db.vaultItemsDao.updateStatus(
           _vaultItem!.id,
           status,

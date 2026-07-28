@@ -2,8 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
-import 'package:komorebi/src/models/db/profiles_table.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
+import 'package:komorebi/src/models/profile.dart';
 
 void main() {
   group('Utils - String formatting and helpers', () {
@@ -45,8 +45,8 @@ void main() {
             home: Scaffold(
               body: Column(
                 children: [
-                  getSyncTypeIcon(SyncType.OAUTH),
-                  getSyncTypeIcon(SyncType.SANDBOX),
+                  getSyncTypeIcon(SyncType.mal),
+                  getSyncTypeIcon(SyncType.sandbox),
                   getSyncTypeIcon(null),
                 ],
               ),
@@ -69,22 +69,17 @@ void main() {
           id: 1,
           username: 'Dash',
           avatarUrl: 'https://example.com/avatar.png',
-          syncType: SyncType.OAUTH,
-          connectedOn: DateTime(2026, 1, 1),
-          isActive: true,
+          syncType: SyncType.mal,
+          createdAt: DateTime(2026, 1, 1),
           accessToken: 'token',
-          animeListJson: null,
         );
 
         final profileWithoutAvatar = Profile(
           id: 2,
           username: 'Komorebi',
           avatarUrl: null,
-          syncType: SyncType.SANDBOX,
-          connectedOn: DateTime(2026, 1, 1),
-          isActive: true,
-          accessToken: null,
-          animeListJson: null,
+          syncType: SyncType.sandbox,
+          createdAt: DateTime(2026, 1, 1),
         );
 
         // When

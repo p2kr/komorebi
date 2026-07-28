@@ -5,13 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/providers/oauth_timer_provider.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
-import 'package:komorebi/src/features/appbar/connected_profiles_tile.dart';
-import 'package:komorebi/src/features/appbar/sanbox_new_user_popup.dart';
-import 'package:komorebi/src/core/services/handle_sync.dart';
+import 'package:komorebi/src/controllers/profile_controller.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
+import 'package:komorebi/src/features/appbar/connected_profiles_tile.dart';
+import 'package:komorebi/src/features/appbar/sandbox_new_user_popup.dart';
+import 'package:komorebi/src/providers/oauth_timer_provider.dart';
+import 'package:komorebi/src/providers/profile_management_provider.dart';
 
 class ProfileManagementPopup extends HookConsumerWidget {
   const ProfileManagementPopup({super.key});
@@ -77,7 +77,7 @@ class ProfileManagementPopup extends HookConsumerWidget {
                               children: [
                                 getSyncTypeIcon(activeProfile.syncType),
                                 Text(
-                                  activeProfile.syncType.name,
+                                  activeProfile.syncType.name.toUpperCase(),
                                   style: context.textTheme.labelSmall,
                                 ),
                               ],
@@ -85,7 +85,7 @@ class ProfileManagementPopup extends HookConsumerWidget {
 
                             // profile creation in local db date-time
                             Text(
-                              "${S.of(context).connectedSince} ${getDateOnly(activeProfile.connectedOn)}",
+                              "${S.of(context).connectedSince} ${getDateOnly(activeProfile.createdAt)}",
                               style: context.textTheme.labelSmall,
                             ),
                           ],
@@ -239,7 +239,7 @@ void onQuickSandboxLinkPressed(BuildContext context, WidgetRef ref) {
   showDialog(
     barrierDismissible: false,
     context: context,
-    builder: (context) => SanboxNewUserPopup(),
+    builder: (context) => SandboxNewUserPopup(),
   );
 }
 
@@ -251,6 +251,8 @@ void onLinkWithOAuthPressed(BuildContext context, WidgetRef ref) {
           SnackBar(content: Text(S.of(context).profileLinkedSuccessfully)),
         );
         Navigator.pop(context);
+        ref.invalidate(allProfilesProvider);
+        ref.invalidate(currentProfileProvider);
       })
       .onError((e, t) {
         if (!context.mounted) return;

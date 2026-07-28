@@ -3,20 +3,18 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:dio/dio.dart';
-import 'package:drift/drift.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
-import 'package:komorebi/src/models/db/profiles_table.dart';
-import 'package:komorebi/src/models/env.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/providers/oauth_timer_provider.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
-import 'package:komorebi/src/core/services/database.dart';
+import 'package:komorebi/src/core/services/api/profile_api_service.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
 import 'package:komorebi/src/core/utils/init.dart';
 import 'package:komorebi/src/core/utils/mal_api.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/models/api/mal_models.dart';
+import 'package:komorebi/src/models/env.dart';
+import 'package:komorebi/src/models/profile.dart';
+import 'package:komorebi/src/providers/oauth_timer_provider.dart';
+import 'package:komorebi/src/providers/profile_management_provider.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -46,13 +44,43 @@ String? _extractOAuthCode(Uri uri) {
   return null;
 }
 
-/// Main OAuth entrypoint for Desktop platforms
-Future<void> signInWithOAuth(WidgetRef ref) async {
-  await signInWithOAuthDesktop(ref);
+/// Delete a profile by ID
+Future<void> handleProfileDeletion(WidgetRef ref, int id) async {
+  final api = ref.read(profileApiServiceProvider);
+  await api.deleteProfile(id);
+  ref.invalidate(allProfilesProvider);
+  ref.invalidate(currentProfileProvider);
 }
 
-/// Desktop-specific OAuth flow using default browser and custom protocol deep linking
-Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
+/// Sandbox sign-in flow
+Future<bool> doSandboxSignIn(WidgetRef ref, String userName) async {
+  final api = MalApi(defaultClientId: Env.malClientId);
+
+  try {
+    await api.getUserAnimeList(username: userName);
+  } catch (e, t) {
+    talker.warning("User not found", e, t);
+    return false;
+  }
+
+  final profileService = ref.read(profileApiServiceProvider);
+  final newProfile = await profileService.addNewProfile(
+    Profile(
+      username: userName,
+      syncType: SyncType.sandbox,
+      createdAt: DateTime.now(),
+    ),
+  );
+
+  await ref
+      .read(currentProfileProvider.notifier)
+      .updateCurrentProfile(newProfile);
+  ref.invalidate(allProfilesProvider);
+  return true;
+}
+
+/// Main OAuth entrypoint for Desktop platforms
+Future<void> signInWithOAuth(WidgetRef ref) async {
   final codeVerifier = _generateCodeVerifier();
   const redirectUrl = MAL_OAUTH_REDIRECT_URL;
 
@@ -75,16 +103,13 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
 
     try {
       await protocolHandler.register(KOMOREBI);
-      // await protocolHandler.register('mal_viewer'); // not required now as komorebi is used
     } catch (e, t) {
       talker.warning("Could not register custom schemes: ", e, t);
     }
 
     final callbackFuture = deepLinkController.stream
         .firstWhere(
-          (uri) =>
-              (uri.scheme == KOMOREBI /* || uri.scheme == 'mal_viewer' */ ) &&
-              _extractOAuthCode(uri) != null,
+          (uri) => (uri.scheme == KOMOREBI) && _extractOAuthCode(uri) != null,
         )
         .timeout(
           desktopOauthTimeout,
@@ -126,28 +151,6 @@ Future<void> signInWithOAuthDesktop(WidgetRef ref) async {
   } finally {
     ref.read(oauthCountdownProvider.notifier).stopCountdown();
   }
-}
-
-Future<bool> doSandboxSignIn(WidgetRef ref, String userName) async {
-  final db = ref.read(dbProvider);
-
-  // verify if valid user
-  final api = MalApi(defaultClientId: Env.malClientId);
-
-  try {
-    await api.getUserAnimeList(username: userName);
-  } catch (e, t) {
-    talker.warning("User not found", e, t);
-    return false;
-  }
-
-  await db.profilesDao.insertOrUpdateProfile(
-    ProfilesCompanion(
-      username: Value(userName),
-      syncType: Value(SyncType.SANDBOX),
-    ),
-  );
-  return true;
 }
 
 Future<void> _exchangeCodeAndSaveProfile(
@@ -195,23 +198,21 @@ Future<void> _exchangeCodeAndSaveProfile(
 
     talker.debug("Fetched MAL user: ${userInfo.name} [ID: ${userInfo.id}]");
 
-    final db = ref.read(dbProvider);
-    final profileId = await db.profilesDao.insertOrUpdateProfile(
-      ProfilesCompanion.insert(
+    final profileService = ref.read(profileApiServiceProvider);
+    final newProfile = await profileService.addNewProfile(
+      Profile(
         username: userInfo.name,
-        avatarUrl: Value(userInfo.picture),
-        syncType: Value(SyncType.OAUTH),
-        accessToken: Value(accessToken),
-        isActive: const Value(true),
+        avatarUrl: userInfo.picture,
+        syncType: SyncType.mal,
+        accessToken: accessToken,
+        createdAt: DateTime.now(),
       ),
     );
 
-    final newProfile = await db.profilesDao.getProfile(profileId);
-    if (newProfile != null) {
-      await ref
-          .read(currentProfileProvider.notifier)
-          .updateCurrentProfile(newProfile);
-    }
+    await ref
+        .read(currentProfileProvider.notifier)
+        .updateCurrentProfile(newProfile);
+    ref.invalidate(allProfilesProvider);
     talker.info("Successfully synced MAL profile: ${userInfo.name}");
   } catch (e, t) {
     talker.error("Error exchanging OAuth token or saving profile: ", e, t);
