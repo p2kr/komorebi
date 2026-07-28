@@ -2,18 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/src/core/services/api/profile_api_service.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
-import 'package:komorebi/src/core/utils/dio.dart';
 import 'package:komorebi/src/core/utils/env.dart';
 import 'package:komorebi/src/core/utils/init.dart';
-import 'package:komorebi/src/core/utils/mal_api.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
-import 'package:komorebi/src/features/dashboard/mal_models.dart';
 import 'package:komorebi/src/features/profile/oauth_timer_provider.dart';
-import 'package:komorebi/src/features/profile/profile.dart';
 import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 import 'package:protocol_handler/protocol_handler.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -54,29 +49,19 @@ Future<void> handleProfileDeletion(WidgetRef ref, int id) async {
 
 /// Sandbox sign-in flow
 Future<bool> doSandboxSignIn(WidgetRef ref, String userName) async {
-  final api = MalApi(defaultClientId: Env.malClientId);
+  final profileService = ref.read(profileApiServiceProvider);
 
   try {
-    await api.getUserAnimeList(username: userName);
+    final newProfile = await profileService.verifySandboxProfile(userName);
+    await ref
+        .read(currentProfileProvider.notifier)
+        .updateCurrentProfile(newProfile);
+    ref.invalidate(allProfilesProvider);
+    return true;
   } catch (e, t) {
-    talker.warning("User not found", e, t);
+    talker.warning("Sandbox sign-in failed or user not found", e, t);
     return false;
   }
-
-  final profileService = ref.read(profileApiServiceProvider);
-  final newProfile = await profileService.addNewProfile(
-    Profile(
-      username: userName,
-      syncType: SyncType.sandbox,
-      createdAt: DateTime.now(),
-    ),
-  );
-
-  await ref
-      .read(currentProfileProvider.notifier)
-      .updateCurrentProfile(newProfile);
-  ref.invalidate(allProfilesProvider);
-  return true;
 }
 
 /// Main OAuth entrypoint for Desktop platforms
@@ -160,62 +145,27 @@ Future<void> _exchangeCodeAndSaveProfile(
   String redirectUrl,
 ) async {
   try {
-    talker.debug("Exchanging authorization code for access token...");
-    final dio = getDioWithLogger();
-
-    final data = <String, dynamic>{
-      'client_id': clientId,
-      if (Env.malClientSecret.isNotEmpty) 'client_secret': Env.malClientSecret,
-      'code': authCode,
-      'code_verifier': codeVerifier,
-      'grant_type': 'authorization_code',
-      'redirect_uri': redirectUrl,
-    };
-
-    final response = await dio.post(
-      tokenUrl,
-      data: data,
-      options: Options(
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-      ),
-    );
-
-    final tokenMap = asMap(response.data);
-    final accessToken = tokenMap['access_token']?.toString();
-
-    if (accessToken == null || accessToken.isEmpty) {
-      throw MalApiException(
-        statusCode: response.statusCode ?? 500,
-        message:
-            "Failed to retrieve access token from response: ${response.data}",
-      );
-    }
-
-    talker.debug("Access token retrieved. Fetching MAL user info...");
-    final api = MalApi(defaultAccessToken: accessToken);
-    final userInfo = await api.getMyUserInfo();
-    api.dispose();
-
-    talker.debug("Fetched MAL user: ${userInfo.name} [ID: ${userInfo.id}]");
+    talker.debug("Exchanging authorization code via Go Sidecar...");
 
     final profileService = ref.read(profileApiServiceProvider);
-    final newProfile = await profileService.addNewProfile(
-      Profile(
-        username: userInfo.name,
-        avatarUrl: userInfo.picture,
-        syncType: SyncType.mal,
-        accessToken: accessToken,
-        createdAt: DateTime.now(),
-      ),
+    final newProfile = await profileService.exchangeOAuthToken(
+      provider: 'mal',
+      authCode: authCode,
+      codeVerifier: codeVerifier,
+      redirectUri: redirectUrl,
+      clientId: clientId,
     );
 
     await ref
         .read(currentProfileProvider.notifier)
         .updateCurrentProfile(newProfile);
     ref.invalidate(allProfilesProvider);
-    talker.info("Successfully synced MAL profile: ${userInfo.name}");
+
+    talker.info(
+      "Successfully synced profile via sidecar: ${newProfile.username}",
+    );
   } catch (e, t) {
-    talker.error("Error exchanging OAuth token or saving profile: ", e, t);
+    talker.error("Error exchanging OAuth token via sidecar: ", e, t);
     rethrow;
   }
 }

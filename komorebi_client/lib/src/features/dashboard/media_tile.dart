@@ -7,43 +7,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
 import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
-import 'package:komorebi/src/features/dashboard/mal_models.dart';
+import 'package:komorebi/src/features/dashboard/domain/media_models.dart';
 import 'package:komorebi/src/features/dashboard/overflowing_list.dart';
 import 'package:komorebi/src/features/dashboard/synopsis_widget.dart';
 import 'package:komorebi/src/shared/widgets/chips.dart';
+import 'package:quiver/strings.dart';
 
-class AnimeTile extends ConsumerWidget {
-  const AnimeTile({super.key, required this.animeItem});
+class MediaTile extends ConsumerWidget {
+  const MediaTile({super.key, required this.mediaItem});
 
-  final MalAnimeListItem animeItem;
+  final MediaItem mediaItem;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final swapTitles = ref.watch(swapAlternateTitleProvider);
-    final alternateTitle = animeItem.node.alternativeTitles;
 
-    final displayTitle =
-        swapTitles &&
-            alternateTitle?.en != null &&
-            alternateTitle!.en!.isNotEmpty
-        ? alternateTitle.en!
-        : animeItem.node.title;
+    final titleRomanizedOrUser = isNotBlank(mediaItem.title.userPreferred)
+        ? mediaItem.title.userPreferred!
+        : (mediaItem.title.romanized ?? '');
+    final titleEnglish = mediaItem.title.english;
+
+    final displayTitle = swapTitles && isNotBlank(titleEnglish)
+        ? titleEnglish!
+        : titleRomanizedOrUser;
 
     final displayAltTitle = swapTitles
-        ? animeItem.node.title
-        : (alternateTitle?.en?.isEmpty == true
-              ? animeItem.node.title
-              : alternateTitle?.en);
+        ? titleRomanizedOrUser
+        : (isBlank(titleEnglish) ? titleRomanizedOrUser : titleEnglish!);
 
-    final leadingImg = animeItem.node.mainPicture?.medium;
-    final synopsis = animeItem.node.synopsis;
-    final mediaType = animeItem.node.mediaType;
-    final episodesWatched = animeItem.node.myListStatus?.numEpisodesWatched;
-    final totalEpisodes = animeItem.node.numEpisodes;
-    final popularity = animeItem.node.popularity;
-    final meanRating = animeItem.node.mean;
-    final contentRating = animeItem.node.rating?.toUpperCase();
-    final genres = animeItem.node.genres;
+    final leadingImg =
+        mediaItem.coverImage.medium ?? mediaItem.coverImage.large;
+    final synopsis = mediaItem.synopsis;
+    final format = mediaItem.format;
+    final episodesWatched = mediaItem.listStatus?.progress;
+    final totalEpisodes = mediaItem.episodes;
+    final popularity = mediaItem.popularity;
+    final meanRating = mediaItem.meanScore;
+    final genres = mediaItem.genres;
     final nextEpisode = getNextEpisodeNumber(episodesWatched, totalEpisodes);
 
     return Card(
@@ -55,12 +55,12 @@ class AnimeTile extends ConsumerWidget {
               spacing: 4,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                if (leadingImg != null)
+                if (isNotBlank(leadingImg))
                   CachedNetworkImage(
                     width: 100,
                     fit: BoxFit.cover,
-                    imageUrl: leadingImg,
-                    placeholder: (context, url) => Placeholder(),
+                    imageUrl: leadingImg!,
+                    placeholder: (context, url) => const Placeholder(),
                   ),
                 Expanded(
                   child: Padding(
@@ -72,8 +72,8 @@ class AnimeTile extends ConsumerWidget {
                         // STATISTICS
                         OverflowingStatisticsList(
                           statistics: [
-                            if (mediaType != null)
-                              SimpleChip(label: mediaType.toUpperCase()),
+                            if (isNotBlank(format))
+                              SimpleChip(label: format!.toUpperCase()),
                             if (meanRating != null)
                               SimpleChip(
                                 label: meanRating.toString(),
@@ -83,11 +83,6 @@ class AnimeTile extends ConsumerWidget {
                               SimpleChip(
                                 label: popularity.toString(),
                                 icon: Icons.trending_up,
-                              ),
-                            if (contentRating != null)
-                              SimpleChip(
-                                label: contentRating.toString(),
-                                icon: Icons.numbers,
                               ),
                           ],
                         ),
@@ -103,7 +98,7 @@ class AnimeTile extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         // Alternate title
-                        if (displayAltTitle != null &&
+                        if (isNotBlank(displayAltTitle) &&
                             displayAltTitle != displayTitle)
                           Row(
                             spacing: 4,
@@ -137,7 +132,7 @@ class AnimeTile extends ConsumerWidget {
                             children: [
                               Text(S.of(context).progress),
                               Text(
-                                "${episodesWatched ?? "?"} / ${totalEpisodes ?? "?"}",
+                                '${episodesWatched ?? '?'} / ${totalEpisodes ?? '?'}',
                               ),
                             ],
                           ),
@@ -169,7 +164,7 @@ class AnimeTile extends ConsumerWidget {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    icon: Icon(Icons.download_sharp),
+                    icon: const Icon(Icons.download_sharp),
                     onPressed: () {
                       // TODO: Download the episode.
                     },
@@ -184,7 +179,7 @@ class AnimeTile extends ConsumerWidget {
                 ),
                 Expanded(
                   child: OutlinedButton.icon(
-                    icon: Icon(Icons.manage_search_outlined),
+                    icon: const Icon(Icons.manage_search_outlined),
                     onPressed: () {
                       // TODO: Navigate to Smart Matcher
                     },
@@ -204,13 +199,9 @@ class AnimeTile extends ConsumerWidget {
   }
 }
 
-int getNextEpisodeNumber(int? episodesWatched, int? totalEpisodes) {
-  if (episodesWatched != null) {
-    if (totalEpisodes != null) {
-      return min(episodesWatched + 1, totalEpisodes);
-    } else {
-      return episodesWatched + 1;
-    }
-  }
-  return 1;
-}
+int getNextEpisodeNumber(int? episodesWatched, int? totalEpisodes) =>
+    episodesWatched != null
+    ? (totalEpisodes != null
+          ? min(episodesWatched + 1, totalEpisodes)
+          : episodesWatched + 1)
+    : 1;

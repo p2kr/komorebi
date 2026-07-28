@@ -57,6 +57,8 @@ func setupRoutesV1() {
 		v1.POST("/addNewProfile", AddNewProfile)
 		v1.DELETE("/deleteProfile", DeleteProfile)
 		v1.POST("/deleteProfile", DeleteProfile)
+		v1.POST("/auth/exchange", ExchangeOAuthToken)
+		v1.POST("/auth/sandbox", VerifySandboxProfile)
 	}
 	{
 		v1.GET("/getAllConfigs", GetAllAppConfigs)
@@ -64,5 +66,9 @@ func setupRoutesV1() {
 		v1.POST("/setConfig", SetAppConfig)
 		v1.DELETE("/deleteConfig", DeleteAppConfig)
 		v1.POST("/deleteConfig", DeleteAppConfig)
+	}
+	{
+		v1.GET("/media/anime", GetUserAnimeList)
+		v1.GET("/media/manga", GetUserMangaList)
 	}
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/features/dashboard/anime_tile.dart';
 import 'package:komorebi/src/features/dashboard/dashboard_providers.dart';
-import 'package:komorebi/src/features/dashboard/mal_models.dart';
+import 'package:komorebi/src/features/dashboard/domain/media_models.dart';
+import 'package:komorebi/src/features/dashboard/media_tile.dart';
 import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 enum MediaType { anime, manga }
@@ -21,8 +21,8 @@ class Dashboard extends HookConsumerWidget {
     final animeOrManga = useState(MediaType.anime);
 
     // Make the state nullable so `null` can represent "All"
-    final animeStatus = useState<MalAnimeStatus?>(null);
-    final mangaStatus = useState<MalMangaStatus?>(null);
+    final animeStatus = useState<AnimeStatusFilter?>(null);
+    final mangaStatus = useState<MangaStatusFilter?>(null);
 
     final currentProfile = ref.watch(currentProfileProvider);
 
@@ -53,9 +53,7 @@ class Dashboard extends HookConsumerWidget {
     final animeList = ref.watch(
       dashboardAnimeProvider(status: animeStatus.value),
     );
-    // final mangaList = ref.watch(dashboardMangaProvider(mangaStatus.value));
 
-    // fetch all currently watching animes/manga from api for current user
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Column(
@@ -75,7 +73,7 @@ class Dashboard extends HookConsumerWidget {
                     value: MediaType.manga,
                     label: s.manga,
                     enabled: false,
-                    trailingIcon: Icon(Icons.construction_outlined),
+                    trailingIcon: const Icon(Icons.construction_outlined),
                   ),
                 ],
                 onSelected: (value) {
@@ -87,18 +85,16 @@ class Dashboard extends HookConsumerWidget {
 
               // Anime Status
               animeOrManga.value == MediaType.anime
-                  // Type the DropdownMenu as nullable
-                  ? DropdownMenu<MalAnimeStatus?>(
+                  ? DropdownMenu<AnimeStatusFilter?>(
                       selectOnly: true,
                       initialSelection: animeStatus.value,
                       label: Text(s.animeStatus),
                       dropdownMenuEntries: [
-                        // Inject the "All" entry at the top with a null value
                         DropdownMenuEntry(
                           value: null,
                           label: statusMap['all']!,
                         ),
-                        for (var status in MalAnimeStatus.values)
+                        for (var status in AnimeStatusFilter.values)
                           DropdownMenuEntry(
                             value: status,
                             label: statusMap[status.name]!,
@@ -108,9 +104,7 @@ class Dashboard extends HookConsumerWidget {
                         animeStatus.value = value;
                       },
                     )
-                  :
-                    // Manga Status
-                    DropdownMenu<MalMangaStatus?>(
+                  : DropdownMenu<MangaStatusFilter?>(
                       initialSelection: mangaStatus.value,
                       label: Text(s.mangaStatus),
                       dropdownMenuEntries: [
@@ -118,7 +112,7 @@ class Dashboard extends HookConsumerWidget {
                           value: null,
                           label: statusMap['all']!,
                         ),
-                        for (var status in MalMangaStatus.values)
+                        for (var status in MangaStatusFilter.values)
                           DropdownMenuEntry(
                             value: status,
                             label: statusMap[status.name]!,
@@ -131,9 +125,9 @@ class Dashboard extends HookConsumerWidget {
             ],
           ),
 
-          Divider(),
+          const Divider(),
 
-          // Anime tiles
+          // Media tiles
           Expanded(
             child: animeList.when(
               data: (animeItem) => GridView.builder(
@@ -141,17 +135,17 @@ class Dashboard extends HookConsumerWidget {
                   maxCrossAxisExtent: 550,
                   mainAxisSpacing: 4,
                   crossAxisSpacing: 4,
-                  mainAxisExtent: 300, // Fixed height for tiles
+                  mainAxisExtent: 300,
                 ),
                 itemCount: animeItem.data.length,
                 itemBuilder: (context, index) {
-                  return AnimeTile(animeItem: animeItem.data[index]);
+                  return MediaTile(mediaItem: animeItem.data[index]);
                 },
               ),
               error: (e, t) => Center(
                 child: TextButton.icon(
-                  icon: Icon(Icons.refresh_outlined),
-                  iconAlignment: .end,
+                  icon: const Icon(Icons.refresh_outlined),
+                  iconAlignment: IconAlignment.end,
                   onPressed: () {
                     ref.invalidate(
                       dashboardAnimeProvider(status: animeStatus.value),
@@ -160,7 +154,7 @@ class Dashboard extends HookConsumerWidget {
                   label: Text(S.of(context).errorClickToRefresh(e.toString())),
                 ),
               ),
-              loading: () => Center(child: CircularProgressIndicator()),
+              loading: () => const Center(child: CircularProgressIndicator()),
             ),
           ),
         ],
@@ -170,12 +164,12 @@ class Dashboard extends HookConsumerWidget {
 }
 
 Map<String, String> _getStatusMap(S s) => {
-  "all": s.all,
-  "watching": s.watching,
-  "completed": s.completed,
-  "onHold": s.onHold,
-  "dropped": s.dropped,
-  "planToWatch": s.planToWatch,
-  "reading": s.reading,
-  "planToRead": s.planToRead,
+  'all': s.all,
+  'watching': s.watching,
+  'completed': s.completed,
+  'onHold': s.onHold,
+  'dropped': s.dropped,
+  'planToWatch': s.planToWatch,
+  'reading': s.reading,
+  'planToRead': s.planToRead,
 };

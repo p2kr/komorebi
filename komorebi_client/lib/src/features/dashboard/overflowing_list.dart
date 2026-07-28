@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
-import 'package:komorebi/src/features/dashboard/mal_models.dart';
 import 'package:komorebi/src/shared/widgets/chips.dart';
 import 'package:overflow_view/overflow_view.dart';
 
 class OverflowingGenreList extends StatelessWidget {
   const OverflowingGenreList({super.key, required this.genres});
 
-  final List<MalNamedNode> genres;
+  final List<String> genres;
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +28,14 @@ class OverflowingGenreList extends StatelessWidget {
             children: [
               for (int i = 0; i < genres.length; i++)
                 Text(
-                  genres[i].name + (i < genres.length - 1 ? ',' : ''),
+                  genres[i] + (i < genres.length - 1 ? ',' : ''),
                   style: style,
                 ),
             ],
             builder: (context, remainingCount) {
               return Tooltip(
-                message: genres
-                    .skip(genres.length - remainingCount)
-                    .map((g) => g.name)
-                    .join('\n'),
-                child: Text("+$remainingCount", style: style),
+                message: genres.skip(genres.length - remainingCount).join('\n'),
+                child: Text('+$remainingCount', style: style),
               );
             },
           ),
@@ -87,7 +83,7 @@ class OverflowingStatisticsList extends ConsumerWidget {
               ),
             ),
           ),
-          child: SimpleChip(label: "+$remainingCount"),
+          child: SimpleChip(label: '+$remainingCount'),
         );
       },
     );

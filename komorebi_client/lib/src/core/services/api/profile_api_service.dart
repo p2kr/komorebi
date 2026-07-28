@@ -102,4 +102,74 @@ class ProfileApiService {
       rethrow;
     }
   }
+
+  /// Exchange OAuth token via Go Sidecar
+  Future<Profile> exchangeOAuthToken({
+    required String provider,
+    required String authCode,
+    String? codeVerifier,
+    String? redirectUri,
+    String? clientId,
+  }) async {
+    try {
+      final data = {
+        'provider': provider,
+        'code': authCode,
+        'code_verifier': ?codeVerifier,
+        'redirect_uri': ?redirectUri,
+        'client_id': ?clientId,
+      };
+
+      final response = await _dio.post(
+        "/auth/exchange",
+        data: data,
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final dataMap = response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : <String, dynamic>{};
+
+        final itemData = dataMap['data'];
+        if (itemData is Map<String, dynamic>) {
+          return Profile.fromJson(itemData);
+        }
+      }
+      throw Exception(
+        "Failed to exchange token. Server returned: ${response.data}",
+      );
+    } catch (e, t) {
+      talker.error("Error in exchangeOAuthToken: ", e, t);
+      rethrow;
+    }
+  }
+
+  /// Verify Sandbox Profile via Go Sidecar
+  Future<Profile> verifySandboxProfile(String username) async {
+    try {
+      final response = await _dio.post(
+        "/auth/sandbox",
+        data: {'username': username},
+        options: Options(headers: {'Content-Type': 'application/json'}),
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final dataMap = response.data is Map<String, dynamic>
+            ? response.data as Map<String, dynamic>
+            : <String, dynamic>{};
+
+        final itemData = dataMap['data'];
+        if (itemData is Map<String, dynamic>) {
+          return Profile.fromJson(itemData);
+        }
+      }
+      throw Exception(
+        "Failed to verify sandbox profile. Server returned: ${response.data}",
+      );
+    } catch (e, t) {
+      talker.error("Error in verifySandboxProfile: ", e, t);
+      rethrow;
+    }
+  }
 }

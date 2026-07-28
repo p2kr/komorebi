@@ -1,52 +1,39 @@
 import 'dart:async';
 
-import 'package:komorebi/src/core/utils/mal_api.dart';
-import 'package:komorebi/src/features/dashboard/mal_models.dart';
+import 'package:komorebi/src/core/services/server_media_api.dart';
+import 'package:komorebi/src/features/dashboard/domain/media_models.dart';
 import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part "dashboard_providers.g.dart";
+part 'dashboard_providers.g.dart';
 
 class EmptyCurrentProfileException implements Exception {
   @override
   String toString() {
-    return "No profile selected.";
+    return 'No profile selected.';
   }
 }
 
 @riverpod
 class DashboardAnimeNotifier extends _$DashboardAnimeNotifier {
   @override
-  Future<MalPaginated<MalAnimeListItem>> build({
-    MalAnimeStatus? status = .watching,
-  }) {
+  Future<MediaPage> build({
+    AnimeStatusFilter? status = AnimeStatusFilter.watching,
+  }) async {
     final currentProfile = ref.watch(currentProfileProvider);
 
     if (currentProfile.value == null) {
       throw EmptyCurrentProfileException();
     }
 
-    // fetch the currently [status] anime list from api
-    final api = MalApi(defaultAccessToken: currentProfile.value!.accessToken);
+    final profile = currentProfile.requireValue!;
+    final serverApi = ref.watch(serverMediaApiProvider);
 
-    ref.onDispose(() {
-      api.dispose();
-    });
-
-    return api.getUserAnimeList(
-      username: currentProfile.requireValue!.username,
-      status: status,
-      fields: [
-        "synopsis",
-        "media_type",
-        "my_list_status",
-        "rating",
-        "mean",
-        "num_episodes",
-        "popularity",
-        "alternative_titles",
-        "genres",
-      ],
+    return serverApi.getUserAnimeList(
+      username: profile.username,
+      accessToken: profile.accessToken,
+      syncType: profile.syncType.name,
+      status: status?.apiValue,
     );
   }
 }
@@ -54,23 +41,21 @@ class DashboardAnimeNotifier extends _$DashboardAnimeNotifier {
 @riverpod
 class DashboardMangaNotifier extends _$DashboardMangaNotifier {
   @override
-  Future<MalPaginated<MalMangaListItem>> build(MalMangaStatus? status) {
+  Future<MediaPage> build(MangaStatusFilter? status) async {
     final currentProfile = ref.watch(currentProfileProvider);
 
     if (currentProfile.value == null) {
-      throw (EmptyCurrentProfileException());
+      throw EmptyCurrentProfileException();
     }
 
-    // fetch the currently [status] manga list from api
-    final api = MalApi(defaultAccessToken: currentProfile.value!.accessToken);
+    final profile = currentProfile.requireValue!;
+    final serverApi = ref.watch(serverMediaApiProvider);
 
-    ref.onDispose(() {
-      api.dispose();
-    });
-
-    return api.getUserMangaList(
-      username: currentProfile.requireValue!.username,
-      status: status,
+    return serverApi.getUserMangaList(
+      username: profile.username,
+      accessToken: profile.accessToken,
+      syncType: profile.syncType.name,
+      status: status?.apiValue,
     );
   }
 }
