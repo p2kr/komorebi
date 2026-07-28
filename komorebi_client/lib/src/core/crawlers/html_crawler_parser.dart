@@ -1,7 +1,7 @@
 import 'package:html/dom.dart';
 import 'package:html/parser.dart' as parser;
 import 'package:komorebi/src/core/crawlers/crawler_parser.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 
 class HtmlCrawlerParser implements CrawlerParser {
   @override

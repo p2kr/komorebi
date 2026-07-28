@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/src/core/services/api/profile_api_service.dart';
-import 'package:komorebi/src/models/profile.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
 
 class MockAdapter implements HttpClientAdapter {
   late ResponseBody Function(RequestOptions options) fetchHandler;

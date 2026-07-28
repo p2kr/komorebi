@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/controllers/profile_controller.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
+import 'package:komorebi/src/features/profile/profile_controller.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 class SandboxNewUserPopup extends HookConsumerWidget {
   const SandboxNewUserPopup({super.key});

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 import 'package:yaml/yaml.dart';
 
 dynamic _convertNode(dynamic node) {

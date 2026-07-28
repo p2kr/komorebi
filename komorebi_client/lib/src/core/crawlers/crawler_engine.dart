@@ -2,8 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:komorebi/src/core/crawlers/crawler_parser.dart';
 import 'package:komorebi/src/core/crawlers/html_crawler_parser.dart';
 import 'package:komorebi/src/core/crawlers/json_crawler_parser.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/core/services/title_parser_service.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 
 @immutable
 class CrawlerEngine {

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/controllers/profile_controller.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
-import 'package:komorebi/src/models/profile.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
+import 'package:komorebi/src/features/profile/profile_controller.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 class ConnectedProfilesTile extends ConsumerWidget {
   const ConnectedProfilesTile({super.key, required this.profile});

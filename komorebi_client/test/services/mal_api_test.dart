@@ -4,7 +4,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/src/core/utils/mal_api.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHttpClientAdapter extends Mock implements HttpClientAdapter {}

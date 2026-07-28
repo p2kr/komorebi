@@ -1,4 +1,4 @@
-import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 
 abstract class CrawlerParser {
   bool canParse(String content, CrawlerConfig config);

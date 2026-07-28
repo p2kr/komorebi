@@ -2,14 +2,14 @@ import 'package:dio/dio.dart';
 import 'package:drift/native.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/services/api/config_api_service.dart';
 import 'package:komorebi/src/core/services/api/profile_api_service.dart';
 import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
-import 'package:komorebi/src/models/app_config.dart';
-import 'package:komorebi/src/models/profile.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
+import 'package:komorebi/src/features/settings/app_config.dart';
 
 class FakeProfileApiService implements ProfileApiService {
   final List<Profile> profiles = [];

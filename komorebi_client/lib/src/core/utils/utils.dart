@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:intl/intl.dart';
-import 'package:komorebi/src/models/profile.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
 
 String getInitials(String? name) {
   if (name == null || name.isEmpty) return "??";

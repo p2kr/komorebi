@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
+import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/features/browser_mode/browser.dart';
 import 'package:komorebi/src/features/crawlers/parser_sources.dart';
 import 'package:komorebi/src/features/crawlers/selected_sandbox.dart';
@@ -11,7 +12,6 @@ import 'package:komorebi/src/features/dashboard/dashboard.dart';
 import 'package:komorebi/src/features/discover/discover.dart';
 import 'package:komorebi/src/features/local_collection/local_collection.dart';
 import 'package:komorebi/src/features/settings/settings_screen.dart';
-import 'package:komorebi/src/core/themes/theme.dart';
 
 // ── Main Navigation Bar Widget ───────────────────────────────────────────────
 

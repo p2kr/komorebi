@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
-import 'package:komorebi/src/models/env.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
+import 'package:komorebi/src/core/utils/env.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
 import 'package:quiver/strings.dart';
 
 // =============================================================================

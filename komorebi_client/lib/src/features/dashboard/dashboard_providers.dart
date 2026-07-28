@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:komorebi/src/models/api/mal_models.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
 import 'package:komorebi/src/core/utils/mal_api.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part "dashboard_providers.g.dart";

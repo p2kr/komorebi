@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:drift/drift.dart' hide JsonKey;
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 
 part 'vault_items_table.freezed.dart';
 

@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:retry/retry.dart';

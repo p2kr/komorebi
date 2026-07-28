@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 import 'package:path/path.dart' as path;
 import 'package:quiver/collection.dart';
 import 'package:quiver/strings.dart';

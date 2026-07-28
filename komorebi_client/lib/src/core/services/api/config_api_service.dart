@@ -1,12 +1,15 @@
 import 'package:dio/dio.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
-import 'package:komorebi/src/models/app_config.dart';
+import 'package:komorebi/src/features/settings/app_config.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-final configApiServiceProvider = Provider<ConfigApiService>((ref) {
+part "config_api_service.g.dart";
+
+@Riverpod(keepAlive: true)
+ConfigApiService configApiService(Ref ref) {
   return ConfigApiService();
-});
+}
 
 class ConfigApiService {
   final Dio _dio = getDioWithLogger(BaseOptions(baseUrl: API_BASE_URL));

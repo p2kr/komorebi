@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 
 class GeneralSettings extends ConsumerWidget {

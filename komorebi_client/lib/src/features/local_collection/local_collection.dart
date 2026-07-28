@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 import 'package:komorebi/src/features/local_collection/download_queue.dart';
 import 'package:komorebi/src/features/local_collection/media_player.dart';
 import 'package:komorebi/src/features/local_collection/media_vault.dart';

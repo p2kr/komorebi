@@ -4,11 +4,11 @@ import 'dart:isolate';
 
 import 'package:dio/dio.dart';
 import 'package:komorebi/src/core/crawlers/crawler_engine.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/core/services/crawler/crawler_api.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
 import 'package:komorebi/src/core/utils/search_ranker.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part "crawler_providers.g.dart";

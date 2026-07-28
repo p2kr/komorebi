@@ -1,5 +1,5 @@
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/core/services/title_parser_service.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 import 'package:quiver/strings.dart';
 
 /// Configurable scoring weights and constants for [SearchRanker].

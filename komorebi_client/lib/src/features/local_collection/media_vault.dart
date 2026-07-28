@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:komorebi/src/providers/vault_providers.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
+import 'package:komorebi/src/features/local_collection/vault_providers.dart';
 
 class MediaVault extends ConsumerWidget {
   const MediaVault({super.key});

@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/src/core/crawlers/crawler_engine.dart';
 import 'package:komorebi/src/core/crawlers/html_crawler_parser.dart';
 import 'package:komorebi/src/core/crawlers/json_crawler_parser.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 
 void main() {
   group('CrawlerEngine Tests', () {

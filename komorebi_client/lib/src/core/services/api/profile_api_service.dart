@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/dio.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
-import 'package:komorebi/src/models/profile.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'profile_api_service.g.dart';

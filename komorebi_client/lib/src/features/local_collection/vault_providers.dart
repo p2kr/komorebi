@@ -1,7 +1,7 @@
-import 'package:komorebi/src/models/api/crawler_config.dart';
-import 'package:komorebi/src/models/db/vault_items_table.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/services/download_service.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
+import 'package:komorebi/src/features/local_collection/vault_items_table.dart';
 import 'package:quiver/collection.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 

@@ -3,11 +3,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/features/home.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/init.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/features/home.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger.dart';
 
 void main(List<String> args) async {

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
 
 void main() {
   group('MalModels parsing and type safety', () {

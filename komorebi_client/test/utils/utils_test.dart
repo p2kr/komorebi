@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
-import 'package:komorebi/src/models/profile.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
 
 void main() {
   group('Utils - String formatting and helpers', () {

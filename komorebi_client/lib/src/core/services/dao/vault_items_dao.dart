@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:komorebi/src/core/services/database.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
-import 'package:komorebi/src/models/db/vault_items_table.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
+import 'package:komorebi/src/features/local_collection/vault_items_table.dart';
 
 part 'vault_items_dao.g.dart';
 

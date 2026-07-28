@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
-import 'package:komorebi/src/features/appbar/diagnostic_window.dart';
-import 'package:komorebi/src/features/appbar/profile_management.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
+import 'package:komorebi/src/features/appbar/diagnostic_window.dart';
+import 'package:komorebi/src/features/appbar/profile_management.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 AppBar appBar(BuildContext context, WidgetRef ref) {
   final activeProfile = ref.watch(currentProfileProvider);

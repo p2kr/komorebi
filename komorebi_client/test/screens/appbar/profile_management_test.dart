@@ -5,12 +5,12 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/services/api/profile_api_service.dart';
 import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/features/appbar/profile_management.dart';
-import 'package:komorebi/src/models/profile.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 class FakeProfileApiService implements ProfileApiService {
   final List<Profile> profiles = [];

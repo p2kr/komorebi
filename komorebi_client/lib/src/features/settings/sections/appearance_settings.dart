@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localized_locales/flutter_localized_locales.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/core/utils/utils.dart';
 import 'package:super_tooltip/super_tooltip.dart';

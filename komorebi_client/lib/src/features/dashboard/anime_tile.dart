@@ -5,11 +5,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
+import 'package:komorebi/src/core/themes/theme.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
 import 'package:komorebi/src/features/dashboard/overflowing_list.dart';
 import 'package:komorebi/src/features/dashboard/synopsis_widget.dart';
-import 'package:komorebi/src/core/themes/theme.dart';
 import 'package:komorebi/src/shared/widgets/chips.dart';
 
 class AnimeTile extends ConsumerWidget {

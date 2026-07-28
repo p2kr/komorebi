@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:komorebi/intl/generated/l10n.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
-import 'package:komorebi/src/providers/dashboard_providers.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
 import 'package:komorebi/src/features/dashboard/anime_tile.dart';
+import 'package:komorebi/src/features/dashboard/dashboard_providers.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 enum MediaType { anime, manga }
 

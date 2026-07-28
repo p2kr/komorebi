@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:komorebi/src/models/api/mal_models.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/themes/theme.dart';
+import 'package:komorebi/src/features/dashboard/mal_models.dart';
 import 'package:komorebi/src/shared/widgets/chips.dart';
 import 'package:overflow_view/overflow_view.dart';
 

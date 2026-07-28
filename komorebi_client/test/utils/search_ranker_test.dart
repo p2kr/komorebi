@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:komorebi/src/models/api/crawler_config.dart';
 import 'package:komorebi/src/core/utils/search_ranker.dart';
+import 'package:komorebi/src/features/crawlers/crawler_config.dart';
 
 void main() {
   group('SearchRanker Tests', () {

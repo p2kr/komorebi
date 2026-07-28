@@ -2,11 +2,11 @@ import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/services/database.dart';
 import 'package:komorebi/src/features/appbar/connected_profiles_tile.dart';
-import 'package:komorebi/src/models/profile.dart';
-import 'package:komorebi/src/providers/common_providers.dart';
-import 'package:komorebi/src/providers/profile_management_provider.dart';
+import 'package:komorebi/src/features/profile/profile.dart';
+import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 
 void main() {
   late AppDatabase db;
