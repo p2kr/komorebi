@@ -8,9 +8,6 @@ const KOMOREBI = "komorebi";
 const DB_NAME = "app_db";
 const DB_FILE_NAME = "$DB_NAME.sqlite";
 
-/// https://p2kr.github.io/komorebi/
-const MAL_OAUTH_REDIRECT_URL = "https://p2kr.github.io/komorebi/";
-
 /// Vault location
 const VAULT_LOC = "vault";
 

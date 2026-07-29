@@ -1,9 +1,13 @@
 package api
 
 import (
+	"strconv"
+
+	"komorebi_server/src/db"
+	dbClient "komorebi_server/src/db/generated"
 	"komorebi_server/src/media"
+	"komorebi_server/src/utils"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,54 +19,57 @@ type mediaParams struct {
 	accessToken string
 }
 
-func parseMediaParams(c *gin.Context) mediaParams {
-	username := c.Query("username")
-	status := c.Query("status")
-	accessToken := c.Query("access_token")
+func parseMediaParams(c *gin.Context) (*mediaParams, bool) {
+	idStr := c.Query("profile_id")
 
-	if accessToken == "" {
-		authHeader := c.GetHeader("Authorization")
-		if after, ok := strings.CutPrefix(authHeader, "Bearer "); ok {
-			accessToken = after
-		}
+	id, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil || id <= 0 {
+		Fail(c, http.StatusBadRequest, "INVALID_ID", "profile_id query parameter is required and must be an integer")
+		return nil, false
 	}
 
-	return mediaParams{
-		client:      resolveMediaClient(c),
-		username:    username,
+	queries := dbClient.New(db.GetDbClient())
+	foundProfile, err := queries.FindProfileById(c.Request.Context(), id)
+	if err != nil {
+		Fail(c, http.StatusNotFound, "PROFILE_NOT_FOUND", "Profile not found")
+		return nil, false
+	}
+
+	var accessToken string
+	if foundProfile.AccessToken != nil {
+		accessToken = *foundProfile.AccessToken
+	}
+
+	status := c.Query("status")
+
+	return &mediaParams{
+		client:      resolveMediaClient(foundProfile.SyncType),
+		username:    foundProfile.Username,
 		status:      status,
 		accessToken: accessToken,
-	}
+	}, true
 }
 
-func resolveMediaClient(c *gin.Context) media.Client {
-	provider := strings.ToLower(c.Query("provider"))
-	syncType := strings.ToLower(c.Query("sync_type"))
-
-	if provider == "" && syncType != "" {
-		if strings.Contains(syncType, "anilist") {
-			provider = "anilist"
-		} else if strings.Contains(syncType, "mal") {
-			provider = "mal"
-		}
-	}
-
-	clientID := c.Query("client_id")
+func resolveMediaClient(syncTypeStr string) media.Client {
+	provider := media.ParseProvider(syncTypeStr)
 
 	switch provider {
-	case "anilist":
+	case media.ProviderAniList:
 		return media.NewAniListClient(nil)
-	case "mal":
+	case media.ProviderMAL:
 		fallthrough
 	default:
-		return media.NewMalClient(clientID, nil)
+		return media.NewMalClient(utils.GetEnv().MalClientID, nil)
 	}
 }
 
 // GetUserAnimeList handles GET /api/v1/media/anime
 func GetUserAnimeList(c *gin.Context) {
-	p := parseMediaParams(c)
-	res, err := p.client.GetUserAnimeList(c.Request.Context(), p.accessToken, p.username, p.status)
+	p, ok := parseMediaParams(c)
+	if !ok {
+		return
+	}
+	res, err := p.client.GetUserAnimeList(c.Request.Context(), p.username, p.status, p.accessToken)
 	if err != nil {
 		Fail(c, http.StatusInternalServerError, "FETCH_ANIME_FAILED", err.Error())
 		return
@@ -73,8 +80,11 @@ func GetUserAnimeList(c *gin.Context) {
 
 // GetUserMangaList handles GET /api/v1/media/manga
 func GetUserMangaList(c *gin.Context) {
-	p := parseMediaParams(c)
-	res, err := p.client.GetUserMangaList(c.Request.Context(), p.accessToken, p.username, p.status)
+	p, ok := parseMediaParams(c)
+	if !ok {
+		return
+	}
+	res, err := p.client.GetUserMangaList(c.Request.Context(), p.username, p.status, p.accessToken)
 	if err != nil {
 		Fail(c, http.StatusInternalServerError, "FETCH_MANGA_FAILED", err.Error())
 		return

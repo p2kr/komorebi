@@ -1,5 +1,45 @@
 package media
 
+import "strings"
+
+// Provider represents media service providers (MAL, AniList, etc.).
+type Provider string
+
+const (
+	ProviderMAL     Provider = "mal"
+	ProviderAniList Provider = "anilist"
+	ProviderSandbox Provider = "sandbox"
+)
+
+func (p Provider) String() string {
+	return string(p)
+}
+
+func ParseProvider(s string) Provider {
+	switch strings.ToLower(s) {
+	case "anilist":
+		return ProviderAniList
+	case "sandbox":
+		return ProviderSandbox
+	case "mal":
+		fallthrough
+	default:
+		return ProviderMAL
+	}
+}
+
+// MalListType represents the MyAnimeList list type (animelist vs mangalist).
+type MalListType string
+
+const (
+	MalListTypeAnime MalListType = "animelist"
+	MalListTypeManga MalListType = "mangalist"
+)
+
+func (l MalListType) String() string {
+	return string(l)
+}
+
 // Title contains title variants harmonized across MAL and AniList.
 type Title struct {
 	Romanized     string `json:"romanized,omitempty"`

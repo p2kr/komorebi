@@ -23,7 +23,7 @@ func NewAniListClient(httpClient *http.Client) *AniListClient {
 }
 
 // GetUserAnimeList fetches user anime list from AniList API (stub implementation).
-func (c *AniListClient) GetUserAnimeList(ctx context.Context, accessToken string, username string, status string) (*PaginatedResponse, error) {
+func (c *AniListClient) GetUserAnimeList(ctx context.Context, username string, status string, accessToken string) (*PaginatedResponse, error) {
 	// TODO: Full AniList GraphQL query implementation
 	return &PaginatedResponse{
 		Data:   []Item{},
@@ -32,7 +32,7 @@ func (c *AniListClient) GetUserAnimeList(ctx context.Context, accessToken string
 }
 
 // GetUserMangaList fetches user manga list from AniList API (stub implementation).
-func (c *AniListClient) GetUserMangaList(ctx context.Context, accessToken string, username string, status string) (*PaginatedResponse, error) {
+func (c *AniListClient) GetUserMangaList(ctx context.Context, username string, status string, accessToken string) (*PaginatedResponse, error) {
 	// TODO: Full AniList GraphQL query implementation
 	return &PaginatedResponse{
 		Data:   []Item{},

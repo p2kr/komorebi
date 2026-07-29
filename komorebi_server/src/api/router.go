@@ -57,7 +57,8 @@ func setupRoutesV1() {
 		v1.POST("/addNewProfile", AddNewProfile)
 		v1.DELETE("/deleteProfile", DeleteProfile)
 		v1.POST("/deleteProfile", DeleteProfile)
-		v1.POST("/auth/exchange", ExchangeOAuthToken)
+		v1.GET("/auth/login", StartOAuthLogin)
+		v1.GET("/auth/callback", OAuthCallback)
 		v1.POST("/auth/sandbox", VerifySandboxProfile)
 	}
 	{

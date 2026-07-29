@@ -12,10 +12,6 @@ sql:
         emit_sql_as_comment: true
         emit_pointers_for_null_types: true
         emit_interface: true
-#        overrides:
-#          - column: "*.created_at"
-#            go_type: "time.Time"
-#          - column: "*.updated_at"
-#            go_type: "time.Time"
-#          - column: "app_logs.timestamp"
-#            go_type: "time.Time"
+        overrides:
+          - column: "profiles.access_token"
+            go_struct_tag: 'json:"-"'

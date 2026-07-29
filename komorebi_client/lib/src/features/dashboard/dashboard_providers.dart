@@ -22,7 +22,7 @@ class DashboardAnimeNotifier extends _$DashboardAnimeNotifier {
   }) async {
     final currentProfile = ref.watch(currentProfileProvider);
 
-    if (currentProfile.value == null) {
+    if (currentProfile.value == null || currentProfile.value?.id == null) {
       throw EmptyCurrentProfileException();
     }
 
@@ -30,9 +30,7 @@ class DashboardAnimeNotifier extends _$DashboardAnimeNotifier {
     final serverApi = ref.watch(serverMediaApiProvider);
 
     return serverApi.getUserAnimeList(
-      username: profile.username,
-      accessToken: profile.accessToken,
-      syncType: profile.syncType.name,
+      profileId: profile.id!,
       status: status?.apiValue,
     );
   }
@@ -44,7 +42,7 @@ class DashboardMangaNotifier extends _$DashboardMangaNotifier {
   Future<MediaPage> build(MangaStatusFilter? status) async {
     final currentProfile = ref.watch(currentProfileProvider);
 
-    if (currentProfile.value == null) {
+    if (currentProfile.value == null || currentProfile.value?.id == null) {
       throw EmptyCurrentProfileException();
     }
 
@@ -52,9 +50,7 @@ class DashboardMangaNotifier extends _$DashboardMangaNotifier {
     final serverApi = ref.watch(serverMediaApiProvider);
 
     return serverApi.getUserMangaList(
-      username: profile.username,
-      accessToken: profile.accessToken,
-      syncType: profile.syncType.name,
+      profileId: profile.id!,
       status: status?.apiValue,
     );
   }

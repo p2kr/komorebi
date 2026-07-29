@@ -7,7 +7,7 @@ import 'package:komorebi/src/core/providers/common_providers.dart';
 import 'package:komorebi/src/core/utils/constants.dart';
 import 'package:komorebi/src/core/utils/init.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
-import 'package:komorebi/src/features/home.dart';
+import 'package:komorebi/src/features/home/home.dart';
 import 'package:talker_riverpod_logger/talker_riverpod_logger.dart';
 
 void main(List<String> args) async {

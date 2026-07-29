@@ -1,31 +1,65 @@
 package api
 
 import (
-	"bytes"
 	"context"
+	"crypto/rand"
 	"database/sql"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"komorebi_server/src/db"
 	dbClient "komorebi_server/src/db/generated"
 	"komorebi_server/src/media"
+	"komorebi_server/src/utils"
 	"net/http"
 	"net/url"
-	"os"
+	"os/exec"
+	"runtime"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
+type authSession struct {
+	codeVerifier string
+	resultChan   chan *dbClient.Profile
+	errChan      chan error
+}
+
+var (
+	authSessions   = make(map[string]*authSession)
+	authSessionsMu sync.Mutex
+)
+
+func generateCodeVerifier() string {
+	b := make([]byte, 32)
+	_, _ = rand.Read(b)
+	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+func openBrowser(targetURL string) error {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("rundll32", "url.dll", "FileProtocolHandler", targetURL)
+	case "darwin":
+		cmd = exec.Command("open", targetURL)
+	default:
+		cmd = exec.Command("xdg-open", targetURL)
+	}
+	return cmd.Start()
+}
+
 // AddNewProfile saves a request profile and returns the saved profile
-// Check if profile already present
 func AddNewProfile(c *gin.Context) {
 	var profile dbClient.Profile
-	err := c.ShouldBindJSON(&profile)
+	err := c.ShouldBindBodyWithJSON(&profile)
 	if err != nil {
 		Fail(c, http.StatusBadRequest, "INVALID_DATA", err.Error())
 		return
@@ -81,14 +115,152 @@ func DeleteProfile(c *gin.Context) {
 	Ok(c, map[string]any{"id": id, "deleted": true})
 }
 
-// --- New OAuth / Auth Handlers ---
+// StartOAuthLogin initiates full server-side OAuth flow for MAL
+func StartOAuthLogin(c *gin.Context) {
+	provider := media.ParseProvider(c.DefaultQuery("provider", string(media.ProviderMAL)))
 
-type ExchangeOAuthTokenRequest struct {
-	Provider     string `json:"provider" binding:"required"`
-	Code         string `json:"code" binding:"required"`
-	CodeVerifier string `json:"code_verifier"`
-	RedirectURI  string `json:"redirect_uri"`
-	ClientID     string `json:"client_id"`
+	if provider == media.ProviderMAL {
+		clientID := utils.GetEnv().MalClientID
+		if clientID == "" {
+			Fail(c, http.StatusInternalServerError, "CONFIG_ERROR", "MAL_CLIENT_ID is not configured on server")
+			return
+		}
+
+		codeVerifier := generateCodeVerifier()
+		sessionID := generateCodeVerifier()[:16]
+
+		resChan := make(chan *dbClient.Profile, 1)
+		errChan := make(chan error, 1)
+
+		authSessionsMu.Lock()
+		authSessions[sessionID] = &authSession{
+			codeVerifier: codeVerifier,
+			resultChan:   resChan,
+			errChan:      errChan,
+		}
+		authSessionsMu.Unlock()
+
+		authURL := fmt.Sprintf(
+			"https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=plain&redirect_uri=%s&state=%s",
+			url.QueryEscape(clientID),
+			url.QueryEscape(codeVerifier),
+			url.QueryEscape(utils.OauthRedirectUrl),
+			url.QueryEscape(sessionID),
+		)
+
+		_ = openBrowser(authURL)
+
+		select {
+		case profile := <-resChan:
+			Ok(c, profile)
+		case err := <-errChan:
+			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", err.Error())
+		case <-time.After(5 * time.Minute):
+			Fail(c, http.StatusRequestTimeout, "TIMEOUT", "Authentication timed out")
+		case <-c.Request.Context().Done():
+			Fail(c, 499, "CANCELLED", "Client cancelled request")
+		}
+
+		authSessionsMu.Lock()
+		delete(authSessions, sessionID)
+		authSessionsMu.Unlock()
+		return
+	}
+
+	Fail(c, http.StatusBadRequest, "INVALID_PROVIDER", "Unsupported provider: "+provider.String())
+}
+
+// OAuthCallback handles the browser redirect callback from MyAnimeList/AniList
+func OAuthCallback(c *gin.Context) {
+	code := c.Query("code")
+	state := c.Query("state")
+
+	authSessionsMu.Lock()
+	session, exists := authSessions[state]
+	authSessionsMu.Unlock()
+
+	if !exists || session == nil {
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte("<html><body><h2>Invalid or expired authentication session.</h2></body></html>"))
+		return
+	}
+
+	clientID := utils.GetEnv().MalClientID
+
+	data := url.Values{}
+	data.Set("client_id", clientID)
+	data.Set("code", code)
+	data.Set("code_verifier", session.codeVerifier)
+	data.Set("grant_type", "authorization_code")
+	data.Set("redirect_uri", utils.OauthRedirectUrl)
+
+	resp, err := http.Post("https://myanimelist.net/v1/oauth2/token", "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
+	if err != nil {
+		session.errChan <- err
+		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte("<html><body><h2>OAuth token exchange failed.</h2></body></html>"))
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		session.errChan <- fmt.Errorf("token error (%d): %s", resp.StatusCode, string(bodyBytes))
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte("<html><body><h2>OAuth authentication failed.</h2></body></html>"))
+		return
+	}
+
+	var tokenResp MalTokenResponse
+	_ = json.NewDecoder(resp.Body).Decode(&tokenResp)
+
+	reqURL, _ := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, "https://api.myanimelist.net/v2/users/@me", nil)
+	reqURL.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
+
+	userResp, err := http.DefaultClient.Do(reqURL)
+	if err != nil {
+		session.errChan <- err
+		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte("<html><body><h2>Failed to fetch user profile.</h2></body></html>"))
+		return
+	}
+	defer userResp.Body.Close()
+
+	var userInfo MalUserInfo
+	_ = json.NewDecoder(userResp.Body).Decode(&userInfo)
+
+	profile := dbClient.Profile{
+		Username:    userInfo.Name,
+		SyncType:    media.ProviderMAL.String(),
+		AvatarUrl:   &userInfo.Picture,
+		AccessToken: &tokenResp.AccessToken,
+	}
+
+	savedProfile, err := saveProfile(c, profile)
+	if err != nil {
+		session.errChan <- err
+		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte("<html><body><h2>Failed to save profile.</h2></body></html>"))
+		return
+	}
+
+	session.resultChan <- savedProfile
+
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`
+		<!DOCTYPE html>
+		<html>
+		<head>
+			<title>Authentication Successful</title>
+			<style>
+				body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+				.card { background: #1e293b; padding: 2rem 3rem; border-radius: 1rem; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+				h1 { color: #38bdf8; margin-bottom: 0.5rem; }
+				p { color: #94a3b8; }
+			</style>
+		</head>
+		<body>
+			<div class="card">
+				<h1>🌸 Authentication Successful!</h1>
+				<p>Your MyAnimeList account has been connected to Komorebi.<br>You can close this window and return to the app.</p>
+			</div>
+		</body>
+		</html>
+	`))
 }
 
 type MalTokenResponse struct {
@@ -103,134 +275,9 @@ type MalUserInfo struct {
 	Picture string `json:"picture"`
 }
 
-func ExchangeOAuthToken(c *gin.Context) {
-	var req ExchangeOAuthTokenRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		Fail(c, http.StatusBadRequest, "INVALID_DATA", err.Error())
-		return
-	}
-
-	if req.Provider == "mal" {
-		// Exchange code for token
-		tokenURL := "https://myanimelist.net/v1/oauth2/token"
-		data := url.Values{}
-		data.Set("client_id", req.ClientID)
-		data.Set("code", req.Code)
-		data.Set("code_verifier", req.CodeVerifier)
-		data.Set("grant_type", "authorization_code")
-		data.Set("redirect_uri", req.RedirectURI)
-
-		resp, err := http.Post(tokenURL, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
-		if err != nil {
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", err.Error())
-			return
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			bodyBytes, _ := io.ReadAll(resp.Body)
-			Fail(c, resp.StatusCode, "OAUTH_ERROR", string(bodyBytes))
-			return
-		}
-
-		var tokenResp MalTokenResponse
-		if err := json.NewDecoder(resp.Body).Decode(&tokenResp); err != nil {
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", "Failed to decode token response")
-			return
-		}
-
-		// Fetch User Info
-		reqURL, _ := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, "https://api.myanimelist.net/v2/users/@me", nil)
-		reqURL.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
-		reqURL.Header.Set("Accept", "application/json")
-
-		userResp, err := http.DefaultClient.Do(reqURL)
-		if err != nil {
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", "Failed to fetch user info")
-			return
-		}
-		defer userResp.Body.Close()
-
-		if userResp.StatusCode != http.StatusOK {
-			bodyBytes, _ := io.ReadAll(userResp.Body)
-			Fail(c, userResp.StatusCode, "OAUTH_ERROR", string(bodyBytes))
-			return
-		}
-
-		var userInfo MalUserInfo
-		if err := json.NewDecoder(userResp.Body).Decode(&userInfo); err != nil {
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", "Failed to decode user info")
-			return
-		}
-
-		// Insert/Update Profile
-		profile := dbClient.Profile{
-			Username:    userInfo.Name,
-			SyncType:    "mal",
-			AvatarUrl:   &userInfo.Picture,
-			AccessToken: &tokenResp.AccessToken,
-		}
-
-		saveProfileAndRespond(c, profile)
-		return
-
-	} else if req.Provider == "anilist" {
-		// Implicit grant returns the token directly in the 'code' parameter mapping
-		accessToken := req.Code
-
-		query := `query { Viewer { id name avatar { large } } }`
-		reqBody := map[string]string{"query": query}
-		jsonBody, _ := json.Marshal(reqBody)
-
-		reqURL, _ := http.NewRequestWithContext(c.Request.Context(), http.MethodPost, "https://graphql.anilist.co", bytes.NewBuffer(jsonBody))
-		reqURL.Header.Set("Authorization", "Bearer "+accessToken)
-		reqURL.Header.Set("Content-Type", "application/json")
-		reqURL.Header.Set("Accept", "application/json")
-
-		userResp, err := http.DefaultClient.Do(reqURL)
-		if err != nil {
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", "Failed to fetch anilist user info")
-			return
-		}
-		defer userResp.Body.Close()
-
-		if userResp.StatusCode != http.StatusOK {
-			bodyBytes, _ := io.ReadAll(userResp.Body)
-			Fail(c, userResp.StatusCode, "OAUTH_ERROR", string(bodyBytes))
-			return
-		}
-
-		var result struct {
-			Data struct {
-				Viewer struct {
-					Name   string `json:"name"`
-					Avatar struct {
-						Large string `json:"large"`
-					} `json:"avatar"`
-				} `json:"Viewer"`
-			} `json:"data"`
-		}
-		if err := json.NewDecoder(userResp.Body).Decode(&result); err != nil {
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", "Failed to decode anilist user info")
-			return
-		}
-
-		profile := dbClient.Profile{
-			Username:    result.Data.Viewer.Name,
-			SyncType:    "anilist",
-			AvatarUrl:   &result.Data.Viewer.Avatar.Large,
-			AccessToken: &accessToken,
-		}
-
-		saveProfileAndRespond(c, profile)
-		return
-	}
-
-	Fail(c, http.StatusBadRequest, "INVALID_PROVIDER", "Unknown provider: "+req.Provider)
-}
-
 type SandboxProfileRequest struct {
 	Username string `json:"username" binding:"required"`
+	Provider string `json:"provider"`
 }
 
 func VerifySandboxProfile(c *gin.Context) {
@@ -240,35 +287,38 @@ func VerifySandboxProfile(c *gin.Context) {
 		return
 	}
 
-	clientID := os.Getenv("MAL_CLIENT_ID")
-	if clientID == "" {
-		clientID = c.Query("client_id")
+	provider := media.ParseProvider(req.Provider)
+	var client media.Client
+
+	if provider == media.ProviderAniList {
+		client = media.NewAniListClient(nil)
+	} else {
+		clientID := utils.GetEnv().MalClientID
+		client = media.NewMalClient(clientID, nil)
 	}
 
-	malClient := media.NewMalClient(clientID, nil)
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
 	defer cancel()
 
-	_, err := malClient.GetUserAnimeList(ctx, "", req.Username, "")
+	_, err := client.GetUserAnimeList(ctx, req.Username, "", "")
 	if err != nil {
 		logger.Error("Sandbox verification failed", zap.Error(err))
-		Fail(c, http.StatusNotFound, "NOT_FOUND", "User not found on MAL")
+		Fail(c, http.StatusNotFound, "NOT_FOUND", fmt.Sprintf("User not found on %s", provider.String()))
 		return
 	}
 
 	profile := dbClient.Profile{
 		Username: req.Username,
-		SyncType: "sandbox",
+		SyncType: media.ProviderSandbox.String(),
 	}
 
 	saveProfileAndRespond(c, profile)
 }
 
-func saveProfileAndRespond(c *gin.Context, profile dbClient.Profile) {
+func saveProfile(c context.Context, profile dbClient.Profile) (*dbClient.Profile, error) {
 	tx, err := db.GetDbClient().Begin()
 	if err != nil {
-		Fail(c, http.StatusInternalServerError, "DB_ERROR", err.Error())
-		return
+		return nil, err
 	}
 	defer func() {
 		_ = tx.Rollback()
@@ -290,14 +340,20 @@ func saveProfileAndRespond(c *gin.Context, profile dbClient.Profile) {
 		})
 	}
 	if err != nil {
-		Fail(c, http.StatusInternalServerError, "DB_ERROR", err.Error())
-		return
+		return nil, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
+		return nil, err
+	}
+	return &newProfile, nil
+}
+
+func saveProfileAndRespond(c *gin.Context, profile dbClient.Profile) {
+	newProfile, err := saveProfile(c, profile)
+	if err != nil {
 		Fail(c, http.StatusInternalServerError, "DB_ERROR", err.Error())
-		logger.Error("error in committing transaction", zap.Error(err))
 		return
 	}
 	Ok(c, newProfile)

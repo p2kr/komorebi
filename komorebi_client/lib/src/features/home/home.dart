@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:komorebi/src/features/appbar/appbar.dart';
-import 'package:komorebi/src/features/nav_bar/navbar.dart';
 import 'package:komorebi/src/core/utils/init.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
+import 'package:komorebi/src/features/appbar/appbar.dart';
+import 'package:komorebi/src/features/nav_bar/navbar.dart';
 import 'package:libtorrent_flutter/libtorrent_flutter.dart';
 
 class HomePage extends ConsumerStatefulWidget {

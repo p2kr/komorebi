@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"komorebi_server/src/utils"
 	"net/http"
 	"net/url"
@@ -15,6 +16,9 @@ import (
 const (
 	DefaultMalBaseURL = "https://api.myanimelist.net/v2"
 	DefaultUserAgent  = "Komorebi-App/1.0"
+
+	MalAnimeFields = "synopsis,media_type,my_list_status,rating,mean,num_episodes,popularity,alternative_titles,genres"
+	MalMangaFields = "synopsis,media_type,my_list_status,mean,num_chapters,num_volumes,popularity,alternative_titles,genres"
 )
 
 var logger = utils.GetLogger()
@@ -37,9 +41,8 @@ func NewMalClient(clientID string, httpClient *http.Client) *MalClient {
 }
 
 // GetUserAnimeList fetches an anime list from MyAnimeList and normalizes it.
-func (c *MalClient) GetUserAnimeList(ctx context.Context, accessToken string, username string, status string) (*PaginatedResponse, error) {
-	fields := "synopsis,media_type,my_list_status,rating,mean,num_episodes,popularity,alternative_titles,genres"
-	raw, err := c.fetchMalList(ctx, "animelist", username, status, fields, accessToken)
+func (c *MalClient) GetUserAnimeList(ctx context.Context, username string, status string, accessToken string) (*PaginatedResponse, error) {
+	raw, err := c.fetchMalList(ctx, MalListTypeAnime, username, status, MalAnimeFields, accessToken)
 	if err != nil {
 		return nil, err
 	}
@@ -47,20 +50,19 @@ func (c *MalClient) GetUserAnimeList(ctx context.Context, accessToken string, us
 }
 
 // GetUserMangaList fetches a manga list from MyAnimeList and normalizes it.
-func (c *MalClient) GetUserMangaList(ctx context.Context, accessToken string, username string, status string) (*PaginatedResponse, error) {
-	fields := "synopsis,media_type,my_list_status,mean,num_chapters,num_volumes,popularity,alternative_titles,genres"
-	raw, err := c.fetchMalList(ctx, "mangalist", username, status, fields, accessToken)
+func (c *MalClient) GetUserMangaList(ctx context.Context, username string, status string, accessToken string) (*PaginatedResponse, error) {
+	raw, err := c.fetchMalList(ctx, MalListTypeManga, username, status, MalMangaFields, accessToken)
 	if err != nil {
 		return nil, err
 	}
 	return c.normalizeResponse(raw, MapMalMangaToItem), nil
 }
 
-func (c *MalClient) fetchMalList(ctx context.Context, listType string, username string, status string, fields string, accessToken string) (*rawMalResponse, error) {
+func (c *MalClient) fetchMalList(ctx context.Context, listType MalListType, username string, status string, fields string, accessToken string) (*rawMalResponse, error) {
 	if username == "" {
 		username = "@me"
 	}
-	u := fmt.Sprintf("%s/users/%s/%s", c.BaseURL, username, listType)
+	u := fmt.Sprintf("%s/users/%s/%s", c.BaseURL, username, listType.String())
 
 	reqURL, err := url.Parse(u)
 	if err != nil {
@@ -91,10 +93,15 @@ func (c *MalClient) fetchMalList(ctx context.Context, listType string, username 
 
 	resp, err := c.HTTPClient.Do(req)
 	if err != nil {
-		logger.Error("network error fetching MAL list", zap.Error(err), zap.String("type", listType), zap.String("user", username))
-		return nil, fmt.Errorf("network error fetching %s: %w", listType, err)
+		logger.Error("network error fetching MAL list", zap.Error(err), zap.String("type", listType.String()), zap.String("user", username))
+		return nil, fmt.Errorf("network error fetching %s: %w", listType.String(), err)
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			logger.Error("error closing response body", zap.Error(err))
+		}
+	}(resp.Body)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		logger.Warn("MAL API returned non-success status code", zap.Int("status_code", resp.StatusCode), zap.String("user", username))

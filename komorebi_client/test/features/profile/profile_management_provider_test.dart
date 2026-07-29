@@ -11,7 +11,7 @@ import 'package:komorebi/src/features/profile/profile.dart';
 import 'package:komorebi/src/features/profile/profile_management_provider.dart';
 import 'package:komorebi/src/features/settings/app_config.dart';
 
-import '../fakes/fake_profile_api_service.dart';
+import '../../fakes/fake_profile_api_service.dart';
 
 class FakeConfigApiService implements ConfigApiService {
   final Map<String, String> configs = {};

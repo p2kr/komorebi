@@ -5,6 +5,7 @@ go 1.26
 require (
 	github.com/gin-contrib/zap v1.1.7
 	github.com/gin-gonic/gin v1.12.0
+	github.com/joho/godotenv v1.5.1
 	go.uber.org/zap v1.28.0
 	modernc.org/sqlite v1.54.0
 )

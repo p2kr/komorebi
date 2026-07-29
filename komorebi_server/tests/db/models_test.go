@@ -45,8 +45,9 @@ func TestProfileJSON(t *testing.T) {
 	if unmarshaled.AvatarUrl == nil || *unmarshaled.AvatarUrl != avatar {
 		t.Errorf("AvatarUrl mismatch: got %v, want %s", unmarshaled.AvatarUrl, avatar)
 	}
-	if unmarshaled.AccessToken == nil || *unmarshaled.AccessToken != token {
-		t.Errorf("AccessToken mismatch: got %v, want %s", unmarshaled.AccessToken, token)
+	// AccessToken has json:"-" tag so it is intentionally omitted from JSON
+	if unmarshaled.AccessToken != nil {
+		t.Errorf("AccessToken should be nil after JSON unmarshal due to json:\"-\" tag, got %v", unmarshaled.AccessToken)
 	}
 
 	// Test with nil pointers

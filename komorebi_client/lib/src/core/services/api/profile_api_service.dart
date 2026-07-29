@@ -103,27 +103,12 @@ class ProfileApiService {
     }
   }
 
-  /// Exchange OAuth token via Go Sidecar
-  Future<Profile> exchangeOAuthToken({
-    required String provider,
-    required String authCode,
-    String? codeVerifier,
-    String? redirectUri,
-    String? clientId,
-  }) async {
+  /// Start full OAuth login flow via Go Sidecar
+  Future<Profile> startOAuthLogin({String provider = 'mal'}) async {
     try {
-      final data = {
-        'provider': provider,
-        'code': authCode,
-        'code_verifier': ?codeVerifier,
-        'redirect_uri': ?redirectUri,
-        'client_id': ?clientId,
-      };
-
-      final response = await _dio.post(
-        "/auth/exchange",
-        data: data,
-        options: Options(headers: {'Content-Type': 'application/json'}),
+      final response = await _dio.get(
+        "/auth/login",
+        queryParameters: {'provider': provider},
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -137,10 +122,10 @@ class ProfileApiService {
         }
       }
       throw Exception(
-        "Failed to exchange token. Server returned: ${response.data}",
+        "Failed to complete OAuth login. Server returned: ${response.data}",
       );
     } catch (e, t) {
-      talker.error("Error in exchangeOAuthToken: ", e, t);
+      talker.error("Error in startOAuthLogin: ", e, t);
       rethrow;
     }
   }

@@ -3,7 +3,8 @@ package utils
 import "path"
 
 const (
-	AppDbDriver = "sqlite"
+	AppDbDriver      = "sqlite"
+	OauthRedirectUrl = "https://p2kr.github.io/komorebi/"
 )
 
 func AppDbPath() string   { return path.Join("com.p2kr", "Komorebi", "app_db.db") }

@@ -37,67 +37,27 @@ class ServerMediaApi {
   }
 
   Future<MediaPage> getUserAnimeList({
-    required String username,
-    String? accessToken,
+    required int profileId,
     String? status,
-    String? syncType,
-    String? provider,
-    String? clientId,
-  }) => _fetchMediaList(
-    '/media/anime',
-    _buildQueryParams(
-      username: username,
-      accessToken: accessToken,
-      status: status,
-      syncType: syncType,
-      provider: provider,
-      clientId: clientId,
-    ),
-  );
+  }) => _fetchMediaList('/media/anime', profileId, status);
 
   Future<MediaPage> getUserMangaList({
-    required String username,
-    String? accessToken,
+    required int profileId,
     String? status,
-    String? syncType,
-    String? provider,
-    String? clientId,
-  }) => _fetchMediaList(
-    '/media/manga',
-    _buildQueryParams(
-      username: username,
-      accessToken: accessToken,
-      status: status,
-      syncType: syncType,
-      provider: provider,
-      clientId: clientId,
-    ),
-  );
-
-  Map<String, String> _buildQueryParams({
-    required String username,
-    String? accessToken,
-    String? status,
-    String? syncType,
-    String? provider,
-    String? clientId,
-  }) => {
-    'username': username,
-    if (isNotBlank(status)) 'status': status!,
-    if (isNotBlank(syncType)) 'sync_type': syncType!,
-    if (isNotBlank(provider)) 'provider': provider!,
-    if (isNotBlank(accessToken)) 'access_token': accessToken!,
-    if (isNotBlank(clientId)) 'client_id': clientId!,
-  };
+  }) => _fetchMediaList('/media/manga', profileId, status);
 
   Future<MediaPage> _fetchMediaList(
     String endpoint,
-    Map<String, String> queryParams,
+    int profileId,
+    String? status,
   ) async {
     try {
       final response = await _dio.get<Map<String, dynamic>>(
         endpoint,
-        queryParameters: queryParams,
+        queryParameters: {
+          'profile_id': profileId,
+          if (isNotBlank(status)) 'status': status!,
+        },
       );
 
       final data = response.data;

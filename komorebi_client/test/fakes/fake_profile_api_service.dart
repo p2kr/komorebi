@@ -46,18 +46,28 @@ class FakeProfileApiService implements ProfileApiService {
   }
 
   @override
-  Future<Profile> exchangeOAuthToken({
-    required String provider,
-    required String authCode,
-    String? codeVerifier,
-    String? redirectUri,
-    String? clientId,
-  }) async {
-    throw UnimplementedError();
+  Future<Profile> startOAuthLogin({String provider = 'mal'}) async {
+    final mockProfile = Profile(
+      id: profiles.length + 1,
+      username: "MockUser",
+      avatarUrl: "https://example.com/avatar.png",
+      syncType: provider == 'mal' ? SyncType.mal : SyncType.anilist,
+      createdAt: DateTime.now(),
+    );
+    profiles.add(mockProfile);
+    return mockProfile;
   }
 
   @override
   Future<Profile> verifySandboxProfile(String username) async {
-    throw UnimplementedError();
+    final profile = Profile(
+      id: profiles.length + 1,
+      username: username,
+      avatarUrl: null,
+      syncType: SyncType.sandbox,
+      createdAt: DateTime.now(),
+    );
+    profiles.add(profile);
+    return profile;
   }
 }

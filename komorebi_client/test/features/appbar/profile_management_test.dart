@@ -206,6 +206,7 @@ void main() {
 
 class MockCurrentProfileNotifier extends CurrentProfileNotifier {
   final Profile? initialProfile;
+
   MockCurrentProfileNotifier(this.initialProfile);
 
   @override

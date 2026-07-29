@@ -155,7 +155,7 @@ class ProfileManagementPopup extends HookConsumerWidget {
 
             Divider(),
 
-            // link another mal profile using oauth button
+            // link another profile using oauth button
             Column(
               spacing: 8,
               crossAxisAlignment: .stretch,

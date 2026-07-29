@@ -38,3 +38,8 @@ WHERE username = ?
 DELETE
 FROM profiles
 WHERE id = ?;
+
+-- name: FindProfileById :one
+SELECT *
+FROM profiles
+WHERE id = ?;
