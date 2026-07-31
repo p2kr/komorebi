@@ -142,7 +142,7 @@ class JsonCrawlerParser implements CrawlerParser {
                 results.add(
                   CrawlerResult(
                     title: '$baseTitle$resTag',
-                    downloadUrl: magnet,
+                    link: magnet,
                     source: config.id,
                     popularity: popVal ?? 0.0,
                     size: size,
@@ -169,7 +169,7 @@ class JsonCrawlerParser implements CrawlerParser {
             results.add(
               CrawlerResult(
                 title: baseTitle,
-                downloadUrl: downloadUrl,
+                link: downloadUrl,
                 source: config.id,
                 popularity: popVal ?? 0.0,
                 size: size,

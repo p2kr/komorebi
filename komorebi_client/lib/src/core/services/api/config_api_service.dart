@@ -22,7 +22,7 @@ class ConfigApiService {
   Future<AppConfig?> getConfig(String key) async {
     try {
       final response = await _dio.get(
-        '/getConfig',
+        '/config/get',
         queryParameters: {'config_key': key},
       );
       final data = response.data;
@@ -38,7 +38,7 @@ class ConfigApiService {
   /// Create or update a config on server
   Future<AppConfig> setConfig(String key, String value) async {
     final response = await _dio.post(
-      '/setConfig',
+      '/config/set',
       data: {'config_key': key, 'config_value': value},
     );
     final data = response.data;
@@ -50,13 +50,13 @@ class ConfigApiService {
 
   /// Delete a config by key from server
   Future<void> deleteConfig(String key) async {
-    await _dio.delete('/deleteConfig', queryParameters: {'config_key': key});
+    await _dio.delete('/config/delete', queryParameters: {'config_key': key});
   }
 
   /// Fetch all configs from server
   Future<List<AppConfig>> getAllConfigs() async {
     try {
-      final response = await _dio.get('/getAllConfigs');
+      final response = await _dio.get('/config/getAll');
       final data = response.data;
       if (data != null && data['success'] == true && data['data'] is List) {
         final list = data['data'] as List;

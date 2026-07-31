@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:komorebi/src/core/services/api/profile_api_service.dart';
+import 'package:komorebi/src/core/utils/init.dart';
 import 'package:komorebi/src/core/utils/talker.dart';
 import 'package:komorebi/src/features/profile/oauth_timer_provider.dart';
 import 'package:komorebi/src/features/profile/profile_management_provider.dart';
@@ -56,4 +57,26 @@ Future<void> signInWithOAuth(WidgetRef ref) async {
   } finally {
     ref.read(oauthCountdownProvider.notifier).stopCountdown();
   }
+}
+
+/// Listens for OAuth deep links and forwards them to the sidecar
+StreamSubscription<Uri> listenToAuthCallbacks(WidgetRef ref) {
+  return deepLinkController.stream.listen((uri) async {
+    talker.info("Received deep link for auth: $uri");
+    if (uri.host == 'auth-callback') {
+      final code = uri.queryParameters['code'];
+      final state = uri.queryParameters['state'];
+      if (code != null && state != null) {
+        try {
+          final apiService = ref.read(profileApiServiceProvider);
+          await apiService.dio.get('/auth/callback', queryParameters: {
+            'code': code,
+            'state': state,
+          });
+        } catch (e, t) {
+          talker.error("Failed to forward auth-callback to sidecar", e, t);
+        }
+      }
+    }
+  });
 }

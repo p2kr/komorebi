@@ -30,7 +30,7 @@ void main() {
       final results = [
         const CrawlerResult(
           title: 'Shingeki no Kyojin S3 - 01',
-          downloadUrl: 'url1',
+          link: 'url1',
           source: 'config_1',
           popularity: 100,
           parsedTitle: CrawlerParsedTitle(
@@ -42,7 +42,7 @@ void main() {
         ),
         const CrawlerResult(
           title: 'Shingeki no Kyojin S1 - 01',
-          downloadUrl: 'url2',
+          link: 'url2',
           source: 'config_2',
           popularity: 500,
           parsedTitle: CrawlerParsedTitle(
@@ -67,14 +67,14 @@ void main() {
       final results = [
         const CrawlerResult(
           title: 'Random Title Low Pop',
-          downloadUrl: 'url1',
+          link: 'url1',
           source: 'config_1',
           popularity: 10,
           parsedTitle: null,
         ),
         const CrawlerResult(
           title: 'Random Title High Pop',
-          downloadUrl: 'url2',
+          link: 'url2',
           source: 'config_2',
           popularity: 500,
           parsedTitle: null,
@@ -96,7 +96,7 @@ void main() {
         final results = [
           const CrawlerResult(
             title: 'One Piece - 1080 (1080p)',
-            downloadUrl: 'url_from_config2',
+            link: 'url_from_config2',
             source: 'config_2',
             popularity: 100,
             parsedTitle: CrawlerParsedTitle(
@@ -107,7 +107,7 @@ void main() {
           ),
           const CrawlerResult(
             title: 'One Piece - 1080 (1080p)',
-            downloadUrl: 'url_from_config1',
+            link: 'url_from_config1',
             source: 'config_1',
             popularity: 100,
             parsedTitle: CrawlerParsedTitle(

@@ -35,7 +35,7 @@ void main() {
     () {
       test('getAllProfiles returns parsed profile list on 200', () async {
         mockAdapter.fetchHandler = (options) {
-          expect(options.path, equals("/getAllProfiles"));
+          expect(options.path, equals("/profile/getAll"));
           return ResponseBody.fromString(
             '{"success":true,"data":[{"id":1,"username":"TestUser","sync_type":"mal","created_at":"2026-01-01T00:00:00.000Z"}]}',
             200,
@@ -71,7 +71,7 @@ void main() {
 
       test('addNewProfile sends JSON body and parses returned profile', () async {
         mockAdapter.fetchHandler = (options) {
-          expect(options.path, equals("/addNewProfile"));
+          expect(options.path, equals("/profile/add"));
           return ResponseBody.fromString(
             '{"success":true,"data":{"id":5,"username":"NewUser","sync_type":"mal"}}',
             200,
@@ -95,7 +95,7 @@ void main() {
 
       test('deleteProfile completes on 200', () async {
         mockAdapter.fetchHandler = (options) {
-          expect(options.path, equals("/deleteProfile"));
+          expect(options.path, equals("/profile/delete"));
           expect(options.queryParameters['id'], equals(5));
           return ResponseBody.fromString(
             '{"success":true,"data":{"deleted":true}}',

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"os"
-	"path"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -19,8 +18,7 @@ func InitDefaultLogger() {
 		l = zap.NewProductionConfig()
 	}
 
-	p, _ := os.UserConfigDir()
-	logPath := path.Join(p, AppLogsPath())
+	logPath := AppLogsPath()
 	l.OutputPaths = []string{"stdout", logPath}
 	l.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 

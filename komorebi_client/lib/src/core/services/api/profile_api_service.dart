@@ -22,7 +22,7 @@ class ProfileApiService {
   /// Fetch all profiles from server
   Future<List<Profile>> getAllProfiles() async {
     try {
-      final response = await _dio.get("/getAllProfiles");
+      final response = await _dio.get("/profile/getAll");
       if (response.statusCode == 200 && response.data != null) {
         final dataMap = response.data is Map<String, dynamic>
             ? response.data as Map<String, dynamic>
@@ -63,7 +63,7 @@ class ProfileApiService {
   Future<Profile> addNewProfile(Profile profile) async {
     try {
       final response = await _dio.post(
-        "/addNewProfile",
+        "/profile/add",
         data: profile.toJson(),
         options: Options(headers: {'Content-Type': 'application/json'}),
       );
@@ -91,7 +91,7 @@ class ProfileApiService {
   Future<void> deleteProfile(int id) async {
     try {
       final response = await _dio.delete(
-        "/deleteProfile",
+        "/profile/delete",
         queryParameters: {'id': id},
       );
       if (response.statusCode != 200) {

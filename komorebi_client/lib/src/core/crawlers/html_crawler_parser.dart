@@ -120,7 +120,7 @@ class HtmlCrawlerParser implements CrawlerParser {
             results.add(
               CrawlerResult(
                 title: title,
-                downloadUrl: downloadUrl,
+                link: downloadUrl,
                 source: config.id,
                 popularity: popularity,
                 size: size,

@@ -31,7 +31,7 @@ void main() {
   group('ConfigApiService Tests', () {
     test('getConfig returns AppConfig on success', () async {
       mockAdapter.fetchHandler = (options) {
-        expect(options.path, equals("/getConfig"));
+        expect(options.path, equals("/config/get"));
         expect(options.queryParameters['config_key'], equals('THEME'));
         return ResponseBody.fromString(
           '{"success":true,"data":{"id":1,"config_key":"THEME","config_value":"dark"}}',
@@ -50,7 +50,7 @@ void main() {
 
     test('setConfig sends JSON body and parses return data', () async {
       mockAdapter.fetchHandler = (options) {
-        expect(options.path, equals("/setConfig"));
+        expect(options.path, equals("/config/set"));
         return ResponseBody.fromString(
           '{"success":true,"data":{"id":2,"config_key":"TEST_KEY","config_value":"TEST_VAL"}}',
           200,
@@ -67,7 +67,7 @@ void main() {
 
     test('deleteConfig completes on 200', () async {
       mockAdapter.fetchHandler = (options) {
-        expect(options.path, equals("/deleteConfig"));
+        expect(options.path, equals("/config/delete"));
         expect(options.queryParameters['config_key'], equals('KEY_TO_DELETE'));
         return ResponseBody.fromString(
           '{"success":true,"data":{"deleted":true}}',
@@ -83,7 +83,7 @@ void main() {
 
     test('getAllConfigs returns parsed AppConfig list', () async {
       mockAdapter.fetchHandler = (options) {
-        expect(options.path, equals("/getAllConfigs"));
+        expect(options.path, equals("/config/getAll"));
         return ResponseBody.fromString(
           '{"success":true,"data":[{"id":1,"config_key":"K1","config_value":"V1"},{"id":2,"config_key":"K2","config_value":"V2"}]}',
           200,

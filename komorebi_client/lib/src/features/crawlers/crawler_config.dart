@@ -25,7 +25,7 @@ abstract class CrawlerConfig with _$CrawlerConfig {
 abstract class CrawlerResult with _$CrawlerResult {
   const factory CrawlerResult({
     required String title,
-    required String downloadUrl,
+    required String link,
     required String source,
     @Default(0) double popularity,
     String? size,

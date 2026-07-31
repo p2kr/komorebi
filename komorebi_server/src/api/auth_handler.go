@@ -5,20 +5,16 @@ import (
 	"crypto/rand"
 	"database/sql"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"komorebi_server/src/db"
 	dbClient "komorebi_server/src/db/generated"
 	"komorebi_server/src/media"
 	"komorebi_server/src/utils"
 	"net/http"
-	"net/url"
 	"os/exec"
 	"runtime"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -30,6 +26,7 @@ type authSession struct {
 	codeVerifier string
 	resultChan   chan *dbClient.Profile
 	errChan      chan error
+	provider     media.Provider
 }
 
 var (
@@ -115,55 +112,16 @@ func DeleteProfile(c *gin.Context) {
 	Ok(c, map[string]any{"id": id, "deleted": true})
 }
 
-// StartOAuthLogin initiates full server-side OAuth flow for MAL
+// StartOAuthLogin initiates full server-side OAuth flow for MAL and AniList
 func StartOAuthLogin(c *gin.Context) {
 	provider := media.ParseProvider(c.DefaultQuery("provider", string(media.ProviderMAL)))
 
-	if provider == media.ProviderMAL {
-		clientID := utils.GetEnv().MalClientID
-		if clientID == "" {
-			Fail(c, http.StatusInternalServerError, "CONFIG_ERROR", "MAL_CLIENT_ID is not configured on server")
-			return
-		}
-
-		codeVerifier := generateCodeVerifier()
-		sessionID := generateCodeVerifier()[:16]
-
-		resChan := make(chan *dbClient.Profile, 1)
-		errChan := make(chan error, 1)
-
-		authSessionsMu.Lock()
-		authSessions[sessionID] = &authSession{
-			codeVerifier: codeVerifier,
-			resultChan:   resChan,
-			errChan:      errChan,
-		}
-		authSessionsMu.Unlock()
-
-		authURL := fmt.Sprintf(
-			"https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=%s&code_challenge=%s&code_challenge_method=plain&redirect_uri=%s&state=%s",
-			url.QueryEscape(clientID),
-			url.QueryEscape(codeVerifier),
-			url.QueryEscape(utils.OauthRedirectUrl),
-			url.QueryEscape(sessionID),
-		)
-
-		_ = openBrowser(authURL)
-
-		select {
-		case profile := <-resChan:
-			Ok(c, profile)
-		case err := <-errChan:
-			Fail(c, http.StatusInternalServerError, "OAUTH_ERROR", err.Error())
-		case <-time.After(5 * time.Minute):
-			Fail(c, http.StatusRequestTimeout, "TIMEOUT", "Authentication timed out")
-		case <-c.Request.Context().Done():
-			Fail(c, 499, "CANCELLED", "Client cancelled request")
-		}
-
-		authSessionsMu.Lock()
-		delete(authSessions, sessionID)
-		authSessionsMu.Unlock()
+	switch provider {
+	case media.ProviderMAL:
+		startMalOAuthLogin(c)
+		return
+	case media.ProviderAniList:
+		startAniListOAuthLogin(c)
 		return
 	}
 
@@ -180,99 +138,18 @@ func OAuthCallback(c *gin.Context) {
 	authSessionsMu.Unlock()
 
 	if !exists || session == nil {
-		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte("<html><body><h2>Invalid or expired authentication session.</h2></body></html>"))
+		Fail(c, http.StatusBadRequest, "AUTH_ERROR", "Invalid or expired authentication session")
 		return
 	}
 
-	clientID := utils.GetEnv().MalClientID
-
-	data := url.Values{}
-	data.Set("client_id", clientID)
-	data.Set("code", code)
-	data.Set("code_verifier", session.codeVerifier)
-	data.Set("grant_type", "authorization_code")
-	data.Set("redirect_uri", utils.OauthRedirectUrl)
-
-	resp, err := http.Post("https://myanimelist.net/v1/oauth2/token", "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
-	if err != nil {
-		session.errChan <- err
-		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte("<html><body><h2>OAuth token exchange failed.</h2></body></html>"))
-		return
+	switch session.provider {
+	case media.ProviderMAL:
+		handleMalOAuthCallback(c, session, code)
+	case media.ProviderAniList:
+		handleAniListOAuthCallback(c, session, code)
+	default:
+		Fail(c, http.StatusBadRequest, "AUTH_ERROR", "Unsupported provider in session")
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		bodyBytes, _ := io.ReadAll(resp.Body)
-		session.errChan <- fmt.Errorf("token error (%d): %s", resp.StatusCode, string(bodyBytes))
-		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte("<html><body><h2>OAuth authentication failed.</h2></body></html>"))
-		return
-	}
-
-	var tokenResp MalTokenResponse
-	_ = json.NewDecoder(resp.Body).Decode(&tokenResp)
-
-	reqURL, _ := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, "https://api.myanimelist.net/v2/users/@me", nil)
-	reqURL.Header.Set("Authorization", "Bearer "+tokenResp.AccessToken)
-
-	userResp, err := http.DefaultClient.Do(reqURL)
-	if err != nil {
-		session.errChan <- err
-		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte("<html><body><h2>Failed to fetch user profile.</h2></body></html>"))
-		return
-	}
-	defer userResp.Body.Close()
-
-	var userInfo MalUserInfo
-	_ = json.NewDecoder(userResp.Body).Decode(&userInfo)
-
-	profile := dbClient.Profile{
-		Username:    userInfo.Name,
-		SyncType:    media.ProviderMAL.String(),
-		AvatarUrl:   &userInfo.Picture,
-		AccessToken: &tokenResp.AccessToken,
-	}
-
-	savedProfile, err := saveProfile(c, profile)
-	if err != nil {
-		session.errChan <- err
-		c.Data(http.StatusInternalServerError, "text/html; charset=utf-8", []byte("<html><body><h2>Failed to save profile.</h2></body></html>"))
-		return
-	}
-
-	session.resultChan <- savedProfile
-
-	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`
-		<!DOCTYPE html>
-		<html>
-		<head>
-			<title>Authentication Successful</title>
-			<style>
-				body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-				.card { background: #1e293b; padding: 2rem 3rem; border-radius: 1rem; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-				h1 { color: #38bdf8; margin-bottom: 0.5rem; }
-				p { color: #94a3b8; }
-			</style>
-		</head>
-		<body>
-			<div class="card">
-				<h1>🌸 Authentication Successful!</h1>
-				<p>Your MyAnimeList account has been connected to Komorebi.<br>You can close this window and return to the app.</p>
-			</div>
-		</body>
-		</html>
-	`))
-}
-
-type MalTokenResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"`
-	ExpiresIn   int    `json:"expires_in"`
-}
-
-type MalUserInfo struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Picture string `json:"picture"`
 }
 
 type SandboxProfileRequest struct {

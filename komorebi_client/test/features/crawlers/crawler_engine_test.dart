@@ -48,7 +48,7 @@ void main() {
         equals('[SubsPlease] One Piece - 1080 (1080p) [12345678].mkv'),
       );
       expect(
-        results.first.downloadUrl,
+        results.first.link,
         equals('magnet:?xt=urn:btih:1234567890abcdef'),
       );
       expect(results.first.popularity, equals(250.0));
@@ -84,7 +84,7 @@ void main() {
       expect(results.length, equals(1));
       expect(results.first.title, equals('[SubsPlease] Bleach - 12 (1080p)'));
       expect(
-        results.first.downloadUrl,
+        results.first.link,
         equals('https://subsplease.org/download/bleach-12.torrent'),
       );
       expect(results.first.source, equals('subsplease'));
@@ -192,7 +192,7 @@ void main() {
         equals('Tensei Shitara Slime Datta Ken S4 - 15 (1080p)'),
       );
       expect(
-        results.first.downloadUrl,
+        results.first.link,
         equals('magnet:?xt=urn:btih:1234567890abcdef'),
       );
       expect(results.first.source, equals('subsplease'));
@@ -243,15 +243,15 @@ void main() {
         expect(results.length, equals(3));
 
         expect(results[0].title, equals('Bleach - 12 (480p)'));
-        expect(results[0].downloadUrl, equals('magnet:?xt=urn:btih:hash480'));
+        expect(results[0].link, equals('magnet:?xt=urn:btih:hash480'));
         expect(results[0].size, equals('350 MB'));
 
         expect(results[1].title, equals('Bleach - 12 (720p)'));
-        expect(results[1].downloadUrl, equals('magnet:?xt=urn:btih:hash720'));
+        expect(results[1].link, equals('magnet:?xt=urn:btih:hash720'));
         expect(results[1].size, equals('650 MB'));
 
         expect(results[2].title, equals('Bleach - 12 (1080p)'));
-        expect(results[2].downloadUrl, equals('magnet:?xt=urn:btih:hash1080'));
+        expect(results[2].link, equals('magnet:?xt=urn:btih:hash1080'));
         expect(results[2].size, equals('1.35 GB'));
       },
     );
@@ -319,7 +319,7 @@ void main() {
         expect(results.length, equals(1));
         expect(results.first.title, equals('Solo Leveling - 05'));
         expect(
-          results.first.downloadUrl,
+          results.first.link,
           equals('magnet:?xt=urn:btih:abcdef123456'),
         );
         expect(results.first.popularity, equals(1500.0));
@@ -350,7 +350,7 @@ void main() {
 
       expect(results.length, equals(1));
       expect(
-        results.first.downloadUrl,
+        results.first.link,
         equals('https://animetosho.org/download/123.torrent'),
       );
     });

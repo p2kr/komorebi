@@ -53,23 +53,31 @@ func setupRoutesV1() {
 		v1.Any("/health", healthCheck)
 	}
 	{
-		v1.GET("/getAllProfiles", GetAllProfiles)
-		v1.POST("/addNewProfile", AddNewProfile)
-		v1.DELETE("/deleteProfile", DeleteProfile)
-		v1.POST("/deleteProfile", DeleteProfile)
-		v1.GET("/auth/login", StartOAuthLogin)
-		v1.GET("/auth/callback", OAuthCallback)
-		v1.POST("/auth/sandbox", VerifySandboxProfile)
+		profile := v1.Group("/profile")
+		profile.GET("/getAll", GetAllProfiles)
+		profile.POST("/add", AddNewProfile)
+		profile.DELETE("/delete", DeleteProfile)
 	}
 	{
-		v1.GET("/getAllConfigs", GetAllAppConfigs)
-		v1.GET("/getConfig", GetAppConfig)
-		v1.POST("/setConfig", SetAppConfig)
-		v1.DELETE("/deleteConfig", DeleteAppConfig)
-		v1.POST("/deleteConfig", DeleteAppConfig)
+		auth := v1.Group("/auth")
+		auth.GET("/login", StartOAuthLogin)
+		auth.GET("/callback", OAuthCallback)
+		auth.POST("/sandbox", VerifySandboxProfile)
 	}
 	{
-		v1.GET("/media/anime", GetUserAnimeList)
-		v1.GET("/media/manga", GetUserMangaList)
+		config := v1.Group("/config")
+		config.GET("/getAll", GetAllAppConfigs)
+		config.GET("/get", GetAppConfig)
+		config.POST("/set", SetAppConfig)
+		config.DELETE("/delete", DeleteAppConfig)
+	}
+	{
+		media := v1.Group("/media")
+		media.GET("/anime", GetUserAnimeList)
+		media.GET("/manga", GetUserMangaList)
+	}
+	{
+		v1.GET("/crawler/fetch", FindDownloadableMedia)
+		// v1.GET("/crawler/download", nil)
 	}
 }

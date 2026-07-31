@@ -18,7 +18,7 @@ class DownloadService {
   final AppDatabase db;
 
   DownloadService(this.resp, this.db)
-    : _isTorrent = resp.downloadUrl.startsWith("magnet");
+    : _isTorrent = resp.link.startsWith("magnet");
 
   final _engine = LibtorrentFlutter.instance;
   final _dio = getDioWithLogger();
@@ -145,13 +145,13 @@ class DownloadService {
       final safeFilename = resp.title.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
       final filePath = join(baseDir, safeFilename);
 
-      _torrentId = _engine.addMagnet(resp.downloadUrl);
+      _torrentId = _engine.addMagnet(resp.link);
 
       _vaultItem = await db.vaultItemsDao.insertVaultItem(
         VaultItemsCompanion(
           title: Value(resp.title),
           tempId: Value(_torrentId.toString()),
-          url: Value(resp.downloadUrl),
+          url: Value(resp.link),
           savePath: Value(filePath),
           status: Value(DownloadStatus.downloading),
           crawlerParsedTitle: Value(resp.parsedTitle),
@@ -221,7 +221,7 @@ class DownloadService {
     _vaultItem = await db.vaultItemsDao.insertVaultItem(
       VaultItemsCompanion(
         title: Value(resp.title),
-        url: Value(resp.downloadUrl),
+        url: Value(resp.link),
         savePath: Value(finalFilePath),
         status: Value(DownloadStatus.downloading),
         crawlerParsedTitle: Value(resp.parsedTitle),
@@ -230,7 +230,7 @@ class DownloadService {
 
     try {
       final r = await _dio.download(
-        resp.downloadUrl,
+        resp.link,
         partFilePath,
         cancelToken: _cancelToken,
         onReceiveProgress: (count, total) {

@@ -22,15 +22,11 @@ var ddl string
 var seedDdl string
 
 func getDbFileName() string {
-	userConfigDir, err := os.UserConfigDir()
-	if err != nil {
-		logger.Error("error in fetching user config directory", zap.Error(err))
-	}
-	dbPath := filepath.Join(userConfigDir, utils.AppDbPath())
+	dbPath := utils.AppDbPath()
 
 	logger.Info("db path", zap.String("path", dbPath))
 
-	err = os.MkdirAll(filepath.Dir(dbPath), os.ModePerm)
+	err := os.MkdirAll(filepath.Dir(dbPath), os.ModePerm)
 	if err != nil {
 		logger.Error("error in creating db directory", zap.Error(err))
 	}
