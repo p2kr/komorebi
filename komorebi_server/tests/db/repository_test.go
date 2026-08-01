@@ -1,17 +1,22 @@
 package db
 
 import (
-	"komorebi_server/src"
 	"komorebi_server/src/db"
 	dbClient "komorebi_server/src/db/generated"
+	"komorebi_server/src/utils"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func init() {
-	src.Init()
+func TestMain(m *testing.M) {
+	utils.InitDefaultLogger()
+	utils.InitValidator()
+	db.InitDbClientWithPath("file:testdb?mode=memory&cache=shared")
+	defer db.CloseDbClient()
+	os.Exit(m.Run())
 }
 
 func TestValidateProfile(t *testing.T) {

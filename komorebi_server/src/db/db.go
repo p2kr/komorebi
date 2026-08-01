@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	_ "embed"
 	"komorebi_server/src/utils"
+	"net/url"
 
 	"go.uber.org/zap"
 	_ "modernc.org/sqlite"
@@ -20,9 +21,24 @@ var ddl string
 var seedDdl string
 
 func InitDbClient() {
-	var err error
-	dbPath := utils.AppDbPath() + "?_pragma=foreign_keys(1)" // &_time_format=sqlite
-	sqlClient, err = sql.Open(utils.AppDbDriver, dbPath)
+	initDbClientWithPath(utils.AppDbPath())
+}
+
+// InitDbClientWithPath opens the DB at the given path and runs DDL.
+// Intended for use in tests to inject an in-memory database URI.
+func InitDbClientWithPath(dbPath string) {
+	initDbClientWithPath(dbPath)
+}
+
+func initDbClientWithPath(rawPath string) {
+	u, err := url.Parse(rawPath)
+	if err != nil {
+		panic(err)
+	}
+	q := u.Query()
+	q.Set("_pragma", "foreign_keys(1)")
+	u.RawQuery = q.Encode()
+	sqlClient, err = sql.Open(utils.AppDbDriver, u.String())
 	if err != nil {
 		logger.Error("error in opening db", zap.Error(err))
 		panic(err)

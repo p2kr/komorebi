@@ -2,17 +2,12 @@ package media
 
 import (
 	"encoding/json"
-	"komorebi_server/src"
 	. "komorebi_server/src/media"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func init() {
-	src.Init()
-}
 
 func TestMapMalAnimeToItem(t *testing.T) {
 	rawJSON := `{
