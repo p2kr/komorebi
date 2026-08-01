@@ -32,9 +32,10 @@ runs:
         restore-keys: ${{ runner.os }}-pub-
 
     - name: ⚙️ Setup sqlc
-      uses: sqlc-dev/setup-sqlc@v4
+      uses: sqlc-dev/setup-sqlc@v5
       with:
         sqlc-version: 'latest'
+      run: sqlc version
 
     - name: ⚙️ Generate sqlc
       shell: bash
