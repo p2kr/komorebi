@@ -25,6 +25,9 @@ jobs:
   test:
     name: 🔍 Test & Analyze
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: komorebi_client
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
@@ -35,16 +38,32 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'komorebi_server/go.mod'
+          cache-dependency-path: 'komorebi_server/go.sum'
+
       - name: 💾 Cache Pub & Build Runner (Linux)
         uses: actions/cache@v4
         with:
           path: |
             ~/.pub-cache
-            .dart_tool/build
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-${{ github.sha }}
+            komorebi_client/.dart_tool/build
+          key: ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-
+            ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-
             ${{ runner.os }}-pub-
+
+      - name: 🧪 Test Go Sidecar with Coverage
+        working-directory: komorebi_server
+        run: go test -coverprofile=coverage.out ./...
+
+      - name: 🔄 Convert Go Coverage to LCOV
+        working-directory: komorebi_server
+        run: |
+          go install github.com/jandelgado/gcov2lcov@latest
+          $(go env GOPATH)/bin/gcov2lcov -infile=coverage.out -outfile=coverage.lcov
 
       - name: 📦 Install dependencies
         run: flutter pub get
@@ -75,7 +94,7 @@ jobs:
         if: github.event_name == 'pull_request'
         uses: zgosalvez/github-actions-report-lcov@v4
         with:
-          coverage-files: coverage/lcov.info
+          coverage-files: komorebi_client/coverage/lcov.info,komorebi_server/coverage.lcov
           minimum-coverage: 0
           artifact-name: komorebi-code-coverage-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -85,14 +104,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: komorebi-coverage-report
-          path: coverage/
+          path: |
+            komorebi_client/coverage/
+            komorebi_server/coverage.lcov
+            komorebi_server/coverage.out
           if-no-files-found: ignore
 
       - name: ☂️ Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          files: coverage/lcov.info
+          files: komorebi_client/coverage/lcov.info,komorebi_server/coverage.out
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
@@ -101,6 +123,9 @@ jobs:
   build_windows:
     name: 🖥️ Build Windows Desktop
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: komorebi_client
     steps:
       - name: 📥 Checkout repository
         uses: actions/checkout@v4
@@ -111,19 +136,29 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: 🐹 Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'komorebi_server/go.mod'
+          cache-dependency-path: 'komorebi_server/go.sum'
+
       - name: 💾 Cache Pub & Build Runner (Windows)
         uses: actions/cache@v4
         with:
           path: |
             C:\Users\runneradmin\AppData\Local\Pub\Cache
-            .dart_tool\build
-          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-${{ github.sha }}
+            komorebi_client\.dart_tool\build
+          key: ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}-
+            ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-
             ${{ runner.os }}-pub-
 
       - name: ⚙️ Enable Windows Desktop Support
         run: flutter config --enable-windows-desktop
+
+      - name: 🏗️ Build Go Sidecar
+        working-directory: komorebi_server
+        run: go build -o ../komorebi_client/assets/bin/komorebi_server.exe .
 
       - name: 📦 Install dependencies
         run: flutter pub get
@@ -141,7 +176,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: komorebi-windows-build
-          path: build/windows/x64/runner/Release/
+          path: komorebi_client/build/windows/x64/runner/Release/
           if-no-files-found: error
 
   deploy_pages:
