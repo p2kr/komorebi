@@ -8,6 +8,7 @@ import (
 
 // Init initializes all settings before starting the application
 func Init() {
+	utils.InitDir()
 	utils.InitDefaultLogger()
 	utils.InitValidator()
 	utils.InitEnv()

@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	_ "embed"
 	"komorebi_server/src/utils"
-	"os"
-	"path/filepath"
 
 	"go.uber.org/zap"
 	_ "modernc.org/sqlite"
@@ -21,21 +19,9 @@ var ddl string
 //go:embed schema/seed.sql
 var seedDdl string
 
-func getDbFileName() string {
-	dbPath := utils.AppDbPath()
-
-	logger.Info("db path", zap.String("path", dbPath))
-
-	err := os.MkdirAll(filepath.Dir(dbPath), os.ModePerm)
-	if err != nil {
-		logger.Error("error in creating db directory", zap.Error(err))
-	}
-	return dbPath
-}
-
 func InitDbClient() {
 	var err error
-	dbPath := getDbFileName() + "?_pragma=foreign_keys(1)" // &_time_format=sqlite
+	dbPath := utils.AppDbPath() + "?_pragma=foreign_keys(1)" // &_time_format=sqlite
 	sqlClient, err = sql.Open(utils.AppDbDriver, dbPath)
 	if err != nil {
 		logger.Error("error in opening db", zap.Error(err))
