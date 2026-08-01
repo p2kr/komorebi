@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	. "komorebi_server/src/api"
+	"komorebi_server/src/utils"
 )
 
 // --- /api/v1/auth/sandbox ---
@@ -91,6 +92,12 @@ func TestStartOAuthLogin_RouteRegistered(t *testing.T) {
 // test environments). ParseProvider maps all unknown strings to MAL via its
 // default case, so there is no INVALID_PROVIDER code path reachable at runtime.
 func TestStartOAuthLogin_MissingClientID(t *testing.T) {
+	t.Setenv("MAL_CLIENT_ID", "")
+	utils.InitEnv()
+	t.Cleanup(func() {
+		utils.InitEnv()
+	})
+
 	r := InitRouter()
 
 	// Default provider is MAL; without MAL_CLIENT_ID set the handler should

@@ -1,6 +1,7 @@
 package db
 
 import (
+	"komorebi_server/src"
 	"komorebi_server/src/db"
 	dbClient "komorebi_server/src/db/generated"
 	"testing"
@@ -8,6 +9,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func init() {
+	src.Init()
+}
 
 func TestValidateProfile(t *testing.T) {
 	validToken := "my-access-token"

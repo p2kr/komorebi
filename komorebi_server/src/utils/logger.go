@@ -8,7 +8,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-var logger *zap.Logger
+var logger *zap.Logger = zap.NewNop()
 
 // InitDefaultLogger Inits the default logger
 func InitDefaultLogger() {
@@ -27,7 +27,7 @@ func InitDefaultLogger() {
 	logger, err = l.Build()
 	if err != nil {
 		fmt.Println("Failed to build logger:", err)
-		logger = zap.NewNop()
+		return
 	}
 
 	logger.Info("Logger initialized at ", zap.String("path", logPath))
@@ -42,8 +42,5 @@ func InitDefaultLogger() {
 }
 
 func Logger() *zap.Logger {
-	if logger == nil {
-		InitDefaultLogger()
-	}
 	return logger
 }

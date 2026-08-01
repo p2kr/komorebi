@@ -19,6 +19,7 @@ scratch/
 *.iws
 .idea/
 .vscode/
+.zed/
 
 # Environment files
 .env

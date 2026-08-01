@@ -14,10 +14,11 @@ coverage:
         threshold: 1%
 
 ignore:
-  - "lib/**/*.g.dart"
-  - "lib/**/*.freezed.dart"
-  - "lib/intl/generated/**/*"
-  - "test/**/*"
+  - "komorebi_client/lib/**/*.g.dart"
+  - "komorebi_client/lib/**/*.freezed.dart"
+  - "komorebi_client/lib/intl/generated/**/*"
+  - "komorebi_client/test/**/*"
+  - "komorebi_server/tests/**/*"
 
 comment:
   layout: "reach, diff, flags, files"
