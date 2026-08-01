@@ -5,6 +5,9 @@ import (
 	dbClient "komorebi_server/src/db/generated"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestProfileJSON(t *testing.T) {
@@ -23,32 +26,19 @@ func TestProfileJSON(t *testing.T) {
 	}
 
 	data, err := json.Marshal(original)
-	if err != nil {
-		t.Fatalf("failed to marshal Profile: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal Profile")
 
 	var unmarshaled dbClient.Profile
 	err = json.Unmarshal(data, &unmarshaled)
-	if err != nil {
-		t.Fatalf("failed to unmarshal Profile: %v", err)
-	}
+	require.NoError(t, err, "failed to unmarshal Profile")
 
-	if unmarshaled.ID != original.ID {
-		t.Errorf("ID mismatch: got %d, want %d", unmarshaled.ID, original.ID)
-	}
-	if unmarshaled.Username != original.Username {
-		t.Errorf("Username mismatch: got %s, want %s", unmarshaled.Username, original.Username)
-	}
-	if unmarshaled.SyncType != original.SyncType {
-		t.Errorf("SyncType mismatch: got %s, want %s", unmarshaled.SyncType, original.SyncType)
-	}
-	if unmarshaled.AvatarUrl == nil || *unmarshaled.AvatarUrl != avatar {
-		t.Errorf("AvatarUrl mismatch: got %v, want %s", unmarshaled.AvatarUrl, avatar)
-	}
+	assert.Equal(t, original.ID, unmarshaled.ID, "ID mismatch")
+	assert.Equal(t, original.Username, unmarshaled.Username, "Username mismatch")
+	assert.Equal(t, original.SyncType, unmarshaled.SyncType, "SyncType mismatch")
+	require.NotNil(t, unmarshaled.AvatarUrl, "expected AvatarUrl to be non-nil")
+	assert.Equal(t, avatar, *unmarshaled.AvatarUrl, "AvatarUrl mismatch")
 	// AccessToken has json:"-" tag so it is intentionally omitted from JSON
-	if unmarshaled.AccessToken != nil {
-		t.Errorf("AccessToken should be nil after JSON unmarshal due to json:\"-\" tag, got %v", unmarshaled.AccessToken)
-	}
+	assert.Nil(t, unmarshaled.AccessToken, "AccessToken should be nil after JSON unmarshal due to json:\"-\" tag")
 
 	// Test with nil pointers
 	originalNil := dbClient.Profile{
@@ -58,20 +48,13 @@ func TestProfileJSON(t *testing.T) {
 	}
 
 	dataNil, err := json.Marshal(originalNil)
-	if err != nil {
-		t.Fatalf("failed to marshal Profile with nil pointers: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal Profile with nil pointers")
 
 	var unmarshaledNil dbClient.Profile
-	if err := json.Unmarshal(dataNil, &unmarshaledNil); err != nil {
-		t.Fatalf("failed to unmarshal Profile: %v", err)
-	}
-	if unmarshaledNil.AvatarUrl != nil {
-		t.Errorf("expected nil AvatarUrl, got %v", unmarshaledNil.AvatarUrl)
-	}
-	if unmarshaledNil.AccessToken != nil {
-		t.Errorf("expected nil AccessToken, got %v", unmarshaledNil.AccessToken)
-	}
+	require.NoError(t, json.Unmarshal(dataNil, &unmarshaledNil), "failed to unmarshal Profile")
+
+	assert.Nil(t, unmarshaledNil.AvatarUrl, "expected nil AvatarUrl")
+	assert.Nil(t, unmarshaledNil.AccessToken, "expected nil AccessToken")
 }
 
 func TestAppConfigJSON(t *testing.T) {
@@ -85,21 +68,14 @@ func TestAppConfigJSON(t *testing.T) {
 	}
 
 	data, err := json.Marshal(cfg)
-	if err != nil {
-		t.Fatalf("failed to marshal AppConfig: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal AppConfig")
 
 	var decoded dbClient.AppConfig
-	if err := json.Unmarshal(data, &decoded); err != nil {
-		t.Fatalf("failed to unmarshal AppConfig: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &decoded), "failed to unmarshal AppConfig")
 
-	if decoded.ConfigKey != "theme" {
-		t.Errorf("expected ConfigKey 'theme', got %q", decoded.ConfigKey)
-	}
-	if decoded.ConfigValue == nil || *decoded.ConfigValue != "light_mode" {
-		t.Errorf("expected ConfigValue 'light_mode', got %v", decoded.ConfigValue)
-	}
+	assert.Equal(t, "theme", decoded.ConfigKey, "expected ConfigKey 'theme'")
+	require.NotNil(t, decoded.ConfigValue, "expected ConfigValue to be non-nil")
+	assert.Equal(t, "light_mode", *decoded.ConfigValue, "expected ConfigValue 'light_mode'")
 }
 
 func TestVaultItemJSON(t *testing.T) {
@@ -121,33 +97,20 @@ func TestVaultItemJSON(t *testing.T) {
 	}
 
 	data, err := json.Marshal(item)
-	if err != nil {
-		t.Fatalf("failed to marshal VaultItem: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal VaultItem")
 
 	var decoded dbClient.VaultItem
-	if err := json.Unmarshal(data, &decoded); err != nil {
-		t.Fatalf("failed to unmarshal VaultItem: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &decoded), "failed to unmarshal VaultItem")
 
-	if decoded.ID != 10 {
-		t.Errorf("expected ID 10, got %d", decoded.ID)
-	}
-	if decoded.Title != "Raw Title" {
-		t.Errorf("expected Title 'Raw Title', got %q", decoded.Title)
-	}
-	if decoded.ParsedTitle == nil || *decoded.ParsedTitle != parsedTitle {
-		t.Errorf("expected ParsedTitle %q, got %v", parsedTitle, decoded.ParsedTitle)
-	}
-	if decoded.TotalBytes == nil || *decoded.TotalBytes != totalBytes {
-		t.Errorf("expected TotalBytes %d, got %v", totalBytes, decoded.TotalBytes)
-	}
-	if decoded.Progress != 45.5 {
-		t.Errorf("expected Progress 45.5, got %f", decoded.Progress)
-	}
-	if decoded.DownloadSpeed == nil || *decoded.DownloadSpeed != speed {
-		t.Errorf("expected DownloadSpeed %f, got %v", speed, decoded.DownloadSpeed)
-	}
+	assert.Equal(t, int64(10), decoded.ID, "expected ID 10")
+	assert.Equal(t, "Raw Title", decoded.Title, "expected Title 'Raw Title'")
+	require.NotNil(t, decoded.ParsedTitle, "expected ParsedTitle to be non-nil")
+	assert.Equal(t, parsedTitle, *decoded.ParsedTitle, "expected ParsedTitle mismatch")
+	require.NotNil(t, decoded.TotalBytes, "expected TotalBytes to be non-nil")
+	assert.Equal(t, totalBytes, *decoded.TotalBytes, "expected TotalBytes mismatch")
+	assert.Equal(t, 45.5, decoded.Progress, "expected Progress mismatch")
+	require.NotNil(t, decoded.DownloadSpeed, "expected DownloadSpeed to be non-nil")
+	assert.Equal(t, speed, *decoded.DownloadSpeed, "expected DownloadSpeed mismatch")
 }
 
 func TestAppLogJSON(t *testing.T) {
@@ -166,61 +129,44 @@ func TestAppLogJSON(t *testing.T) {
 	}
 
 	data, err := json.Marshal(appLog)
-	if err != nil {
-		t.Fatalf("failed to marshal AppLog: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal AppLog")
 
 	var decoded dbClient.AppLog
-	if err := json.Unmarshal(data, &decoded); err != nil {
-		t.Fatalf("failed to unmarshal AppLog: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(data, &decoded), "failed to unmarshal AppLog")
 
-	if decoded.Level != "ERROR" || decoded.Category != "NETWORK" || decoded.Message != "Connection timed out" {
-		t.Errorf("mismatch in decoded AppLog fields: %+v", decoded)
-	}
-	if decoded.Details == nil || *decoded.Details != details {
-		t.Errorf("expected Details %q, got %v", details, decoded.Details)
-	}
+	assert.Equal(t, "ERROR", decoded.Level)
+	assert.Equal(t, "NETWORK", decoded.Category)
+	assert.Equal(t, "Connection timed out", decoded.Message)
+	require.NotNil(t, decoded.Details)
+	assert.Equal(t, details, *decoded.Details)
 }
 
 func TestLookupModelsJSON(t *testing.T) {
 	ck := dbClient.ConfigKey{Key: "theme"}
 	ckData, err := json.Marshal(ck)
-	if err != nil {
-		t.Fatalf("failed to marshal ConfigKey: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal ConfigKey")
 	var unmarshaledCK dbClient.ConfigKey
-	if err := json.Unmarshal(ckData, &unmarshaledCK); err != nil || unmarshaledCK.Key != "theme" {
-		t.Errorf("ConfigKey unmarshal failed: got %+v", unmarshaledCK)
-	}
+	require.NoError(t, json.Unmarshal(ckData, &unmarshaledCK))
+	assert.Equal(t, "theme", unmarshaledCK.Key, "ConfigKey unmarshal failed")
 
 	ll := dbClient.LogLevel{Name: "INFO"}
 	llData, err := json.Marshal(ll)
-	if err != nil {
-		t.Fatalf("failed to marshal LogLevel: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal LogLevel")
 	var unmarshaledLL dbClient.LogLevel
-	if err := json.Unmarshal(llData, &unmarshaledLL); err != nil || unmarshaledLL.Name != "INFO" {
-		t.Errorf("LogLevel unmarshal failed: got %+v", unmarshaledLL)
-	}
+	require.NoError(t, json.Unmarshal(llData, &unmarshaledLL))
+	assert.Equal(t, "INFO", unmarshaledLL.Name, "LogLevel unmarshal failed")
 
 	st := dbClient.SyncType{Name: "MAL"}
 	stData, err := json.Marshal(st)
-	if err != nil {
-		t.Fatalf("failed to marshal SyncType: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal SyncType")
 	var unmarshaledST dbClient.SyncType
-	if err := json.Unmarshal(stData, &unmarshaledST); err != nil || unmarshaledST.Name != "MAL" {
-		t.Errorf("SyncType unmarshal failed: got %+v", unmarshaledST)
-	}
+	require.NoError(t, json.Unmarshal(stData, &unmarshaledST))
+	assert.Equal(t, "MAL", unmarshaledST.Name, "SyncType unmarshal failed")
 
 	vis := dbClient.VaultItemStatus{Name: "COMPLETED"}
 	visData, err := json.Marshal(vis)
-	if err != nil {
-		t.Fatalf("failed to marshal VaultItemStatus: %v", err)
-	}
+	require.NoError(t, err, "failed to marshal VaultItemStatus")
 	var unmarshaledVIS dbClient.VaultItemStatus
-	if err := json.Unmarshal(visData, &unmarshaledVIS); err != nil || unmarshaledVIS.Name != "COMPLETED" {
-		t.Errorf("VaultItemStatus unmarshal failed: got %+v", unmarshaledVIS)
-	}
+	require.NoError(t, json.Unmarshal(visData, &unmarshaledVIS))
+	assert.Equal(t, "COMPLETED", unmarshaledVIS.Name, "VaultItemStatus unmarshal failed")
 }

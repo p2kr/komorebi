@@ -11,6 +11,7 @@ vendor/
 *.out
 *.test
 coverage.txt
+coverage
 
 # Local Environment
 .env

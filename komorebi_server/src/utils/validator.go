@@ -11,5 +11,8 @@ func InitValidator() {
 }
 
 func Validator() *validator.Validate {
+	if validate == nil {
+		InitValidator()
+	}
 	return validate
 }

@@ -8,6 +8,7 @@ import (
 
 // Init initializes all settings before starting the application
 func Init() {
+	println("Initializing startup")
 	utils.InitDir()
 	utils.InitDefaultLogger()
 	utils.InitValidator()
@@ -19,5 +20,6 @@ func Init() {
 
 // Close closes all resources before exiting the application
 func Close() {
+	println("Closing resources")
 	db.CloseDbClient()
 }

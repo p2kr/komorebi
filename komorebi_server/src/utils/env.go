@@ -49,5 +49,9 @@ func InitEnv() {
 }
 
 func Env() EnvConfig {
+	// fall back to init if not configured
+	if currentEnv.MalClientID == "" {
+		InitEnv()
+	}
 	return currentEnv
 }

@@ -8,6 +8,8 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestResponseJSON(t *testing.T) {
@@ -17,24 +19,14 @@ func TestResponseJSON(t *testing.T) {
 			Data:    map[string]string{"foo": "bar"},
 		}
 		data, err := json.Marshal(resp)
-		if err != nil {
-			t.Fatalf("failed to marshal Response: %v", err)
-		}
+		require.NoError(t, err, "failed to marshal Response")
 
 		var decoded api.Response
-		if err := json.Unmarshal(data, &decoded); err != nil {
-			t.Fatalf("failed to unmarshal Response: %v", err)
-		}
+		require.NoError(t, json.Unmarshal(data, &decoded), "failed to unmarshal Response")
 
-		if !decoded.Success {
-			t.Error("expected Success to be true")
-		}
-		if decoded.Error != nil {
-			t.Errorf("expected Error to be nil, got %+v", decoded.Error)
-		}
-		if decoded.Meta != nil {
-			t.Errorf("expected Meta to be nil, got %+v", decoded.Meta)
-		}
+		assert.True(t, decoded.Success, "expected Success to be true")
+		assert.Nil(t, decoded.Error, "expected Error to be nil")
+		assert.Nil(t, decoded.Meta, "expected Meta to be nil")
 	})
 
 	t.Run("marshal error response", func(t *testing.T) {
@@ -46,27 +38,15 @@ func TestResponseJSON(t *testing.T) {
 			},
 		}
 		data, err := json.Marshal(resp)
-		if err != nil {
-			t.Fatalf("failed to marshal Response: %v", err)
-		}
+		require.NoError(t, err, "failed to marshal Response")
 
 		var decoded api.Response
-		if err := json.Unmarshal(data, &decoded); err != nil {
-			t.Fatalf("failed to unmarshal Response: %v", err)
-		}
+		require.NoError(t, json.Unmarshal(data, &decoded), "failed to unmarshal Response")
 
-		if decoded.Success {
-			t.Error("expected Success to be false")
-		}
-		if decoded.Error == nil {
-			t.Fatal("expected Error to be non-nil")
-		}
-		if decoded.Error.Code != "INVALID_INPUT" {
-			t.Errorf("expected code 'INVALID_INPUT', got %q", decoded.Error.Code)
-		}
-		if decoded.Error.Message != "Field username is required" {
-			t.Errorf("expected message 'Field username is required', got %q", decoded.Error.Message)
-		}
+		assert.False(t, decoded.Success, "expected Success to be false")
+		require.NotNil(t, decoded.Error, "expected Error to be non-nil")
+		assert.Equal(t, "INVALID_INPUT", decoded.Error.Code, "expected code 'INVALID_INPUT'")
+		assert.Equal(t, "Field username is required", decoded.Error.Message, "expected message 'Field username is required'")
 	})
 
 	t.Run("marshal response with meta pagination", func(t *testing.T) {
@@ -81,21 +61,16 @@ func TestResponseJSON(t *testing.T) {
 			},
 		}
 		data, err := json.Marshal(resp)
-		if err != nil {
-			t.Fatalf("failed to marshal Response: %v", err)
-		}
+		require.NoError(t, err, "failed to marshal Response")
 
 		var decoded api.Response
-		if err := json.Unmarshal(data, &decoded); err != nil {
-			t.Fatalf("failed to unmarshal Response: %v", err)
-		}
+		require.NoError(t, json.Unmarshal(data, &decoded), "failed to unmarshal Response")
 
-		if decoded.Meta == nil {
-			t.Fatal("expected Meta to be non-nil")
-		}
-		if decoded.Meta.Page != 1 || decoded.Meta.PerPage != 10 || decoded.Meta.Total != 2 || decoded.Meta.TotalPages != 1 {
-			t.Errorf("unexpected Meta values: %+v", decoded.Meta)
-		}
+		require.NotNil(t, decoded.Meta, "expected Meta to be non-nil")
+		assert.Equal(t, 1, decoded.Meta.Page, "unexpected Meta value for Page")
+		assert.Equal(t, 10, decoded.Meta.PerPage, "unexpected Meta value for PerPage")
+		assert.Equal(t, 2, decoded.Meta.Total, "unexpected Meta value for Total")
+		assert.Equal(t, 1, decoded.Meta.TotalPages, "unexpected Meta value for TotalPages")
 	})
 }
 
@@ -106,18 +81,12 @@ func TestOkHelper(t *testing.T) {
 
 	api.Ok(c, map[string]string{"result": "success"})
 
-	if w.Code != http.StatusOK {
-		t.Errorf("expected status 200, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusOK, w.Code, "expected status 200")
 
 	var resp api.Response
-	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-		t.Fatalf("failed to unmarshal body: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp), "failed to unmarshal body")
 
-	if !resp.Success {
-		t.Error("expected resp.Success to be true")
-	}
+	assert.True(t, resp.Success, "expected resp.Success to be true")
 }
 
 func TestFailHelper(t *testing.T) {
@@ -127,25 +96,13 @@ func TestFailHelper(t *testing.T) {
 
 	api.Fail(c, http.StatusBadRequest, "BAD_REQUEST", "invalid payload")
 
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("expected status 400, got %d", w.Code)
-	}
+	assert.Equal(t, http.StatusBadRequest, w.Code, "expected status 400")
 
 	var resp api.Response
-	if err := json.Unmarshal(w.Body.Bytes(), &resp); err != nil {
-		t.Fatalf("failed to unmarshal body: %v", err)
-	}
+	require.NoError(t, json.Unmarshal(w.Body.Bytes(), &resp), "failed to unmarshal body")
 
-	if resp.Success {
-		t.Error("expected resp.Success to be false")
-	}
-	if resp.Error == nil {
-		t.Fatal("expected resp.Error to be non-nil")
-	}
-	if resp.Error.Code != "BAD_REQUEST" {
-		t.Errorf("expected code 'BAD_REQUEST', got %q", resp.Error.Code)
-	}
-	if resp.Error.Message != "invalid payload" {
-		t.Errorf("expected message 'invalid payload', got %q", resp.Error.Message)
-	}
+	assert.False(t, resp.Success, "expected resp.Success to be false")
+	require.NotNil(t, resp.Error, "expected resp.Error to be non-nil")
+	assert.Equal(t, "BAD_REQUEST", resp.Error.Code, "expected code 'BAD_REQUEST'")
+	assert.Equal(t, "invalid payload", resp.Error.Message, "expected message 'invalid payload'")
 }

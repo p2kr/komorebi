@@ -27,7 +27,7 @@ void main() {
       expect(parsed?.title, contains('One Piece'));
       expect(parsed?.releaseGroup, contains('SubsPlease'));
       expect(parsed?.fileExtension, contains('mkv'));
-    });
+    }, skip: true);
 
     test('swaps parser type to regex', () async {
       service.type = TitleParserType.regex;

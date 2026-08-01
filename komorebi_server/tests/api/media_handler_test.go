@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMediaEndpointsRegistration(t *testing.T) {
@@ -18,16 +21,10 @@ func TestMediaEndpointsRegistration(t *testing.T) {
 
 	// Since network call to MAL without valid token will return error status (500),
 	// check that the route responded with our JSON error format instead of 404.
-	if w.Code == http.StatusNotFound {
-		t.Fatalf("expected route /api/v1/media/anime to be registered, but got 404")
-	}
+	assert.NotEqual(t, http.StatusNotFound, w.Code, "expected route /api/v1/media/anime to be registered")
 
 	var res Response
-	if err := json.NewDecoder(w.Body).Decode(&res); err != nil {
-		t.Fatalf("failed to decode response JSON: %v", err)
-	}
+	require.NoError(t, json.NewDecoder(w.Body).Decode(&res), "failed to decode response JSON")
 
-	if res.Success {
-		t.Errorf("expected failure response for unauthenticated MAL request, got success")
-	}
+	assert.False(t, res.Success, "expected failure response for unauthenticated MAL request")
 }

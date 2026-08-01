@@ -6,14 +6,16 @@ require (
 	github.com/gin-contrib/zap v1.1.7
 	github.com/gin-gonic/gin v1.12.0
 	github.com/joho/godotenv v1.5.1
+	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.28.0
 	modernc.org/sqlite v1.54.0
 )
 
 require (
-	github.com/PuerkitoBio/goquery v1.12.0 // indirect
-	github.com/andybalholm/cascadia v1.3.3 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
@@ -26,7 +28,7 @@ require (
 	github.com/gin-contrib/sse v1.1.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.30.3 // indirect
+	github.com/go-playground/validator/v10 v10.30.3
 	github.com/goccy/go-json v0.10.6 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect

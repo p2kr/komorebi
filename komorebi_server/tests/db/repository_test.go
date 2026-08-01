@@ -4,6 +4,9 @@ import (
 	"komorebi_server/src/db"
 	dbClient "komorebi_server/src/db/generated"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestValidateProfile(t *testing.T) {
@@ -97,12 +100,11 @@ func TestValidateProfile(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := db.ValidateProfile(tt.profile)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateProfile() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantErr && err != nil && err.Error() != tt.errMsg {
-				t.Errorf("ValidateProfile() error message = %q, want %q", err.Error(), tt.errMsg)
+			if tt.wantErr {
+				require.Error(t, err, "ValidateProfile() expected an error")
+				assert.EqualError(t, err, tt.errMsg, "ValidateProfile() error message mismatch")
+			} else {
+				require.NoError(t, err, "ValidateProfile() expected no error")
 			}
 		})
 	}
@@ -154,12 +156,11 @@ func TestValidateAppConfig(t *testing.T) {
 	for _, tt := range testCases {
 		t.Run(tt.name, func(t *testing.T) {
 			err := db.ValidateAppConfig(tt.config)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("ValidateAppConfig() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if tt.wantErr && err != nil && err.Error() != tt.errMsg {
-				t.Errorf("ValidateAppConfig() error message = %q, want %q", err.Error(), tt.errMsg)
+			if tt.wantErr {
+				require.Error(t, err, "ValidateAppConfig() expected an error")
+				assert.EqualError(t, err, tt.errMsg, "ValidateAppConfig() error message mismatch")
+			} else {
+				require.NoError(t, err, "ValidateAppConfig() expected no error")
 			}
 		})
 	}

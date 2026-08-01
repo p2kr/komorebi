@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"os"
 
 	"go.uber.org/zap"
@@ -22,7 +23,12 @@ func InitDefaultLogger() {
 	l.OutputPaths = []string{"stdout", logPath}
 	l.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	logger, _ = l.Build()
+	var err error
+	logger, err = l.Build()
+	if err != nil {
+		fmt.Println("Failed to build logger:", err)
+		logger = zap.NewNop()
+	}
 
 	logger.Info("Logger initialized at ", zap.String("path", logPath))
 
