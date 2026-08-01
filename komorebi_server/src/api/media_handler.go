@@ -59,7 +59,7 @@ func resolveMediaClient(syncTypeStr string) media.Client {
 	case media.ProviderMAL:
 		fallthrough
 	default:
-		return media.NewMalClient(utils.GetEnv().MalClientID, nil)
+		return media.NewMalClient(utils.Env().MalClientID, nil)
 	}
 }
 

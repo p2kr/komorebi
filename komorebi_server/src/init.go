@@ -9,7 +9,9 @@ import (
 // Init initializes all settings before starting the application
 func Init() {
 	utils.InitDefaultLogger()
+	utils.InitValidator()
 	utils.InitEnv()
+
 	db.InitDbClient()
 	crawler.InitCrawler()
 }

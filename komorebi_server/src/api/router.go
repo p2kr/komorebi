@@ -3,6 +3,7 @@ package api
 import (
 	"komorebi_server/src/utils"
 	"log/slog"
+	"net/http"
 	"time"
 
 	ginzap "github.com/gin-contrib/zap"
@@ -12,7 +13,7 @@ import (
 var router *gin.Engine
 var startTime = time.Now()
 
-var logger = utils.GetLogger()
+var logger = utils.Logger()
 
 func InitRouter() *gin.Engine {
 	//gin.SetMode(gin.ReleaseMode)
@@ -27,26 +28,30 @@ func InitRouter() *gin.Engine {
 
 func healthCheck(c *gin.Context) {
 	Ok(c, map[string]any{
-		"version": "1.0.0",
-		"uptime":  time.Since(startTime).String(),
+		"version":  "1.0.0",
+		"uptime":   time.Since(startTime).String(),
+		"base_url": "/api/v1",
 	})
 }
 
 func setupTrustedProxies() {
-	err := router.SetTrustedProxies(
-		[]string{"127.0.0.1"},
-	)
+	trustedProxies := []string{"127.0.0.1"}
+	trustedProxies = append(trustedProxies, utils.Env().TrustedProxies...)
+	err := router.SetTrustedProxies(trustedProxies)
 	if err != nil {
 		slog.Error("error setting trusted proxies", "err", err)
 	}
 }
 
 func setupMiddlewares() {
-	router.Use(ginzap.Ginzap(utils.GetLogger(), "2006-01-02 15:04:05 07:00", true))
-	router.Use(ginzap.RecoveryWithZap(utils.GetLogger(), true))
+	router.Use(ginzap.Ginzap(utils.Logger(), "2006-01-02 15:04:05 07:00", true))
+	router.Use(ginzap.RecoveryWithZap(utils.Logger(), true))
 }
 
 func setupRoutesV1() {
+	router.GET("/", func(ctx *gin.Context) {
+		Fail(ctx, http.StatusNotFound, "API_VERSION_TO_USE", "/api/v1")
+	})
 	v1 := router.Group("/api/v1")
 	{
 		v1.Any("/", healthCheck)

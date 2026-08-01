@@ -84,18 +84,6 @@ func GetAllProfiles(c *gin.Context) {
 // DeleteProfile deletes a profile by ID
 func DeleteProfile(c *gin.Context) {
 	idStr := c.Query("id")
-	if idStr == "" {
-		idStr = c.PostForm("id")
-	}
-
-	if idStr == "" {
-		var body struct {
-			ID int64 `json:"id"`
-		}
-		if err := c.ShouldBindJSON(&body); err == nil && body.ID > 0 {
-			idStr = strconv.FormatInt(body.ID, 10)
-		}
-	}
 
 	id, err := strconv.ParseInt(idStr, 10, 64)
 	if err != nil {
@@ -170,7 +158,7 @@ func VerifySandboxProfile(c *gin.Context) {
 	if provider == media.ProviderAniList {
 		client = media.NewAniListClient(nil)
 	} else {
-		clientID := utils.GetEnv().MalClientID
+		clientID := utils.Env().MalClientID
 		client = media.NewMalClient(clientID, nil)
 	}
 

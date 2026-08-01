@@ -11,7 +11,7 @@ import (
 	"go.yaml.in/yaml/v4"
 )
 
-var logger = utils.GetLogger()
+var logger = utils.Logger()
 
 var loadedConfigsList []Config
 
@@ -60,8 +60,8 @@ func initCrawlerConfigs() error {
 		crawlerConfigsList = append(crawlerConfigsList, config)
 	}
 
-	// Copy crawlerConfigsList to loadedConfigsList TODO: atomically
-	copy(loadedConfigsList, crawlerConfigsList)
+	// Point crawlerConfigsList to loadedConfigsList atomically
+	loadedConfigsList = crawlerConfigsList
 
 	logger.Info("Loaded crawlerConfigsList", zap.Any("crawlerConfigsList", crawlerConfigsList))
 	return nil

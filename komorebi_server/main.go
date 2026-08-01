@@ -7,7 +7,9 @@ import (
 	"log/slog"
 )
 
-var logger = utils.GetLogger()
+var logger = utils.Logger()
+
+//go:generate sqlc generate
 
 func main() {
 	logger.Info("starting application")
@@ -25,5 +27,4 @@ func main() {
 	if err != nil {
 		slog.Error("error starting application", "err", err)
 	}
-
 }

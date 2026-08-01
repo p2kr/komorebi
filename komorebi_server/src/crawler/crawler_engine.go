@@ -1,8 +1,8 @@
 package crawler
 
 import (
-	"errors"
 	"io"
+	"komorebi_server/src/utils"
 	"net/http"
 	"strings"
 
@@ -10,29 +10,26 @@ import (
 )
 
 type CrawlerEngine struct {
-	query        string
-	configs      []Config
-	crawlers     []Crawler
-	titleParsers []TitleParser
+	Query        string        `validate:"required,min=1"`
+	Configs      []Config      `validate:"required,min=1"`
+	Crawlers     []Crawler     `validate:"required,min=1"`
+	TitleParsers []TitleParser `validate:"required,min=1"`
 }
 
 // NewCrawlerEngine creates a new CrawlerEngine with the given query
 func NewCrawlerEngine(query string) (*CrawlerEngine, error) {
-	if len(query) == 0 {
-		return nil, errors.New("query is empty")
-	}
-	if len(GetLoadedConfigsList()) == 0 {
-		return nil, errors.New("no configs loaded")
+	engine := &CrawlerEngine{
+		Query:        query,
+		Configs:      GetLoadedConfigsList(),
+		Crawlers:     []Crawler{&HtmlCrawlerEngine{}, &JsonCrawlerEngine{}},
+		TitleParsers: []TitleParser{&AnitomyTitleParser{}, &RegexTitleParser{}},
 	}
 
 	// TODO: Add validation for crawlers and title parsers
-
-	return &CrawlerEngine{
-		query:        query,
-		configs:      GetLoadedConfigsList(),
-		crawlers:     []Crawler{&HtmlCrawlerEngine{}, &JsonCrawlerEngine{}},
-		titleParsers: []TitleParser{&AnitomyTitleParser{}, &RegexTitleParser{}},
-	}, nil
+	if err := utils.Validator().Struct(engine); err != nil {
+		return nil, err
+	}
+	return engine, nil
 }
 
 // Parse parses the content and returns the results
@@ -40,7 +37,7 @@ func NewCrawlerEngine(query string) (*CrawlerEngine, error) {
 func (e *CrawlerEngine) Begin() []CrawlerResult {
 	var results []CrawlerResult
 
-	for _, config := range e.configs {
+	for _, config := range e.Configs {
 		// TODO: Make it concurrent
 		results = append(results, e.crawlSingle(config)...)
 	}
@@ -56,7 +53,7 @@ func (e *CrawlerEngine) crawlSingle(config Config) []CrawlerResult {
 		return results
 	}
 
-	url := strings.ReplaceAll(config.BaseUrl, "query", e.query)
+	url := strings.ReplaceAll(config.BaseUrl, "query", e.Query)
 
 	// Hit the search query and extract html/json
 	resp, err := http.Get(url)
@@ -77,7 +74,7 @@ func (e *CrawlerEngine) crawlSingle(config Config) []CrawlerResult {
 	// check if content conforms to html or json
 	// if not, return early
 	// if so, crawl using the first appropriate crawler
-	for _, crawler := range e.crawlers {
+	for _, crawler := range e.Crawlers {
 		if crawler.CanCrawl(content) {
 			results = append(results, crawler.Crawl(content, config)...)
 			break
@@ -89,7 +86,7 @@ func (e *CrawlerEngine) crawlSingle(config Config) []CrawlerResult {
 
 func (e *CrawlerEngine) parseTitle(rawTitle string) ParsedTitle {
 	var parsedTitle ParsedTitle
-	for _, parser := range e.titleParsers {
+	for _, parser := range e.TitleParsers {
 		if parser.CanParse(rawTitle) {
 			parsedTitle = parser.Parse(rawTitle)
 			break

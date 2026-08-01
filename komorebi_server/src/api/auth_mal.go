@@ -29,7 +29,7 @@ type MalUserInfo struct {
 }
 
 func startMalOAuthLogin(c *gin.Context) {
-	clientID := utils.GetEnv().MalClientID
+	clientID := utils.Env().MalClientID
 	if clientID == "" {
 		Fail(c, http.StatusInternalServerError, "CONFIG_ERROR", "MAL_CLIENT_ID is not configured on server")
 		return
@@ -77,7 +77,7 @@ func startMalOAuthLogin(c *gin.Context) {
 }
 
 func handleMalOAuthCallback(c *gin.Context, session *authSession, code string) {
-	clientID := utils.GetEnv().MalClientID
+	clientID := utils.Env().MalClientID
 
 	data := url.Values{}
 	data.Set("client_id", clientID)

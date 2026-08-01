@@ -21,7 +21,7 @@ const (
 	MalMangaFields = "synopsis,media_type,my_list_status,mean,num_chapters,num_volumes,popularity,alternative_titles,genres"
 )
 
-var logger = utils.GetLogger()
+var logger = utils.Logger()
 
 type MalClient struct {
 	BaseURL    string

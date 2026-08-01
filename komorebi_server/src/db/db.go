@@ -12,7 +12,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
-var logger = utils.GetLogger()
+var logger = utils.Logger()
 var sqlClient *sql.DB
 
 //go:embed schema/schema.sql

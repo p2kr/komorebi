@@ -35,7 +35,7 @@ func InitDefaultLogger() {
 
 }
 
-func GetLogger() *zap.Logger {
+func Logger() *zap.Logger {
 	if logger == nil {
 		InitDefaultLogger()
 	}
