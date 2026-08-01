@@ -1,0 +1,42 @@
+name: 'Setup Komorebi Environment'
+description: 'Sets up Flutter, Go (with built-in caching), pub/build_runner cache, and generates sqlc code.'
+
+inputs:
+  pub-cache:
+    description: 'Path to the pub cache directory. Varies by OS.'
+    required: false
+    default: '~/.pub-cache'
+
+runs:
+  using: composite
+  steps:
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'stable'
+        cache: true
+
+    # setup-go v4+ automatically caches Go module & build caches.
+    # No manual actions/cache step is needed for Go.
+    - uses: actions/setup-go@v5
+      with:
+        go-version-file: 'komorebi_server/go.mod'
+        cache-dependency-path: 'komorebi_server/go.sum'
+
+    - name: 💾 Cache Pub & Build Runner
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ inputs.pub-cache }}
+          komorebi_client/.dart_tool/build
+        key: ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}
+        restore-keys: ${{ runner.os }}-pub-
+
+    - name: ⚙️ Setup sqlc
+      uses: sqlc-dev/setup-sqlc@v4
+      with:
+        sqlc-version: 'latest'
+
+    - name: ⚙️ Generate sqlc
+      shell: bash
+      working-directory: komorebi_server
+      run: sqlc generate

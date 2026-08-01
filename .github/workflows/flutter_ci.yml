@@ -1,78 +1,62 @@
-name: Flutter CI/CD (Windows)
+name: Komorebi CI/CD
 
 on:
   push:
     branches: [ "develop", "master" ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
   pull_request:
     branches: [ "develop", "master" ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - 'LICENSE'
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Minimal baseline: each job grants only what it needs.
 permissions:
   contents: read
-  pull-requests: write
-  pages: write
-  id-token: write
-
-env:
-  MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
-  MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
 
 jobs:
   test:
     name: 🔍 Test & Analyze
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write   # needed by github-actions-report-lcov
+    # Scoped here rather than globally to limit exposure to 3rd-party actions.
+    env:
+      MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+      MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
     defaults:
       run:
         working-directory: komorebi_client
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
-          cache: true
-
-      - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'komorebi_server/go.mod'
-          cache-dependency-path: 'komorebi_server/go.sum'
-
-      - name: 💾 Cache Pub & Build Runner (Linux)
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pub-cache
-            komorebi_client/.dart_tool/build
-          key: ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-
-            ${{ runner.os }}-pub-
+      - name: 🔧 Setup Environment
+        uses: ./.github/actions/setup-komorebi-env
 
       - name: 🧪 Test Go Sidecar with Coverage
         working-directory: komorebi_server
-        run: go test -coverprofile=coverage.out ./...
-
-      - name: 🔄 Convert Go Coverage to LCOV
-        working-directory: komorebi_server
         run: |
-          go install github.com/jandelgado/gcov2lcov@latest
+          go test -coverprofile=coverage.out ./...
+          go install github.com/jandelgado/gcov2lcov@v1.0.6
           $(go env GOPATH)/bin/gcov2lcov -infile=coverage.out -outfile=coverage.lcov
 
       - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: ⚙️ Generate Drift Database Schemas (build_runner)
-        run: dart run build_runner build
-
-      - name: 🌐 Generate Localization Files (intl_utils)
-        run: dart run intl_utils:generate
+      - name: ⚙️ Generate code (build_runner & intl_utils)
+        run: |
+          dart run build_runner build
+          dart run intl_utils:generate
 
       - name: 🔎 Verify Formatting
         run: dart format --output=none --set-exit-if-changed .
@@ -84,13 +68,15 @@ jobs:
       - name: 🧪 Run Unit Tests with Coverage
         run: flutter test --coverage
 
+      # Explicitly install lcov to guard against runner image changes.
+      - name: 🔧 Install lcov
+        run: sudo apt-get install -y lcov
+
       - name: 🧹 Filter Generated Files from Coverage
-        run: |
-          sudo apt-get update && sudo apt-get install -y lcov
-          lcov --remove coverage/lcov.info 'lib/**/*.g.dart' 'lib/intl/generated/*' -o coverage/lcov.info --ignore-errors unused
+        run: lcov --remove coverage/lcov.info 'lib/**/*.g.dart' 'lib/intl/generated/*' -o coverage/lcov.info --ignore-errors unused
         continue-on-error: true
 
-      - name: 📊 Report Test Coverage to PR
+      - name: 📊 Report Coverage to PR
         if: github.event_name == 'pull_request'
         uses: zgosalvez/github-actions-report-lcov@v4
         with:
@@ -110,7 +96,7 @@ jobs:
             komorebi_server/coverage.out
           if-no-files-found: ignore
 
-      - name: ☂️ Upload coverage to Codecov
+      - name: ☂️ Upload to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -120,84 +106,95 @@ jobs:
           fail_ci_if_error: false
 
 
-  build_windows:
-    name: 🖥️ Build Windows Desktop
-    runs-on: windows-latest
+  build:
+    name: 🏗️ Build ${{ matrix.name }}
+    needs: test
+    runs-on: ${{ matrix.os }}
+    # Scoped here rather than globally to limit exposure to 3rd-party actions.
+    env:
+      MAL_CLIENT_ID: ${{ secrets.MAL_CLIENT_ID }}
+      MAL_CLIENT_SECRET: ${{ secrets.MAL_CLIENT_SECRET }}
     defaults:
       run:
         working-directory: komorebi_client
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows Desktop
+            os: windows-latest
+            platform: windows
+            sidecar-output: ../komorebi_client/assets/bin/komorebi_server.exe
+            # Use tilde-expansion — env context is unavailable during matrix generation.
+            pub-cache: ~\AppData\Local\Pub\Cache
+            artifact-path: komorebi_client/build/windows/x64/runner/Release/
+          - name: Linux Desktop
+            os: ubuntu-latest
+            platform: linux
+            sidecar-output: ../komorebi_client/assets/bin/komorebi_server
+            pub-cache: ~/.pub-cache
+            artifact-path: komorebi_client/build/linux/x64/release/bundle/
+
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🐦 Setup Flutter
-        uses: subosito/flutter-action@v2
+      - name: 🔧 Install Linux Desktop Dependencies
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - name: 🔧 Setup Environment
+        uses: ./.github/actions/setup-komorebi-env
         with:
-          channel: 'stable'
-          cache: true
-
-      - name: 🐹 Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version-file: 'komorebi_server/go.mod'
-          cache-dependency-path: 'komorebi_server/go.sum'
-
-      - name: 💾 Cache Pub & Build Runner (Windows)
-        uses: actions/cache@v4
-        with:
-          path: |
-            C:\Users\runneradmin\AppData\Local\Pub\Cache
-            komorebi_client\.dart_tool\build
-          key: ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-pub-${{ hashFiles('komorebi_client/pubspec.lock') }}-
-            ${{ runner.os }}-pub-
-
-      - name: ⚙️ Enable Windows Desktop Support
-        run: flutter config --enable-windows-desktop
+          pub-cache: ${{ matrix.pub-cache }}
 
       - name: 🏗️ Build Go Sidecar
         working-directory: komorebi_server
-        run: go build -o ../komorebi_client/assets/bin/komorebi_server.exe .
+        # Use bash on all platforms (available via Git Bash on Windows runners)
+        # to ensure mkdir -p works cross-platform.
+        shell: bash
+        run: |
+          mkdir -p "$(dirname "${{ matrix.sidecar-output }}")"
+          go build -o ${{ matrix.sidecar-output }} .
+
+      - name: ⚙️ Enable Desktop Support
+        run: flutter config --enable-${{ matrix.platform }}-desktop
 
       - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: ⚙️ Generate Drift Database Schemas (build_runner)
-        run: dart run build_runner build
+      - name: ⚙️ Generate code (build_runner & intl_utils)
+        run: |
+          dart run build_runner build
+          dart run intl_utils:generate
 
-      - name: 🌐 Generate Localization Files (intl_utils)
-        run: dart run intl_utils:generate
+      - name: 🏗️ Build Release Bundle
+        run: flutter build ${{ matrix.platform }} --release
 
-      - name: 🏗️ Build Windows Release Bundle
-        run: flutter build windows --release
-
-      - name: 📤 Upload Windows Artifacts
+      - name: 📤 Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: komorebi-windows-build
-          path: komorebi_client/build/windows/x64/runner/Release/
+          name: komorebi-${{ matrix.platform }}-build
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
+
 
   deploy_pages:
     name: 🚀 Deploy Auth Page to GitHub Pages
     if: github.ref == 'refs/heads/master' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write      # needed to deploy to GitHub Pages
+      id-token: write   # needed for OIDC token-based deployment
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: 📥 Checkout repository
-        uses: actions/checkout@v4
-
-      - name: ⚙️ Setup GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: 📤 Upload Pages Artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: docs
-
       - name: 🚀 Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
