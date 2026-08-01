@@ -34,10 +34,11 @@ runs:
     - name: ⚙️ Setup sqlc
       uses: sqlc-dev/setup-sqlc@v5
       with:
-        sqlc-version: 'latest'
-      run: sqlc version
+        sqlc-version: '1.31.1'
 
     - name: ⚙️ Generate sqlc
       shell: bash
       working-directory: komorebi_server
-      run: sqlc generate
+      run: |
+          sqlc version
+          sqlc generate
