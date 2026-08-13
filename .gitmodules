@@ -1,0 +1,6 @@
+[submodule "komorebi-server"]
+	path = komorebi-server
+	url = https://github.com/p2kr/komorebi-server
+[submodule "komorebi-web"]
+	path = komorebi-web
+	url = https://github.com/p2kr/komorebi-web
