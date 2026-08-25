@@ -1,0 +1,55 @@
+# Docker & Version Control
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+**/.git
+**/.gitignore
+**/.gitmodules
+**/.github
+
+# Agent & AI tool files
+.agents/
+**/skills-lock.json
+**/repomix-output.xml
+
+# IDE & OS files
+**/.vscode/
+**/.idea/
+**/.DS_Store
+**/Thumbs.db
+**/*.log
+
+# Environment files
+**/.env
+**/.env.*
+!**/.env.example
+
+# Database files
+**/*.sqlite
+**/*.sqlite-*
+**/*.db
+**/*.db-*
+
+# Backend (komorebi-server) ignores
+**/target/
+**/debug/
+**/*.rs.bk
+**/*.pdb
+**/config/local.yaml
+**/config/*.local.yaml
+**/docs/
+**/examples/
+
+# Frontend (komorebi-web) ignores
+**/node_modules/
+**/.svelte-kit/
+**/build/
+**/.output/
+**/.husky/
+**/.yarn/cache/
+**/.yarn/unplugged/
+**/.yarn/build-state.yml
+**/.yarn/install-state.gz
+**/.pnp.*
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
