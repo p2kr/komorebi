@@ -53,3 +53,5 @@ docker-compose*.yml
 **/.pnp.*
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+vault/
