@@ -43,7 +43,7 @@ fmt: fmt-server fmt-web
 
 [working-directory("komorebi-server")]
 fmt-server:
-    cargo clippy --fix --allow-dirty --allow-staged
+    cargo clippy --fix --all-targets --allow-dirty --allow-staged
     cargo fmt
 
 [working-directory("komorebi-web")]
@@ -122,4 +122,3 @@ deploy-zip output="komorebi.zip": build
     abs_out="$(cd "$(dirname "{{ output }}")" 2>/dev/null && pwd)/$(basename "{{ output }}")"; \
     (cd "$staging" && zip -r -q "$abs_out" .); \
     echo "Created production deployment package: {{ output }}"
-
