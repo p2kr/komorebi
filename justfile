@@ -1,6 +1,6 @@
 # Komorebi — build task runner
 # Usage: just <recipe>
-# Requires: just, cargo, yarn (v4 via corepack), docker
+# Requires: just, go, yarn (v4 via corepack), docker
 
 set minimum-version := "1.58.0"
 
@@ -17,12 +17,8 @@ default:
 # ── Build ────────────────────────────────────────────────────────────────────
 
 [working-directory("komorebi-server")]
-ts-bindings:
-    cargo ts-rs
-
-[working-directory("komorebi-server")]
 build-server:
-    cargo build --release
+    go build -o komorebi-server main.go
 
 [working-directory("komorebi-web")]
 _install:
@@ -30,7 +26,7 @@ _install:
 
 [parallel]
 [working-directory("komorebi-web")]
-build-web: ts-bindings _install
+build-web: _install
     yarn build
 
 [parallel]
@@ -43,8 +39,9 @@ fmt: fmt-server fmt-web
 
 [working-directory("komorebi-server")]
 fmt-server:
-    cargo clippy --fix --all-targets --allow-dirty --allow-staged
-    cargo fmt
+    go fmt ./...
+    go vet ./...
+    gofumpt -w -extra .
 
 [working-directory("komorebi-web")]
 fmt-web:
@@ -56,7 +53,7 @@ docker-build:
     docker build -t {{ image }}:{{ tag }} .
 
 docker-run:
-    docker run --rm -p 5150:5150 {{ image }}:{{ tag }}
+    docker run --rm -p 8080:8080 {{ image }}:{{ tag }}
 
 # Build and run docker image
 docker: docker-build docker-run
@@ -68,19 +65,16 @@ docker: docker-build docker-run
 deploy-zip output="komorebi.zip": build
     @$staging = Join-Path ([System.IO.Path]::GetTempPath()) ("komorebi-deploy-" + [System.Guid]::NewGuid().ToString()); \
     try { \
-        New-Item -ItemType Directory -Path (Join-Path $staging "config") -Force | Out-Null; \
+        New-Item -ItemType Directory -Path (Join-Path $staging "configs") -Force | Out-Null; \
         New-Item -ItemType Directory -Path (Join-Path $staging "assets") -Force | Out-Null; \
         New-Item -ItemType Directory -Path (Join-Path $staging "static") -Force | Out-Null; \
-        $binPath = "komorebi-server/target/release/komorebi_server-cli.exe"; \
-        if (-not (Test-Path $binPath)) { $binPath = "komorebi-server/target/release/komorebi_server-cli" }; \
+        $binPath = "komorebi-server/komorebi-server.exe"; \
+        if (-not (Test-Path $binPath)) { $binPath = "komorebi-server/komorebi-server" }; \
         if (-not (Test-Path $binPath)) { throw "Server release binary not found" }; \
         Copy-Item -Path $binPath -Destination $staging; \
-        Copy-Item -Path "komorebi-server/config/production.yaml" -Destination (Join-Path $staging "config"); \
-        if (Test-Path "komorebi-server/assets/crawler_configs.yaml") { \
-            Copy-Item -Path "komorebi-server/assets/crawler_configs.yaml" -Destination (Join-Path $staging "assets"); \
-        }; \
-        if (Test-Path "komorebi-server/assets/dht.json") { \
-            Copy-Item -Path "komorebi-server/assets/dht.json" -Destination (Join-Path $staging "assets"); \
+        Copy-Item -Path "komorebi-server/configs/config-prod.toml" -Destination (Join-Path $staging "configs"); \
+        if (Test-Path "komorebi-server/assets/main.sqlite") { \
+            Copy-Item -Path "komorebi-server/assets/main.sqlite" -Destination (Join-Path $staging "assets"); \
         }; \
         if (-not (Test-Path "komorebi-web/build")) { throw "Frontend build not found at komorebi-web/build" }; \
         Copy-Item -Path "komorebi-web/build/*" -Destination (Join-Path $staging "static") -Recurse; \
@@ -100,18 +94,17 @@ deploy-zip output="komorebi.zip": build
     @set -e; \
     staging="$(mktemp -d)"; \
     trap 'rm -rf "$staging"' EXIT; \
-    mkdir -p "$staging/config" "$staging/assets" "$staging/static"; \
-    if [ -f "komorebi-server/target/release/komorebi_server-cli" ]; then \
-        cp "komorebi-server/target/release/komorebi_server-cli" "$staging/"; \
-        chmod +x "$staging/komorebi_server-cli"; \
-    elif [ -f "komorebi-server/target/release/komorebi_server-cli.exe" ]; then \
-        cp "komorebi-server/target/release/komorebi_server-cli.exe" "$staging/"; \
+    mkdir -p "$staging/configs" "$staging/assets" "$staging/static"; \
+    if [ -f "komorebi-server/komorebi-server" ]; then \
+        cp "komorebi-server/komorebi-server" "$staging/"; \
+        chmod +x "$staging/komorebi-server"; \
+    elif [ -f "komorebi-server/komorebi-server.exe" ]; then \
+        cp "komorebi-server/komorebi-server.exe" "$staging/"; \
     else \
         echo "Error: Server release binary not found" >&2; exit 1; \
     fi; \
-    cp "komorebi-server/config/production.yaml" "$staging/config/"; \
-    [ -f "komorebi-server/assets/crawler_configs.yaml" ] && cp "komorebi-server/assets/crawler_configs.yaml" "$staging/assets/" || true; \
-    [ -f "komorebi-server/assets/dht.json" ] && cp "komorebi-server/assets/dht.json" "$staging/assets/" || true; \
+    cp "komorebi-server/configs/config-prod.toml" "$staging/configs/"; \
+    [ -f "komorebi-server/assets/main.sqlite" ] && cp "komorebi-server/assets/main.sqlite" "$staging/assets/" || true; \
     if [ ! -d "komorebi-web/build" ]; then \
         echo "Error: Frontend build not found at komorebi-web/build" >&2; exit 1; \
     fi; \

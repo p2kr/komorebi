@@ -1,15 +1,8 @@
 # ===================================================
-# Stage 1: Build Backend (komorebi-server) & Generate TS Bindings
+# Stage 1: Build Backend (komorebi-server)
 # ===================================================
-FROM rust:1-slim-bookworm AS backend-builder
+FROM golang:1.23-bookworm AS backend-builder
 WORKDIR /usr/src/komorebi-server
-
-# Install git (required by Cargo to fetch git dependencies like anitomy-rs) and build tools
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    git \
-    pkg-config \
-    libssl-dev \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy backend source code
 COPY komorebi-server/ .
@@ -17,12 +10,9 @@ COPY komorebi-server/ .
 # Ensure .env exists to prevent build script warnings
 RUN touch .env
 
-# Export TypeScript bindings for the frontend using cargo ts-rs
-RUN mkdir -p /usr/src/komorebi-web/src/lib/models/bindings \
-    && cargo ts-rs
-
-# Compile the release binary
-RUN cargo build --release
+# Download dependencies and compile the release binary
+RUN go mod download && \
+    CGO_ENABLED=1 go build -ldflags="-s -w" -o komorebi-server main.go
 
 # ===================================================
 # Stage 2: Build Frontend (komorebi-web)
@@ -42,9 +32,6 @@ RUN yarn install --immutable
 # Copy frontend source
 COPY komorebi-web/ ./
 
-# Copy generated TypeScript bindings from backend-builder
-COPY --from=backend-builder /usr/src/komorebi-web/src/lib/models/bindings/ ./src/lib/models/bindings/
-
 # Build static output to build/
 RUN yarn build
 
@@ -59,24 +46,26 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /usr/app
+# Set WORKDIR so that ../static resolves correctly if default is ../static
+# The default frontend.staticPath is "../static", so if we are in /usr/app/server,
+# it will resolve to /usr/app/static
+WORKDIR /usr/app/server
 
 # Default environment configuration
-ENV LOCO_ENV=production
+ENV APP_ENV=prod
 ENV PORT=5150
 ENV BINDING=0.0.0.0
 
 # Copy compiled backend binary
-COPY --from=backend-builder /usr/src/komorebi-server/target/release/komorebi_server-cli /usr/app/komorebi_server-cli
+COPY --from=backend-builder /usr/src/komorebi-server/komorebi-server /usr/app/server/komorebi-server
 
-# Copy configuration and assets (crawler configs, initial assets)
-COPY --from=backend-builder /usr/src/komorebi-server/config /usr/app/config
-COPY --from=backend-builder /usr/src/komorebi-server/assets /usr/app/assets
+# Copy configuration and assets
+COPY --from=backend-builder /usr/src/komorebi-server/configs /usr/app/server/configs
+COPY --from=backend-builder /usr/src/komorebi-server/assets /usr/app/server/assets
 
-# Copy built frontend assets into static/ for Loco's static file middleware
+# Copy built frontend assets into static/
 COPY --from=frontend-builder /app/komorebi-web/build /usr/app/static
 
-EXPOSE 5150
+EXPOSE 8080
 
-ENTRYPOINT ["/usr/app/komorebi_server-cli"]
-CMD ["start"]
+ENTRYPOINT ["/usr/app/server/komorebi-server"]

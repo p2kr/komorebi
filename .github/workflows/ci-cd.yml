@@ -1,0 +1,94 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "master", "main" ]
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  build:
+    name: Build & Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.23.0'
+          cache-dependency-path: komorebi-server/go.sum
+
+      - name: Build Backend (Go)
+        working-directory: ./komorebi-server
+        run: |
+          go mod verify
+          go build -v ./...
+          go vet ./...
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+          cache-dependency-path: ./komorebi-web/yarn.lock
+
+      - name: Build Frontend (Svelte)
+        working-directory: ./komorebi-web
+        run: |
+          yarn install --immutable
+          yarn build
+
+      - name: Test Docker Build
+        run: docker build -t komorebi:ci-test .
+
+  release:
+    name: Release
+    # Only run the release job if a version tag is pushed
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Just
+        uses: extractions/setup-just@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.23.0'
+          cache-dependency-path: komorebi-server/go.sum
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'yarn'
+          cache-dependency-path: ./komorebi-web/yarn.lock
+
+      - name: Package Release Archive
+        run: just deploy-zip komorebi-release-${{ github.ref_name }}.zip
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: komorebi-release-${{ github.ref_name }}.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
