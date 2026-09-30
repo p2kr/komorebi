@@ -18,13 +18,13 @@ default:
 
 [working-directory("komorebi-server")]
 build-server:
+    go generate
     go build -o komorebi-server main.go
 
 [working-directory("komorebi-web")]
 _install:
     yarn install --immutable
 
-[parallel]
 [working-directory("komorebi-web")]
 build-web: _install
     yarn build

@@ -30,8 +30,8 @@ Komorebi connects with third-party anime and manga tracking platforms (currently
 
 ### Prerequisites
 
-- **Rust** (latest stable toolchain) & Cargo
-- **Node.js** (v20+) & **Yarn**
+- **Go** (1.27+)
+- **Node.js** (v26+) & **Yarn**
 
 ### 1. Clone the Repository
 
@@ -52,29 +52,17 @@ git submodule update --init --recursive
 
 ## Development
 
-### 1. Generate TypeScript Bindings
-
-The web frontend relies on TypeScript definitions generated from backend Rust DTOs via `ts-rs`:
+### 1. Running the Backend
 
 ```bash
 cd komorebi-server
-cargo ts-rs
+go mod tidy
+go run main.go
 ```
 
-### 2. Running the Backend
+The server defaults to running on port `8080` or the port defined in your configuration.
 
-```bash
-cd komorebi-server
-# Apply migrations
-cargo loco db migrate
-
-# Start development server
-cargo loco start
-```
-
-The server starts on `http://127.0.0.1:5150` with API routes under `/api/v1`.
-
-### 3. Running the Web Client
+### 2. Running the Web Client
 
 ```bash
 cd komorebi-web
@@ -90,46 +78,41 @@ The web client runs on `http://localhost:5173`.
 
 To build both the frontend and backend for deployment:
 
-1. **Export TypeScript bindings:**
+1. **Build the web frontend:**
    ```bash
-   cd komorebi-server
-   cargo ts-rs
-   ```
-
-2. **Build the web frontend:**
-   ```bash
-   cd ../komorebi-web
+   cd komorebi-web
    yarn install
    yarn build
    ```
 
-3. **Build the server release binary:**
+2. **Build the server release binary:**
    ```bash
    cd ../komorebi-server
-   cargo build --release
+   go generate
+   go build -o komorebi-server main.go
    ```
 
-4. **Run the server:**
+3. **Run the server:**
    ```bash
-   ./target/release/komorebi_server-cli start
+   ./komorebi-server
    ```
-   Open `http://127.0.0.1:5150` in your browser.
+   Open `http://127.0.0.1:8081` (or your configured port) in your browser.
 
 ---
 
 ## Docker Build & Deployment
 
-You can build and run the complete application using Docker. The multi-stage `Dockerfile` automatically generates TypeScript bindings with `cargo ts-rs`, builds the frontend static assets, compiles the release binary, and packages everything into a minimal runtime image:
+You can build and run the complete application using Docker. The multi-stage `Dockerfile` automatically builds the frontend static assets, compiles the Go release binary, and packages everything into a minimal runtime image with FFmpeg included:
 
 ```bash
 # Build the Docker image
 docker build -t komorebi .
 
 # Run the container
-docker run -d -p 5150:5150 --name komorebi komorebi
+docker run -d -p 8081:8081 --name komorebi komorebi
 ```
 
-The application will be accessible at `http://localhost:5150`.
+The application will be accessible at `http://localhost:8081`.
 
 ---
 
